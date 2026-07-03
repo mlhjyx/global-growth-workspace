@@ -3,6 +3,8 @@ import { useState } from 'react';
 import {
   activeResearch,
   QUESTION_STATUS_LABELS,
+  SUPPORT_LEVEL_LABELS,
+  type MarketCandidate,
   type ResearchQuestion,
 } from '@/mocks/researchData';
 import { EvidenceDrawer, PageState, type EvidenceItem } from '@/components/governance';
@@ -18,8 +20,33 @@ const LAYERS = [
   '行动计划',
 ];
 
-export default function ResearchWorkspace() {
-  const r = activeResearch;
+interface ResearchWorkspaceProps {
+  // 从市场扫描进入时携带的候选市场；null/未传 = 直接打开工作台，展示进行中的研究
+  market?: MarketCandidate | null;
+}
+
+// 所选市场尚无进行中研究时的草稿态：Brief 取自候选卡，问题树为空（创建后才生成）
+const draftResearch = (m: MarketCandidate): typeof activeResearch => ({
+  ...activeResearch,
+  id: `rp_draft_${m.id}`,
+  market_id: m.id,
+  title: `${m.country}${m.industry}市场深度研究（未创建）`,
+  brief: {
+    offering: activeResearch.brief.offering,
+    market: `${m.flag} ${m.country}（${SUPPORT_LEVEL_LABELS[m.support_level].label}）`,
+    depth: '待选择',
+    budget_used: '未消耗',
+    started_at: '—',
+  },
+  progress: { answered: 0, total: 0 },
+  data_as_of: m.data_as_of,
+  questions: [] as ResearchQuestion[],
+  action_outputs: [],
+});
+
+export default function ResearchWorkspace({ market }: ResearchWorkspaceProps) {
+  const isDraft = !!market && market.id !== activeResearch.market_id;
+  const r = isDraft && market ? draftResearch(market) : activeResearch;
   const [openLayers, setOpenLayers] = useState<string[]>(['准入与风险', '行动计划']);
   const [drawer, setDrawer] = useState<ResearchQuestion | null>(null);
   const [outputs, setOutputs] = useState(r.action_outputs);
@@ -72,7 +99,9 @@ export default function ResearchWorkspace() {
             <div className="h-1.5 rounded bg-white/10 overflow-hidden">
               <span
                 className="block h-full bg-primary-400/70"
-                style={{ width: `${(r.progress.answered / r.progress.total) * 100}%` }}
+                style={{
+                  width: `${r.progress.total ? (r.progress.answered / r.progress.total) * 100 : 0}%`,
+                }}
               ></span>
             </div>
           </div>
@@ -83,6 +112,11 @@ export default function ResearchWorkspace() {
           <p className="text-primary-300 text-xs font-medium mb-2">
             <i className="ri-flashlight-line mr-1"></i>可执行输出（Action Outputs）
           </p>
+          {outputs.length === 0 && (
+            <p className="text-foreground-600 text-[10px]">
+              研究推进后生成可执行输出（转 ICP / Lead / Campaign 草案）
+            </p>
+          )}
           <div className="space-y-2">
             {outputs.map((o) => (
               <div key={o.id} className="flex items-center justify-between gap-2">
@@ -120,7 +154,14 @@ export default function ResearchWorkspace() {
           </span>
         </div>
         {r.questions.length === 0 ? (
-          <PageState kind="EMPTY" description="创建研究后自动生成结构化问题树" />
+          <PageState
+            kind="EMPTY"
+            description={
+              isDraft && market
+                ? `${market.country} 尚未创建深度研究：创建后按八层模型生成问题树（模拟环境以越南研究为进行中示例）`
+                : '创建研究后自动生成结构化问题树'
+            }
+          />
         ) : (
           <div className="space-y-1.5">
             {LAYERS.map((layer) => {

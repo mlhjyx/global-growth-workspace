@@ -12,15 +12,33 @@ const VERDICT_UI: Record<Verdict, { label: string; cls: string }> = {
   EXCLUDED: { label: '排除', cls: 'bg-error/10 text-error' },
 };
 
-// 从 fixtures 取样例账户 + 静态判定（模拟回测结果）
-const buildSamples = (icpIndex: number) =>
-  accounts.slice(icpIndex * 4, icpIndex * 4 + 8).map((a, i) => ({
-    id: a.id,
-    name: a.legal_name || a.trading_names?.[0] || a.id,
-    country: a.country,
-    hit: i % 4 !== 3 ? '行业/规模/市场条件命中' : '规模低于 Must-have 下限',
-    verdict: (i % 4 === 3 ? 'EXCLUDED' : i % 4 === 2 ? 'BORDERLINE' : 'MATCH') as Verdict,
-  }));
+// 从 fixtures 按 matched_icp_ids 取样：正例 = 命中该 ICP 的账户（最多 6），
+// 负例 = 未命中账户（优先无任何 ICP 匹配的，2 个对照）——回测样本必须属于被验证的 ICP
+const buildSamples = (icpId: string) => {
+  const toName = (a: (typeof accounts)[number]) => a.legal_name || a.trading_names?.[0] || a.id;
+  const positives = accounts
+    .filter((a) => (a.matched_icp_ids ?? []).includes(icpId))
+    .slice(0, 6)
+    .map((a, i) => ({
+      id: a.id,
+      name: toName(a),
+      country: a.country,
+      hit: i % 3 === 2 ? '部分条件处于边界（规模接近下限）' : '行业/规模/市场条件命中',
+      verdict: (i % 3 === 2 ? 'BORDERLINE' : 'MATCH') as Verdict,
+    }));
+  const negatives = accounts
+    .filter((a) => !(a.matched_icp_ids ?? []).includes(icpId))
+    .sort((a, b) => (a.matched_icp_ids?.length ?? 0) - (b.matched_icp_ids?.length ?? 0))
+    .slice(0, 2)
+    .map((a) => ({
+      id: a.id,
+      name: toName(a),
+      country: a.country,
+      hit: '未命中 ICP 条件（对照负例）',
+      verdict: 'EXCLUDED' as Verdict,
+    }));
+  return [...positives, ...negatives];
+};
 
 // 查询计划（LED-005；供应商未定 = OD-07）
 const QUERY_PLAN = {
@@ -35,21 +53,25 @@ const QUERY_PLAN = {
 
 interface ICPValidationProps {
   icpId: string;
-  icpIndex: number;
 }
 
-export default function ICPValidation({ icpId, icpIndex }: ICPValidationProps) {
+export default function ICPValidation({ icpId }: ICPValidationProps) {
   const [reviews, setReviews] = useState<Record<string, 'accept' | 'reject'>>({});
   // 按 icpId 区分激活态：避免激活 ICP A 后切换到 B 时错误显示已激活（绕过 LED-004 回测门禁）
   const [activatedMap, setActivatedMap] = useState<Record<string, boolean>>({});
   const activated = !!activatedMap[icpId];
   const setActivated = (v: boolean) => setActivatedMap((p) => ({ ...p, [icpId]: v }));
 
-  const samples = buildSamples(icpIndex);
-  const reviewed = samples.filter((s) => reviews[`${icpId}_${s.id}`]).length;
-  const backtestDone = reviewed >= Math.ceil(samples.length * 0.6);
+  const samples = buildSamples(icpId);
+  const accepted = samples.filter((s) => reviews[`${icpId}_${s.id}`] === 'accept').length;
+  const rejected = samples.filter((s) => reviews[`${icpId}_${s.id}`] === 'reject').length;
+  // 门禁看「认可数」而非「打分动作数」：全部点不认可不能开闸（LED-004）
+  const threshold = Math.ceil(samples.length * 0.6);
+  const backtestPassed = accepted >= threshold;
+  // 剩余未评样本即使全部认可也到不了阈值 = 回测已失败，需调整 ICP 条件
+  const backtestFailed = !backtestPassed && rejected > samples.length - threshold;
   const matchRate = Math.round(
-    (samples.filter((s) => s.verdict === 'MATCH').length / samples.length) * 100,
+    (samples.filter((s) => s.verdict === 'MATCH').length / Math.max(samples.length, 1)) * 100,
   );
 
   const mark = (sid: string, v: 'accept' | 'reject') =>
@@ -70,17 +92,25 @@ export default function ICPValidation({ icpId, icpIndex }: ICPValidationProps) {
             className={`text-[10px] px-2 py-0.5 rounded ${
               activated
                 ? 'bg-success/10 text-success'
-                : backtestDone
+                : backtestPassed
                   ? 'bg-primary-500/10 text-primary-300'
-                  : 'bg-warning/10 text-warning'
+                  : backtestFailed
+                    ? 'bg-error/10 text-error'
+                    : 'bg-warning/10 text-warning'
             }`}
           >
-            {activated ? 'ACTIVE 已激活' : backtestDone ? 'VALIDATING 待激活' : 'HYPOTHESIS 假设'}
+            {activated
+              ? 'ACTIVE 已激活'
+              : backtestPassed
+                ? 'VALIDATING 待激活'
+                : backtestFailed
+                  ? '回测未达标'
+                  : 'HYPOTHESIS 假设'}
           </span>
         </div>
         <p className="text-foreground-600 text-[10px] mb-2">
-          系统判定命中率 {matchRate}% · 已人工确认 {reviewed}/{samples.length}
-          （确认 60% 以上可激活）
+          系统判定命中率 {matchRate}% · 已认可 {accepted}/{samples.length} · 不认可 {rejected}
+          （认可 ≥{threshold} 家方可激活，LED-004）
         </p>
         <div className="space-y-1.5 max-h-56 overflow-y-auto">
           {samples.map((s) => {
@@ -126,6 +156,12 @@ export default function ICPValidation({ icpId, icpIndex }: ICPValidationProps) {
             );
           })}
         </div>
+        {backtestFailed && (
+          <p className="text-error text-[10px] mt-2">
+            回测未达标：不认可样本过多，认可数已无法达到阈值 {threshold}。请调整 ICP 条件
+            （Must/Exclude）后重新回测；当前 ICP 保持假设态，不能启动批量搜索（LED-004）。
+          </p>
+        )}
       </div>
 
       {/* Query Preview（LED-005） */}
@@ -163,13 +199,15 @@ export default function ICPValidation({ icpId, icpIndex }: ICPValidationProps) {
         </div>
         <div className="flex gap-2 mt-3">
           <button
-            disabled={!backtestDone && !activated}
+            disabled={!backtestPassed && !activated}
             onClick={() => setActivated(true)}
             title={
-              backtestDone || activated ? '' : '完成样例回测后才能激活并启动批量搜索（LED-004）'
+              backtestPassed || activated
+                ? ''
+                : '认可样本达到 60% 后才能激活并启动批量搜索（LED-004）'
             }
             className={`px-3 py-1.5 rounded-lg text-xs border cursor-pointer ${
-              backtestDone || activated
+              backtestPassed || activated
                 ? 'bg-primary-500/15 text-primary-300 border-primary-500/30 hover:bg-primary-500/25'
                 : 'bg-white/5 text-foreground-600 border-white/10 cursor-not-allowed'
             }`}

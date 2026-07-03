@@ -3,6 +3,7 @@ import { useState } from 'react';
 import MarketScan from './components/MarketScan';
 import ResearchWorkspace from './components/ResearchWorkspace';
 import CompetitiveIntel from './components/CompetitiveIntel';
+import type { MarketCandidate } from '@/mocks/researchData';
 
 type Tab = 'scan' | 'workspace' | 'competitive';
 
@@ -13,7 +14,14 @@ const TABS: { key: Tab; label: string; icon: string }[] = [
 ];
 
 export default function ResearchPage() {
-  const [tab, setTab] = useState<Tab>('scan');
+  // 支持 ?tab= 直达（旧 /competitors 路由重定向到竞争情报 tab，不落在默认扫描页）
+  const [params] = useSearchParams();
+  const initialTab = params.get('tab');
+  const [tab, setTab] = useState<Tab>(
+    initialTab === 'workspace' || initialTab === 'competitive' ? initialTab : 'scan',
+  );
+  // 从扫描卡进入深度研究时携带所选市场，工作台据此展示对应上下文
+  const [market, setMarket] = useState<MarketCandidate | null>(null);
 
   return (
     <div className="flex flex-col md:h-[calc(100vh-3.5rem)]">
@@ -50,8 +58,15 @@ export default function ResearchPage() {
 
       {/* 内容 */}
       <div className="flex-1 overflow-y-auto p-3 md:p-5">
-        {tab === 'scan' && <MarketScan onEnterResearch={() => setTab('workspace')} />}
-        {tab === 'workspace' && <ResearchWorkspace />}
+        {tab === 'scan' && (
+          <MarketScan
+            onEnterResearch={(c) => {
+              setMarket(c);
+              setTab('workspace');
+            }}
+          />
+        )}
+        {tab === 'workspace' && <ResearchWorkspace key={market?.id ?? 'active'} market={market} />}
         {tab === 'competitive' && <CompetitiveIntel />}
       </div>
     </div>
