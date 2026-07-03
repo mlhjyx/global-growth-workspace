@@ -2,6 +2,8 @@
 
 **唯一活跃跟踪。** 母本 15.12 与 CLAUDE.md 的清单以本文件为准。规则（CLAUDE.md 硬边界）：命中未关闭项即停止，向业务负责人提问，**禁止 Claude Code 自行假设或静默改变产品边界**。关闭后移入 [DECISION_LEDGER.md](DECISION_LEDGER.md) 并标 PDR 编号。
 
+状态图例：**✅ 已关闭**（入 Ledger）；**🔶 部分已决**（可依已定语义实施，剩余子项命中即停）；**⬜ 开放**（命中即停）。注：OD-11 为纯范围剪裁批示（实现内容被限定、决策本身未做），故仍标 ⬜——未决部分照停。
+
 | ID | 决策 | 阻塞什么 | 最晚关闭点 | 状态 |
 |---|---|---|---|---|
 | OD-01 | 首批 2 个行业 | fixtures/Pack/试点画像 | M0 用户测试前 | ✅ 关闭 → PDR-001（光伏能源、建材） |
@@ -14,9 +16,10 @@
 | OD-08 | AiToEarn 实际复用的模块范围 | M1 W4 EPIC-EXEC-001 | AiToEarn Spike（V-002）后 | ⬜ 开放 |
 | OD-09 | 知识层：Cognee / Graphiti / pgvector 基线选型 | M1 W2 知识实现 | Bake-off（V-004）后 | ⬜ 开放（ADR-004 保留接口，pgvector 为退出基线） |
 | OD-10 | 试点商务模式（免费/付费/共建）+ 首批 Design Partner 与成功阈值 | M2 客户招募与成功口径 | M2 客户招募前 | ⬜ 开放 |
-| OD-11 | 代理商多 Workspace 模式是否进入首批 | Workspace M1 Schema（RBAC/委派） | Workspace M1 Schema 冻结前 | ⬜ 开放 |
+| OD-11 | 代理商多 Workspace 模式是否进入首批 | Workspace M1 Schema（RBAC/委派） | Workspace M1 Schema 冻结前 | ⬜ **开放（2026-07-04 批示：不阻塞 BE-03——只实现通用 Organization→Workspace→Membership 与一人多 Workspace；代理商商业模式/跨客户委派/代理计费不实现）** |
 | OD-12 | 私有化部署是否进入 M3 | M2 架构冻结（区域/租户隔离物理模式） | M2 架构冻结前 | ⬜ 开放（ADR-001 逻辑隔离，物理待定） |
-| OD-13 | 哪些动作必须人工审批 | Policy/审批链默认集 | M1 W1 Policy Epic | ⬜ 默认集已定（对外发送/发布、数据导出、跨境模型、删除/Suppression），最终以业务确认为准 |
+| OD-13 | 哪些动作必须人工审批 | Policy/审批链默认集 | M1 W1 Policy Epic | 🔶 **分类语义已定（2026-07-04 批示，M1_BACKEND_FOUNDATION_PLAN §5-C）**：对外发送/发布/批量导出/删除/Suppression=逐动作或逐批人工审批；跨境模型调用=Workspace 管理员级授权+每次确定性 Policy Check，仅授权边界变化重新审批。剩余：具体渠道/平台细则随 OD-06 |
+| OD-14 | **Production Identity Provider（生产登录供应商）** | M1 外部 Alpha / 首个 Design Partner 登录 | M1 外部 Alpha 前 | ⬜ 开放（2026-07-04 新增：M1 用 Dev IdP 经 IdentityProviderAdapter、仅 Local/CI；Subject ID/Membership/Claims/Session 模型在 BE-01α 定死，最终 IdP 可后换，禁自研生产认证） |
 
 ## 提问模板（命中未关闭项时对业务负责人）
 

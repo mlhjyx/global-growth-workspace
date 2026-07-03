@@ -25,4 +25,5 @@ M0 四个 PR（数据术语 / 治理组件 / 补缺页面 / 旅程串线）是**
 
 ## M1 前置（交付要求 #12）
 
-M1 生产实现开始前，必须提交并通过评审：**[EPIC-FOUNDATION Dev-Ready Package](../prd/epics/EPIC-FOUNDATION.md)**（含 C4、ADR 基线、Core ERD、Tenant/RBAC、Event Envelope、Adapter Contract、OpenAPI Baseline、CI/CD、Security Baseline、Threat Model）。未过不启动 M1 Runtime 编码。
+M1 生产实现开始前，必须提交并通过评审：**[EPIC-FOUNDATION Dev-Ready Package](../epics/EPIC-FOUNDATION.md)**（含 C4、ADR 基线、Core ERD、Tenant/RBAC、Event Envelope、Adapter Contract、OpenAPI Baseline、CI/CD、Security Baseline、Threat Model）。未过不启动 M1 Runtime 编码。
+**Foundation 例外（GDR-002，2026-07-04）**：该包两阶段化——阶段一（BE-01α）经业务负责人 R2 批准即启动地基运行时（BE-02..05）；阶段二（BE-01β）随 Spike 验收卡终审，最晚 BE-04 前；纵向切片需 BE-01β。见 docs/program/M1_BACKEND_FOUNDATION_PLAN.md。
