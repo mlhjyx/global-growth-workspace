@@ -6,6 +6,7 @@ import ChannelBreakdown from './components/ChannelBreakdown';
 import ReportGenerator from './components/ReportGenerator';
 import InsightsAI from './components/InsightsAI';
 import EventStream from './components/EventStream';
+import OutcomeChain from './components/OutcomeChain';
 import {
   mockKPIs,
   mockTrendData,
@@ -23,6 +24,9 @@ export default function InsightsPage() {
     <div className="flex flex-col md:h-[calc(100vh-3.5rem)]">
       {/* Top bar: KPI overview + time selector */}
       <KPIBar kpis={mockKPIs} selectedPeriod={selectedPeriod} onPeriodChange={setSelectedPeriod} />
+
+      {/* 三级结果链（EPIC-M0-05 T2） */}
+      <OutcomeChain />
 
       {/* Main content: full-screen dashboard grid */}
       <div className="flex-1 md:overflow-hidden overflow-y-auto">
