@@ -1,0 +1,23 @@
+name: Epic
+description: 一个可交付的产品能力块（编码前须完成 Dev-Ready Package）
+title: '[EPIC] '
+labels: ['type:epic']
+body:
+  - type: input
+    id: requirements
+    attributes: { label: 覆盖需求 ID（母本第 7 部分）, placeholder: 'CAM-001..008' }
+    validations: { required: true }
+  - type: input
+    id: release
+    attributes: { label: Release / Wave, placeholder: 'M1 / W3' }
+    validations: { required: true }
+  - type: textarea
+    id: goal
+    attributes: { label: 业务目标与范围（含明确不做项） }
+    validations: { required: true }
+  - type: input
+    id: package
+    attributes: { label: Dev-Ready Package 路径, placeholder: 'docs/epics/EPIC-XXX/' }
+  - type: input
+    id: blocking
+    attributes: { label: 阻塞的 Open Decision, placeholder: 'OD-06 或 无' }

@@ -1,0 +1,16 @@
+name: Bug
+description: 缺陷报告
+title: '[BUG] '
+labels: []
+body:
+  - type: textarea
+    id: repro
+    attributes: { label: 复现步骤与期望/实际行为 }
+    validations: { required: true }
+  - type: input
+    id: scope
+    attributes: { label: 影响范围（页面/模块/需求 ID） }
+  - type: dropdown
+    id: severity
+    attributes: { label: 严重度, options: ['S1 阻断', 'S2 主功能受损', 'S3 次要', 'S4 体验'] }
+    validations: { required: true }
