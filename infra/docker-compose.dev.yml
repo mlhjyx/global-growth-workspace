@@ -9,11 +9,11 @@ services:
       POSTGRES_PASSWORD: ggw_dev_local_only
       POSTGRES_DB: ggw
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ggw -d ggw"]
+      test: ['CMD-SHELL', 'pg_isready -U ggw -d ggw']
       interval: 5s
       timeout: 5s
       retries: 10
@@ -22,7 +22,7 @@ services:
     image: redis:7-alpine
     container_name: ggw-redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
 
 # 按需引入（各自 ADR）：temporal、opa、minio(S3)、opensearch。
 volumes:

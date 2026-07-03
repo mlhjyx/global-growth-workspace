@@ -16,10 +16,7 @@
       "Bash(node --version)",
       "Bash(pnpm --version)"
     ],
-    "deny": [
-      "Bash(git push --force:*)",
-      "Bash(git push -f:*)"
-    ]
+    "deny": ["Bash(git push --force:*)", "Bash(git push -f:*)"]
   },
   "hooks": {
     "PreToolUse": [

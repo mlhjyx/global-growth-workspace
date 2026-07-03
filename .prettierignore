@@ -1,0 +1,11 @@
+node_modules
+dist
+build
+.next
+.turbo
+coverage
+pnpm-lock.yaml
+
+# 文档人工排版（母本、ADR、README），不由 prettier 重排
+docs/
+*.md
