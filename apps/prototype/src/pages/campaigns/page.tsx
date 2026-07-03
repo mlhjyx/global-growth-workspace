@@ -4,6 +4,7 @@ import CampaignStages from './components/CampaignStages';
 import CampaignBoard from './components/CampaignBoard';
 import AIAssistantPanel from './components/AIAssistantPanel';
 import ActivityStream from './components/ActivityStream';
+import GovernancePanel from './components/GovernancePanel';
 import {
   mockCampaigns,
   mockStages,
@@ -100,6 +101,9 @@ export default function CampaignsPage() {
           </div>
         </div>
       </div>
+
+      {/* 治理面板（EPIC-M0-04 T2：授权状态 / 停止条件 / Dry Run 入口） */}
+      <GovernancePanel campaign={selectedCampaign} />
 
       {/* Three-column layout */}
       <div className="flex flex-col md:flex-row flex-1 md:overflow-hidden overflow-y-auto">

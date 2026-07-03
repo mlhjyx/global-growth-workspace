@@ -20,6 +20,8 @@ const typeConfig: Record<string, { icon: string; color: string; bg: string; labe
 export default function AIAssistantPanel({ insights }: AIAssistantPanelProps) {
   const [expandedId, setExpandedId] = useState<string | null>(insights[0]?.id || null);
   const [inputValue, setInputValue] = useState('');
+  // 提案化（EPIC-M0-04 T2，硬边界 1）：AI 建议被采纳时生成 ActionProposal 进审批，不直接执行
+  const [proposedIds, setProposedIds] = useState<Record<string, boolean>>({});
 
   return (
     <div className="flex flex-col h-full">
@@ -88,12 +90,23 @@ export default function AIAssistantPanel({ insights }: AIAssistantPanelProps) {
                   <p className="text-foreground-400 text-xs leading-relaxed pl-8">
                     {insight.content}
                   </p>
-                  {insight.actionable && insight.actionText && (
-                    <button className="ml-8 mt-2 btn-primary text-xs px-3 py-1.5 inline-flex items-center gap-1">
-                      <i className="ri-magic-line text-xs"></i>
-                      {insight.actionText}
-                    </button>
-                  )}
+                  {insight.actionable &&
+                    insight.actionText &&
+                    (proposedIds[insight.id] ? (
+                      <p className="ml-8 mt-2 text-[11px] text-success">
+                        <i className="ri-file-shield-2-line mr-1"></i>
+                        已生成 ActionProposal（模拟）· 进入审批队列，批准后由确定性系统执行
+                      </p>
+                    ) : (
+                      <button
+                        onClick={() => setProposedIds((p) => ({ ...p, [insight.id]: true }))}
+                        className="ml-8 mt-2 btn-primary text-xs px-3 py-1.5 inline-flex items-center gap-1"
+                        title="AI 只提出建议；采纳生成提案，经 Policy/Approval 后才执行（硬边界 1）"
+                      >
+                        <i className="ri-file-add-line text-xs"></i>
+                        {insight.actionText}（生成提案）
+                      </button>
+                    ))}
                 </div>
               )}
             </div>
