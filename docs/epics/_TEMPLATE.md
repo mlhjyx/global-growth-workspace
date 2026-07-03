@@ -1,6 +1,7 @@
 # Dev-Ready Package：<EPIC-ID> <标题>
 
 > 每个 Epic 编码前必须完成本包并经评审（交付要求 #2 / 母本 15.13.6 / Gate 3）。未完成不进入编码。
+> （Foundation 例外：EPIC-FOUNDATION 按 GDR-002 两阶段门执行，见 CHANGE_CONTROL 与 M1_BACKEND_FOUNDATION_PLAN。）
 >
 > **本模板分两档，标题必须注明用的哪档**（外部审计 2026-07-04 采纳，防"初始包"被当成完整 Dev-Ready）：
 > - **Production Dev-Ready（M1 起强制）**：11 段全部必填，不适用写"N/A + 理由"，不减免。

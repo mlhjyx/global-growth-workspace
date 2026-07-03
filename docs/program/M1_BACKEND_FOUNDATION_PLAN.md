@@ -11,7 +11,7 @@
 | 内部架构一致性 Agent | REQUEST_CHANGES | 1 BLOCKER / 2 MAJOR / 4 MINOR | 全部修复（§6） |
 | 内部安全与交付 Agent | REQUEST_CHANGES | 6 MAJOR / 2 MINOR | 全部修复或登记（§6） |
 | Codex 行级评审（PR #19） | 4 × P2 | Spike 顺序 / 身份表租户化 / Outbox envelope / 策略实体持久化 | 全部修复（§6） |
-| 内部治理与流程 Agent | 首轮被会话中断终止 | — | 对本 v2 重跑，结论落盘 PR 评论 |
+| 内部治理与流程 Agent（对 v2 复审） | APPROVE_WITH_CHANGES | 3 MAJOR / 4 MINOR / 1 NOTE，无 BLOCKER，无一阻塞 BE-01α | 全部修复于本版（§6 末行） |
 
 ## 1. 后端就绪度审计（2026-07-04，结论维持）
 
@@ -36,8 +36,9 @@ Track B 后端去风险（新启）：
   切片：BE-09 纵向切片 Epic（5 个 PR，§4）依赖 BE-03/04/05/06 + BE-01β
 ```
 
-- **最低推进节奏（防 Track B 饥饿，业务负责人 G 项）**：`BE-01α → M0-05 → BE-02 → M0-06 → BE-03 → M0 Gate 1 → BE-04/05 → BE-06 → BE-09A..E`。冲突时 Track A 优先，但**每完成一个 M0 Epic 必须至少推进一个 BE 单元**。
-- **WIP 上限（安全评审）**：同一时刻最多 **1 个开放的 BE 运行时 PR**（纯 Spike 报告除外）；**数据库迁移只允许出现在当前唯一开放的 BE PR 中**（防迁移顺序冲突与批准积压）。
+- **最低推进节奏（防 Track B 饥饿，业务负责人 G 项）**：`BE-01α → M0-05 → BE-02 → M0-06 → BE-03 → M0 Gate 1 → BE-04/05 → BE-06 → BE-09A..E`。冲突时 Track A 优先，但**每完成一个 M0 Epic 必须至少推进一个 BE 单元**——「推进」的判定标准：**对应 BE PR 已合并，或已 Ready 并提请 R2 批准且评审证据落盘**；在启动下一个 M0 Epic 前判定。
+- **WIP 上限（安全评审，治理评审精确化）**：**BE-xx 运行时 PR 同一时刻最多 1 个开放**；SPK-*/文档 PR 不计入上限，**但数据库迁移仍只允许出现在唯一开放的 BE PR 中**（防迁移顺序冲突与批准积压）。
+- **Spike 产物边界（治理评审）**：Spike 产物一律置于 `spikes/**` + 验收卡回写 `docs/oss/`，**不得写入 packages/**（含 packages/policy）与 .github/workflows**；gitleaks 等 CI 变更随 BE-02 或单独 R2 PR 实施。
 - Outbox（BE-05）不依赖 Auth（BE-04）：envelope 的 workspace_id 来自业务事务而非会话（架构评审确认）；两者都依赖 BE-03，可按节奏先后。
 
 ## 3. 后端 Epic/PR 计划 v2
@@ -45,7 +46,7 @@ Track B 后端去风险（新启）：
 | 编号 | 内容 | 前置 | R 级 | DoD 要点 |
 |---|---|---|---|---|
 | **BE-01α** | Foundation 包阶段一：冻结不依赖 Spike 的段——C4 落细、Bounded Context、Core ERD、Tenant/Auth/RBAC 模型、API·Error·Versioning、幂等、迁移/回滚、测试策略、威胁模型、环境阶梯 | 本计划合并 | **R2** | 业务负责人批准 = BE-02..05 启动门（GDR-002 取代「过 Gate 3」表述，EPIC-FOUNDATION 已同步修订） |
-| **BE-01β** | Foundation 包阶段二：第 6 段 Permissions（OPA）、Temporal/Model Gateway 相关段、Task Breakdown 终审 | 三张 Spike 验收卡 | **R2** | 最晚 BE-04 开始前完成；引用 Spike 结论，不猜写 |
+| **BE-01β** | Foundation 包阶段二：第 6 段 Permissions（OPA）、Temporal/Model Gateway 相关段、Task Breakdown 终审 | 三张 Spike 验收卡 | **R2** | 最晚 BE-04 开始前完成；**每个 Spike 依赖段必须逐段引用对应验收卡编号，无验收卡的段不得冻结** |
 | **SPK-TMP** | Temporal Runtime Spike：compose 起集群；首个 Workflow = `Campaign Draft→DryRun→Proposal→Policy→人工审批(Signal)→授权→Mock 执行→Result`；Retry/Timeout/补偿/Worker 重启恢复/版本化/Activity 幂等 | 无 | R1 | 杀 Worker 后 Workflow 恢复完成；验收卡回写 OSS Registry。**Spike 批准 ≠ 生产采用：仍须 License/Security Review + Production Gate（业务负责人 F 项）** |
 | **SPK-OPA** | OPA Policy Spike：用 contracts 的 ActionProposal/ExecutionAuthorization fixtures 驱动（不依赖 BE-04）；Allow/Deny/RequireApproval；决策审计 | 无 | R1 | **Fail-Closed 边界明确化：仅覆盖经 PolicyDecision 的动作清单（对外发送/发布/数据导出/删除/Suppression/跨境模型调用）；内部读写由 RBAC 承接；OPA 不可用 → 清单动作全拒 + readiness 亮红 + 告警**。验收卡回写；同 F 项 Gate 约束 |
 | **SPK-MGW** | Model Gateway Spike：自有 ModelGateway Contract + TaskRegistry/PromptRegistry/路由/BudgetGuard/脱敏/StructuredOutput/Fallback/Trace（LiteLLM 内核候选、Langfuse Trace 候选） | 无 | R1（Mock Provider） | Mock 全链路 Trace + 预算熔断测试。**真实 Key 路径：仅 gitignored env 注入、Config 校验拒缺失/占位值、gitleaks 秘密扫描先进 CI、Key 登记 INT-001；接真实模型 API 前须完成 §5-C 的 Workspace 级跨境授权**。同 F 项 Gate 约束 |
@@ -125,5 +126,6 @@ Workspace → Company(Claim/Evidence) → ICP → Lead → Campaign → Dry Run 
 | Codex #2 | 身份表不得一刀切租户化 | BE-03 表集所有权注记 |
 | Codex #3 | Outbox envelope 与契约不符 | BE-05 DoD（不含 idempotency_key，checkpoint 去重） |
 | Codex #4 | 策略实体缺持久化 | BE-04 迁移补 PermissionGrant/WorkspacePolicy/ApprovalRule/ControlSwitch；Brand→BE-09A |
+| 治理评审（v2 复审）#1-8 | Gate 3 残余矛盾 / GDR-001 适用范围 / OD 状态图例 / Spike 产物边界 / WIP 精确化 / 「推进」定义 / ROADMAP 旧行 / DoD 含糊 | RELEASE_GATES+_TEMPLATE 补例外注；GDR-001 补范围条款；OPEN_DECISIONS 加图例；§2 Spike 产物边界与 WIP/推进判定标准；ROADMAP 去风险线行更新；BE-01β DoD 精确化 |
 
 —— **合并条件**：治理评审 Agent 对本 v2 出具结论且无未处置 BLOCKER → 业务负责人回复批准合并。合并后：BE-01α 开工（R2）；SPK-TMP/OPA/MGW 可并行启动。
