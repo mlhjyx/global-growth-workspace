@@ -15,12 +15,13 @@ interface SecondaryNavItem {
   path: string;
 }
 
-// 一级导航六项，对应母本 5.2 一级信息架构（今日/研究/客户/战役/内容/互动/洞察中的七域，
-// 研究页为 M0 Batch 3 新建项；发布按母本归入「内容」域，经内容页入口进入 /publish）
+// 一级导航七项 = 母本 5.2 一级信息架构（今日/研究/客户/战役/内容/互动/洞察）；
+// 发布归入「内容」域（内容页内入口）；市场与竞品已并入研究页（EPIC-M0-03）
 const primaryNavItems: NavItem[] = [
   { key: 'home', label: '今日', icon: 'ri-home-5-line', path: '/dashboard' },
-  { key: 'campaigns', label: '战役', icon: 'ri-flag-2-line', path: '/campaigns' },
+  { key: 'research', label: '研究', icon: 'ri-compass-3-line', path: '/research' },
   { key: 'accounts', label: '客户', icon: 'ri-user-search-line', path: '/accounts' },
+  { key: 'campaigns', label: '战役', icon: 'ri-flag-2-line', path: '/campaigns' },
   { key: 'content', label: '内容', icon: 'ri-file-text-line', path: '/content' },
   { key: 'engagement', label: '互动', icon: 'ri-chat-3-line', path: '/engagement' },
   { key: 'insights', label: '洞察', icon: 'ri-line-chart-line', path: '/insights' },
@@ -28,7 +29,6 @@ const primaryNavItems: NavItem[] = [
 
 const secondaryNavItems: SecondaryNavItem[] = [
   { key: 'knowledge', label: '企业知识', icon: 'ri-book-open-line', path: '/knowledge' },
-  { key: 'competitors', label: '市场与竞品', icon: 'ri-radar-line', path: '/competitors' },
   { key: 'integrations', label: '集成与账号', icon: 'ri-plug-line', path: '/integrations' },
   { key: 'team', label: '团队与审批', icon: 'ri-team-line', path: '/team' },
   { key: 'settings', label: '设置与安全', icon: 'ri-settings-3-line', path: '/settings' },
