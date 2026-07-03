@@ -8,12 +8,12 @@ P0 Contracts:                Core Batch 1 完成（五域 46 Schema；CRT/PUB/EN
 Demo Gap Analysis (V-001):   完成
 EPIC-M0-01 数据与术语:        ✅ MERGED（PR #1，main CI 通过 752e499）
 EPIC-M0-02 治理组件:          ✅ MERGED（PR #2，main CI 通过 4e1df03）
-Development Operating System: In Review（本 PR：治理迁移 docs/program + 宪章/变更控制/R0-R3 + GitHub 治理）
+Development Operating System: ✅ MERGED（PR #3，79638f7）；PDR-003 不升级 Pro 已登记（PR #7）
 EPIC-M0-03:                  ✅ MERGED（PR #13，main CI 通过 5ba076c）
 EPIC-M0-04..06:              M0-04 进行中
 架构去风险线（并行 Spike）:     文档就绪（OSS registry+Temporal 卡）；Spike 真跑需 M1 环境
 Foundation 状态:              设计/契约/校验基线已立；运行时实现（PG/RLS/Outbox/OPA/Temporal/认证）属 M1
-GitHub 治理:                  仅 squash/删分支/里程碑/标签 ✅；分支保护待 Pro（用户升级中）
+GitHub 治理:                  仅 squash/删分支/里程碑/标签 ✅；分支保护不启用（PDR-003），流程纪律为唯一控制
 ```
 
 - **本文性质：** 母本 v2.1 的开发执行拆分与状态追踪，随开发滚动更新。产品真相以母本为准，本文只回答"什么顺序、拆成哪些 PR、现在做到哪了"。
