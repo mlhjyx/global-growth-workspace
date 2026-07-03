@@ -1,0 +1,10 @@
+{
+  "name": "@ggw/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "跨域契约单一事实源：OpenAPI / AsyncAPI 事件 / JSON Schema / Adapter 接口。受保护路径（ADR-102）。",
+  "scripts": {
+    "contracts:validate": "node -e \"console.log('[contracts] 校验器占位 — 阶段1 P0 契约生成时接入 spectral/ajv/asyncapi-cli')\""
+  }
+}

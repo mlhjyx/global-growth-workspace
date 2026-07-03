@@ -1,0 +1,46 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build outputs
+dist/
+build/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+
+# test / coverage
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# env & secrets — never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# editor / os
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# claude code — commit shared config, ignore local overrides & transcripts
+.claude/settings.local.json
+.claude/projects/
+.claude/todos/
+
+# scratch
+tmp/
+scratch/

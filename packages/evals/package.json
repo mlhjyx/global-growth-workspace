@@ -1,0 +1,6 @@
+{
+  "name": "@ggw/evals",
+  "version": "0.0.0",
+  "private": true,
+  "description": "AI Golden Set 与评估器（母本 14.2）。上线阈值按任务风险制定，不用统一准确率。"
+}

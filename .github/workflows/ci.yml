@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # 注意：需先本地 `pnpm install` 生成并提交 pnpm-lock.yaml 后，frozen 安装才能通过。
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm -w run format:check
+      - run: pnpm -w run lint
+      - run: pnpm -w run typecheck
+      - run: pnpm -w run test
+      - run: pnpm -w run contracts:validate
+
+  # 合并前置人工/半自动检查（母本 14.1）：
+  #   /code-review    接口与实现
+  #   /security-review 多租户隔离、数据权利、SSRF、Prompt Injection、导出与 Secret
