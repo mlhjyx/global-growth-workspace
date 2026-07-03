@@ -58,6 +58,16 @@
 
 命中以上任一项时：停止，说明缺哪项决策、它阻断了什么，请业务负责人拍板。
 
+## 合并纪律（服务端分支保护不可用期间的强制流程）
+
+仓库为 GitHub Free 私有仓库，无法启用服务端 Required Checks/分支保护（2026-07-03 已验证 403）。在升级 GitHub Pro 前，以下流程为硬性纪律：
+
+1. **禁止直接 push main**。一切变更走 feature 分支 → PR。（教训：a78bf5f 直推 main 曾致 CI 静默失败）
+2. **合并前**：`set -euo pipefail`；用 `gh pr view --json state,mergeStateStatus,statusCheckRollup` 完整读取检查结果，**禁止用 `| head` 截断后判断**；确认非 Draft、检查全绿、无未解决冲突。
+3. **合并后**：确认 main 的 CI run 为 success（`gh run list --branch main`），失败立即修复或 revert，不得留着红的 main 过夜。
+4. 三个状态严格区分，不得混用：本地全绿 ≠ PR 可合并 ≠ 已合并且 main 验证通过。
+5. CLAUDE.md/hooks 只是开发行为约束；CI、数据库约束、运行时 Policy 才是不可绕过的系统约束——运行时硬约束在 M1 落地（RLS、OPA、审批链）。
+
 ## 开发工作流
 
 1. **纵切片，不按层平推。** 第一条切片沿 J-A 旅程打穿骨架：Workspace/权限 → Company 知识 → ICP/Lead → Campaign 画布 →（mock 执行）。

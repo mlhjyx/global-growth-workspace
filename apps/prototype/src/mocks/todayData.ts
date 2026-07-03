@@ -10,6 +10,7 @@ import {
   QUALIFICATION_LABELS,
   OPPORTUNITY_STAGE_LABELS,
 } from '@/data/fixtures';
+import type { ApprovalProposal } from '@/components/governance';
 
 // ---- workspace 上下文（替代硬编码用户/公司名）----
 export const workspaceName: string = workspace.display_name || workspace.name;
@@ -184,6 +185,108 @@ export const mockPendingApprovals: PendingApproval[] = [
     submittedTime: '昨天 16:45',
     type: 'budget',
     urgency: 'low',
+  },
+];
+
+// 治理提案（硬边界 1：外部动作 = ActionProposal → Policy → 审批 → ExecutionAuthorization）。
+// 接入治理组件库 ApprovalCard；4 个受治理动作类型，含差异对比/成本/策略/证据。
+export const mockApprovalProposals: ApprovalProposal[] = [
+  {
+    id: 'prop-1',
+    action: 'OUTBOUND_SEND',
+    title: '建材非洲经销商招募 · 外联邮件序列第 2 批（42 封）',
+    proposed_by: 'AI · Campaign Planning',
+    proposed_at: '2026-07-03T14:30:00Z',
+    risk_level: 'L2',
+    scope_summary: '42 位联系人 · 邮件 · 3 天窗口',
+    diff: [
+      { field: '发送人数', before: '30', after: '42' },
+      { field: '每日上限', before: '15', after: '20' },
+    ],
+    cost: {
+      kind: 'ESTIMATED',
+      amount: 12,
+      currency: 'USD',
+      category: 'EMAIL',
+      detail: '邮箱验证 42 + 发送 42',
+    },
+    policy: {
+      effect: 'REQUIRE_APPROVAL',
+      reason: '外联发送需人工审批（D-019）',
+      reason_codes: ['OUTBOUND_SEND'],
+    },
+    evidence: [
+      {
+        id: 'ev-1',
+        subject: '联系人邮箱可投递性',
+        source: 'EmailVerificationProvider',
+        confidence: 0.92,
+        fetched_at: '2026-07-02T00:00:00Z',
+        allowed_for_outreach: true,
+      },
+      {
+        id: 'ev-2',
+        subject: '2 位联系人许可禁止外联',
+        source: 'DatasetLicense',
+        confidence: 1,
+        fetched_at: '2026-07-01T00:00:00Z',
+        allowed_for_outreach: false,
+      },
+    ],
+    expires_at: '2026-07-06T00:00:00Z',
+    status: 'PENDING',
+  },
+  {
+    id: 'prop-2',
+    action: 'DATA_EXPORT',
+    title: 'Qualified Lead 名单导出（20 条 · CSV）',
+    proposed_by: '销售负责人',
+    proposed_at: '2026-07-03T11:20:00Z',
+    risk_level: 'L3',
+    scope_summary: '20 条 Lead · 含联系方式',
+    policy: {
+      effect: 'REQUIRE_APPROVAL',
+      reason: '含许可受限字段，5 条不可导出',
+      reason_codes: ['LICENSE_RESTRICTED', 'DATA_EXPORT'],
+    },
+    evidence: [
+      {
+        id: 'ev-3',
+        subject: '5 条联系人禁止导出',
+        source: 'DatasetLicense',
+        confidence: 1,
+        fetched_at: '2026-07-01T00:00:00Z',
+        allowed_to_export: false,
+      },
+    ],
+    status: 'PENDING',
+  },
+  {
+    id: 'prop-3',
+    action: 'CONTENT_PUBLISH',
+    title: '光伏产品介绍图文 · 东南亚（越/英双语）',
+    proposed_by: 'AI · Content Generation',
+    proposed_at: '2026-07-03T09:10:00Z',
+    risk_level: 'L1',
+    scope_summary: '2 个平台 · 已过事实检查',
+    cost: { kind: 'ESTIMATED', amount: 3, currency: 'USD', category: 'MODEL' },
+    policy: { effect: 'ALLOW_WITH_DISCLOSURE', reason: '关键参数已引用 Approved Claim' },
+    status: 'PENDING',
+  },
+  {
+    id: 'prop-4',
+    action: 'CROSS_BORDER_MODEL_CALL',
+    title: '非洲市场深度研究 · 调用境外模型',
+    proposed_by: 'AI · Market Research',
+    proposed_at: '2026-07-03T08:00:00Z',
+    risk_level: 'L2',
+    scope_summary: '市场公开数据 · 无 PII',
+    policy: {
+      effect: 'REQUIRE_APPROVAL',
+      reason: '跨境模型调用需审批',
+      reason_codes: ['CROSS_BORDER_MODEL_CALL'],
+    },
+    status: 'PENDING',
   },
 ];
 
