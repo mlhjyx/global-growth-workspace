@@ -62,6 +62,18 @@ export default function InsightsPage() {
         </div>
       </div>
 
+      {/* Gate 1 埋点看板占位（EPIC-M0-05 T3；M0-06 埋点接入后点亮） */}
+      <div className="mx-4 mb-2 rounded-lg border border-dashed border-white/10 px-3 py-2 flex flex-wrap items-center gap-x-4 gap-y-1 shrink-0">
+        <span className="text-foreground-500 text-[10px] font-medium">
+          <i className="ri-flag-line mr-1"></i>Gate 1 验证埋点（占位）
+        </span>
+        {['旅程完成率', '页面停留', '术语理解反馈', '目标→机会转化'].map((m) => (
+          <span key={m} className="text-[10px] text-foreground-600">
+            {m} <span className="text-foreground-700">待埋点（M0-06）</span>
+          </span>
+        ))}
+      </div>
+
       {/* Bottom: Event stream */}
       <div className="h-auto md:h-[180px] min-h-[140px] shrink-0">
         <EventStream events={mockEventStream} />

@@ -57,12 +57,13 @@ export default function SystemHealthCard() {
         <h3 className="text-white text-sm font-semibold">
           <i className="ri-heart-pulse-line text-primary-400 mr-1.5"></i>系统健康
         </h3>
-        <span
-          className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-foreground-600 cursor-not-allowed"
-          title="Operations Console（PG-013）M1 提供"
+        <Link
+          to="/ops"
+          className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-foreground-500 hover:text-primary-300"
+          title="Operations Console（PG-013）占位，M1 实装"
         >
-          Operations Console · M1
-        </span>
+          Operations Console <i className="ri-arrow-right-line"></i>
+        </Link>
       </div>
       <div className="space-y-2">
         {HEALTH_ITEMS.map((h) => (
