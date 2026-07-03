@@ -12,7 +12,7 @@ import PublishPage from '../pages/publish/page';
 import Layout from '../components/feature/Layout';
 
 import KnowledgePage from '../pages/knowledge/page';
-import CompetitorsPage from '../pages/competitors/page';
+import ResearchPage from '../pages/research/page';
 import IntegrationsPage from '../pages/integrations/page';
 import TeamPage from '../pages/team/page';
 import SettingsPage from '../pages/settings/page';
@@ -63,8 +63,13 @@ const routes: RouteObject[] = [
         element: <KnowledgePage />,
       },
       {
+        path: '/research',
+        element: <ResearchPage />,
+      },
+      {
+        // 市场与竞品已并入研究页（EPIC-M0-03，Gap Analysis G 组判定）
         path: '/competitors',
-        element: <CompetitorsPage />,
+        element: <Navigate to="/research" replace />,
       },
       {
         path: '/integrations',
