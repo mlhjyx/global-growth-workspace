@@ -1,6 +1,7 @@
 # Dev-Ready Package：EPIC-FOUNDATION（M1 Foundation）
 
-> **交付要求 #12：M1 生产实现开始前必须提交并通过本包评审。** 当前为骨架，M0 期间随架构去风险 Spike 结果逐步填充；未过 Gate 3 不启动 M1 Runtime 编码。
+> **交付要求 #12：M1 生产实现开始前必须提交并通过本包评审。** 当前为骨架，M0 期间随架构去风险 Spike 结果逐步填充。
+> **启动门（GDR-002 修订，2026-07-04）**：本包分两阶段——**阶段一（BE-01α，不依赖 Spike 的段）经业务负责人 R2 批准后，即可启动 Foundation 地基运行时编码（BE-02..05）**；阶段二（BE-01β：Permissions/Temporal/Model Gateway/任务分解段）随 Spike 验收卡终审，最晚 BE-04 前完成；纵向切片（BE-09）需 BE-01β 完成。原「未过 Gate 3 不启动 M1 Runtime 编码」表述由本条取代（docs/program/M1_BACKEND_FOUNDATION_PLAN.md）。
 
 - **Release / Wave：** M1 / Wave 1
 - **覆盖需求：** WSP-001~010（部分）、母本第 11 部分架构、ADR-001~018 + ADR-100~104
