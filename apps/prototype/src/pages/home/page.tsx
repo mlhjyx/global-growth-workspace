@@ -5,121 +5,68 @@ import ApprovalsCard from './components/ApprovalsCard';
 import AnomalyCard from './components/AnomalyCard';
 import OpportunityCard from './components/OpportunityCard';
 import DailyBriefModal from './components/DailyBriefModal';
+import { EvidenceDrawer, type EvidenceItem, type ApprovalProposal } from '@/components/governance';
 import {
   mockStats,
   mockNextActions,
-  mockPendingApprovals,
+  mockApprovalProposals,
   mockAnomalies,
   mockOpportunities,
   workspaceName,
   DATA_AS_OF,
 } from '@/mocks/todayData';
 
-export default function Home() {
-  const [showBrief, setShowBrief] = useState(false);
-  const today = new Date();
-  const dateStr = today.toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long',
+export default function HomePage() {
+  const [briefOpen, setBriefOpen] = useState(false);
+  // 页面级共享证据抽屉（母本 6.13：任意 AI 结论/关键字段两次点击内可查依据）
+  const [drawer, setDrawer] = useState<{ open: boolean; title: string; items: EvidenceItem[] }>({
+    open: false,
+    title: '',
+    items: [],
   });
 
-  const hour = today.getHours();
-  const greeting = hour < 12 ? '早上好' : hour < 18 ? '下午好' : '晚上好';
-
-  const handleExportDaily = () => {
-    const text = [
-      `Global Growth Workspace 日报 - ${dateStr}（数据截止 ${DATA_AS_OF}）`,
-      '',
-      '=== 北极星指标 ===',
-      ...mockStats.map((s) => `${s.label}: ${s.value} (${s.change})`),
-      '',
-      '=== 待办事项 ===',
-      ...mockNextActions.map(
-        (a) =>
-          `[${a.priority === 'high' ? '高' : a.priority === 'medium' ? '中' : '低'}] ${a.title}`,
-      ),
-      '',
-      '=== 待审批 ===',
-      ...mockPendingApprovals.map((a) => `- ${a.title} (提交人: ${a.submittedBy})`),
-      '',
-      '=== 异常告警 ===',
-      ...mockAnomalies.map(
-        (a) =>
-          `[${a.severity === 'critical' ? '严重' : a.severity === 'warning' ? '警告' : '提示'}] ${a.title}`,
-      ),
-      '',
-      '=== 商业机会（三级结果链） ===',
-      ...mockOpportunities.map(
-        (o) => `- ${o.company} [${o.signal} · ${o.stageLabel}] 下一步: ${o.signalDetail}`,
-      ),
-    ].join('\n');
-
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        alert('日报内容已复制到剪贴板');
-      })
-      .catch(() => {
-        alert('复制失败，请手动复制');
-      });
+  const showEvidence = (title: string, proposal: ApprovalProposal) => {
+    setDrawer({ open: true, title, items: proposal.evidence ?? [] });
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-5 max-w-[1400px] mx-auto">
-      {/* Greeting */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
+    <div className="min-h-screen p-4 md:p-6 lg:p-8">
+      {/* Page header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-white text-xl font-semibold">
-            {greeting}，<span className="text-primary-400">{workspaceName}</span>
-          </h1>
-          <p className="text-foreground-500 text-sm mt-0.5">
-            {dateStr} · 今日待办 {mockNextActions.length} 项 · 数据截止 {DATA_AS_OF}
+          <h1 className="text-white text-xl md:text-2xl font-bold">今日</h1>
+          <p className="text-foreground-500 text-sm mt-1">
+            {workspaceName} · 数据截止 {DATA_AS_OF}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleExportDaily}
-            className="btn-secondary flex items-center gap-1.5 px-3 py-2 text-sm cursor-pointer"
-          >
-            <span className="w-4 h-4 flex items-center justify-center">
-              <i className="ri-download-line text-sm"></i>
-            </span>
-            导出日报
-          </button>
-          <button
-            onClick={() => setShowBrief(true)}
-            className="btn-primary flex items-center gap-1.5 px-4 py-2 text-sm cursor-pointer"
-          >
-            <span className="w-4 h-4 flex items-center justify-center">
-              <i className="ri-robot-2-line text-sm"></i>
-            </span>
-            生成今日简报
-          </button>
-        </div>
+        <button
+          onClick={() => setBriefOpen(true)}
+          className="btn-primary flex items-center gap-2 self-start sm:self-auto"
+        >
+          <span className="w-4 h-4 flex items-center justify-center">
+            <i className="ri-sparkling-line"></i>
+          </span>
+          AI 今日简报
+        </button>
       </div>
 
-      {/* Stats Bar */}
-      <StatsBar stats={mockStats} />
-
-      {/* Main content: 2-column grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Left column: Next Actions + Anomaly */}
-        <div className="flex flex-col gap-4">
-          <NextActionsCard actions={mockNextActions} />
-          <AnomalyCard anomalies={mockAnomalies} />
-        </div>
-
-        {/* Right column: Approvals + Opportunities */}
-        <div className="flex flex-col gap-4">
-          <ApprovalsCard approvals={mockPendingApprovals} />
-          <OpportunityCard opportunities={mockOpportunities} />
-        </div>
+      {/* Bento grid layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
+        <StatsBar stats={mockStats} />
+        <NextActionsCard actions={mockNextActions} />
+        <ApprovalsCard proposals={mockApprovalProposals} onShowEvidence={showEvidence} />
+        <AnomalyCard anomalies={mockAnomalies} />
+        <OpportunityCard opportunities={mockOpportunities} />
       </div>
 
-      {/* Daily Brief Modal */}
-      {showBrief && <DailyBriefModal onClose={() => setShowBrief(false)} />}
+      {briefOpen && <DailyBriefModal onClose={() => setBriefOpen(false)} />}
+
+      <EvidenceDrawer
+        open={drawer.open}
+        onClose={() => setDrawer((d) => ({ ...d, open: false }))}
+        title={drawer.title}
+        items={drawer.items}
+      />
     </div>
   );
 }
