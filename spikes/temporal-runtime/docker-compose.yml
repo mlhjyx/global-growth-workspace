@@ -1,0 +1,49 @@
+# SPK-TMP Temporal Runtime Spike — 本地 Temporal Server（temporalio/auto-setup + 专用 postgres）
+# 端口刻意避开仓库 infra/docker-compose.dev.yml（5432/6379）：postgres 用 127.0.0.1:5433。
+# 仅 spike 用途，密码为本地默认值，勿用于任何非本地环境。
+# 起停：docker compose -f spikes/temporal-runtime/docker-compose.yml up -d
+name: spk-tmp-temporal
+
+services:
+  postgresql:
+    image: postgres:16-alpine
+    container_name: spk-tmp-postgres
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: temporal
+    ports:
+      - '127.0.0.1:5433:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U temporal']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  temporal:
+    image: temporalio/auto-setup:1.25.2
+    container_name: spk-tmp-temporal
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_SEEDS=postgresql
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
+    ports:
+      - '127.0.0.1:7233:7233'
+    volumes:
+      - ./dynamicconfig:/etc/temporal/config/dynamicconfig
+
+  temporal-ui:
+    image: temporalio/ui:2.31.2
+    container_name: spk-tmp-temporal-ui
+    depends_on:
+      - temporal
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost:8233
+    ports:
+      - '127.0.0.1:8233:8080'

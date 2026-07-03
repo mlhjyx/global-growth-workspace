@@ -1,0 +1,54 @@
+{
+  "_meta": {
+    "case": "CROSS_BORDER_MODEL_CALL 在 Workspace 级授权边界内（provider/region/data_class/task/预算）→ allow，无需每次人工确认（M1 §5-C）",
+    "derived_from": "packages/contracts/fixtures/workspace.json → ws_01JZW0RK000000000000000001（授权对象为 spike 提案形状）",
+    "expected_decision": {
+      "allow": true,
+      "require_approval": false,
+      "reason_codes": []
+    }
+  },
+  "action": {
+    "type": "CROSS_BORDER_MODEL_CALL",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "requested_at": "2026-07-01T08:00:00Z",
+    "model": {
+      "provider": "anthropic",
+      "region": "ap-southeast-1",
+      "data_class": "INTERNAL",
+      "task": "company_understanding",
+      "consumed_amount": 120.5
+    }
+  },
+  "workspace_model_authorization": {
+    "id": "wmga_01JZWMGA000000000000000001",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "status": "ACTIVE",
+    "granted_by": "mem_01JZMEMB000000000000000001",
+    "boundaries": {
+      "providers": [
+        "anthropic",
+        "azure_openai"
+      ],
+      "regions": [
+        "ap-southeast-1",
+        "us-east-1"
+      ],
+      "data_classes": [
+        "PUBLIC",
+        "INTERNAL"
+      ],
+      "tasks": [
+        "company_understanding",
+        "content_generation",
+        "market_scan_summary"
+      ]
+    },
+    "budget_cap": {
+      "amount": 500,
+      "currency": "USD"
+    },
+    "valid_from": "2026-06-01T00:00:00Z",
+    "valid_until": "2026-12-31T00:00:00Z"
+  }
+}

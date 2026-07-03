@@ -1,0 +1,21 @@
+{
+  "name": "@ggw/spike-opa-policy",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "SPK-OPA Policy Spike — packages/contracts fixtures 驱动的 PolicyDecision {allow, require_approval, reason_codes[]} 验证（M1 计划 SPK-OPA 行）。独立 package，不进入仓库 pnpm workspace。",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build:inputs": "node scripts/build-inputs.mjs",
+    "validate:inputs": "node scripts/validate-inputs.mjs",
+    "opa:test": "node scripts/opa.mjs test",
+    "opa:eval": "node scripts/opa.mjs eval",
+    "test": "npm run build:inputs && npm run validate:inputs && npm run opa:test && npm run opa:eval"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
+}

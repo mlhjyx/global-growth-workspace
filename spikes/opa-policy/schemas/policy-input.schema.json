@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://spike/opa-policy/policy-input",
+  "title": "PolicyDecisionInput (SPK-OPA 提案)",
+  "description": "PolicyDecision（PEP→OPA）输入契约的 Spike 提案。授权载体：OUTBOUND_SEND/CONTENT_PUBLISH 用 ExecutionAuthorization（真实契约 ggw://contracts/campaign/execution-authorization）；DATA_EXPORT/DELETE/SUPPRESSION_CHANGE 用 Approval Token（WSP-006 语义，实体契约缺口）；CROSS_BORDER_MODEL_CALL 用 Workspace 级模型授权（M1 §5-C 语义，契约缺口）。正式契约化须经 R2 PR 落入 packages/contracts。",
+  "type": "object",
+  "properties": {
+    "_meta": {
+      "type": "object",
+      "description": "演示/测试元数据（期望决策等），策略规则不读取"
+    },
+    "action": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "OUTBOUND_SEND",
+            "CONTENT_PUBLISH",
+            "DATA_EXPORT",
+            "DELETE",
+            "SUPPRESSION_CHANGE",
+            "CROSS_BORDER_MODEL_CALL"
+          ],
+          "description": "默认审批集动作清单（经 PolicyDecision 的全部动作；清单外内部读写由 RBAC 承接）"
+        },
+        "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+        "requested_at": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+          "description": "PEP 注入的评估时刻（确定性；OPA 不读墙钟）"
+        },
+        "actor": {
+          "type": "object",
+          "description": "审计关联（对齐 audit-log-entry.actor_*），策略规则不读取",
+          "properties": {
+            "actor_type": {
+              "type": "string",
+              "enum": ["USER", "SYSTEM", "AI_AGENT", "EXPERT", "API_CLIENT"]
+            },
+            "actor_id": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "campaign_id": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+        "authorization_id": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+        "channel": { "$ref": "ggw://contracts/campaign/channel-plan#/$defs/channel_type" },
+        "action_type": {
+          "type": "string",
+          "enum": ["PUBLISH", "OUTBOUND_EMAIL", "DM", "COMMENT", "REPLY", "FOLLOW_UP"],
+          "description": "对齐 execution-authorization.scope.allowed_action_types 枚举"
+        },
+        "template_ref": { "type": "string", "minLength": 1 },
+        "content_hash": { "type": "string", "minLength": 1 },
+        "audience_id": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+        "actions_executed_total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "确定性执行服务（PG 事实源）提供的本授权已执行动作数"
+        },
+        "resource_type": { "type": "string" },
+        "resource_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "DATA_EXPORT/DELETE/SUPPRESSION_CHANGE 的被操作对象"
+        },
+        "model": {
+          "type": "object",
+          "description": "CROSS_BORDER_MODEL_CALL 的调用属性",
+          "properties": {
+            "provider": { "type": "string", "minLength": 1 },
+            "region": { "type": "string", "minLength": 1 },
+            "data_class": {
+              "$ref": "ggw://contracts/common/primitives#/$defs/privacy_classification"
+            },
+            "task": { "type": "string", "minLength": 1 },
+            "consumed_amount": {
+              "type": "number",
+              "minimum": 0,
+              "description": "BudgetGuard（WSP-005）提供的已消耗额（与授权 budget_cap 同币种）"
+            }
+          },
+          "required": ["provider", "region", "data_class", "task"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["type", "workspace_id", "requested_at"],
+      "additionalProperties": false
+    },
+    "authorization": {
+      "$ref": "ggw://contracts/campaign/execution-authorization",
+      "description": "PG 中的 ExecutionAuthorization 记录（PEP 按 action.authorization_id 加载；OPA 不拥有状态）"
+    },
+    "approval": {
+      "type": "object",
+      "description": "Approval Token（WSP-006 语义；spike 提案形状）",
+      "properties": {
+        "id": { "type": "string", "pattern": "^aprt_[0-9A-HJKMNP-TV-Z]{26}$" },
+        "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+        "approval_rule_id": { "type": "string", "pattern": "^apr_[0-9A-HJKMNP-TV-Z]{26}$" },
+        "status": { "type": "string", "enum": ["GRANTED", "REVOKED", "CONSUMED", "EXPIRED"] },
+        "governed_actions": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        },
+        "resource_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        },
+        "granted_by": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+        "granted_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+        "expires_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" }
+      },
+      "required": [
+        "id",
+        "workspace_id",
+        "status",
+        "governed_actions",
+        "resource_ids",
+        "granted_by",
+        "granted_at",
+        "expires_at"
+      ],
+      "additionalProperties": false
+    },
+    "workspace_model_authorization": {
+      "type": "object",
+      "description": "Workspace 级跨境模型授权（M1 §5-C 语义；spike 提案形状，建议契约化为 workspace/model-access-grant）",
+      "properties": {
+        "id": { "type": "string", "pattern": "^wmga_[0-9A-HJKMNP-TV-Z]{26}$" },
+        "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+        "status": { "type": "string", "enum": ["ACTIVE", "REVOKED", "EXPIRED", "SUPERSEDED"] },
+        "granted_by": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+          "description": "Workspace 管理员级签发人（mem_ 前缀）"
+        },
+        "boundaries": {
+          "type": "object",
+          "properties": {
+            "providers": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+            "regions": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+            "data_classes": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "ggw://contracts/common/primitives#/$defs/privacy_classification" }
+            },
+            "tasks": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+          },
+          "required": ["providers", "regions", "data_classes", "tasks"],
+          "additionalProperties": false
+        },
+        "budget_cap": { "$ref": "ggw://contracts/common/primitives#/$defs/money" },
+        "valid_from": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+        "valid_until": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" }
+      },
+      "required": [
+        "id",
+        "workspace_id",
+        "status",
+        "granted_by",
+        "boundaries",
+        "valid_from",
+        "valid_until"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": ["action"],
+  "additionalProperties": false
+}
