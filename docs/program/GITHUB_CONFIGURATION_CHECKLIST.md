@@ -14,9 +14,9 @@
 | Dependabot | .github/dependabot.yml（npm + actions 每周） |
 | CI Required 候选 | verify（format/type-check/build/contracts） |
 
-## ⛔ 待 GitHub Pro（已验证 Free 私有仓库 403，用户升级后执行）
+## ⛔ 分支保护：不启用（PDR-003 已拍板不升级 Pro）——以下仅存档，若未来升级/转公开再执行
 
-升级路径：github.com → Settings → Billing and plans → Upgrade to Pro（需网页付款，Claude Code 不能代付）。
+
 
 升级后由 Claude Code 立即执行（命令已备）：
 

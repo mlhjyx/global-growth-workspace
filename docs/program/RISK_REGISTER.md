@@ -10,7 +10,7 @@
 
 | ID | 风险 | 级别 | 触发信号 | 缓解 | 状态 |
 |---|---|---|---|---|---|
-| RISK-101 | GitHub Free 私有仓库无服务端分支保护，PR 检查可被绕过合并 | 高 | 直推 main、`\| head` 截断判断 CI | CLAUDE.md 合并纪律（严格失败模式）；建议升级 GitHub Pro 启用 Required Checks | 缓解中（流程纪律），根治待升级 Pro |
+| RISK-101 | GitHub Free 私有仓库无服务端分支保护，PR 检查可被绕过合并 | 高 | 直推 main、`\| head` 截断判断 CI | CLAUDE.md 合并纪律（严格失败模式）；建议升级 GitHub Pro 启用 Required Checks | **接受残余风险（PDR-003：不升级 Pro）**；流程纪律为唯一控制，任何绕过即事故复盘 |
 | RISK-102 | 长任务被 session limit 中断，并行代理 in-process 工作丢失 | 中 | 一次派多个后台代理 + 长运行 | 工作分小批可提交单元；代理任务独占文件、完成即验证提交；关键产出先落盘 | 已发生 2 次（无损失，工作树干净） |
 | RISK-103 | M0 原型技术栈（Vite/React SPA）与 M1 生产（Next.js）不同，接入组件形态若过度耦合原型会增加 M1 迁移成本 | 中 | 治理组件依赖原型专有机制 | 治理组件库保持无路由/无构建耦合，只依赖 React+Tailwind；M1 复用组件形态与设计令牌，不迁移路由 | 监控中 |
 | RISK-104 | de-risking Spike（Temporal/OPA/AiToEarn 等）结果可能推翻 M1 架构假设 | 中高 | Spike 未做即冻结 M1 设计 | 架构去风险线与 M0 并行启动；Spike 未过不锁 M1 对应设计 | 待启动（Spike 需 M1 环境） |
