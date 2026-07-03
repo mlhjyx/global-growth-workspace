@@ -67,9 +67,9 @@ const routes: RouteObject[] = [
         element: <ResearchPage />,
       },
       {
-        // 市场与竞品已并入研究页（EPIC-M0-03，Gap Analysis G 组判定）
+        // 市场与竞品已并入研究页竞争情报 tab（EPIC-M0-03，Gap Analysis G 组判定）
         path: '/competitors',
-        element: <Navigate to="/research" replace />,
+        element: <Navigate to="/research?tab=competitive" replace />,
       },
       {
         path: '/integrations',

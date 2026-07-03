@@ -192,6 +192,33 @@ export const marketCandidates: MarketCandidate[] = [
     risks: ['物流与售后网络成本高'],
   },
   {
+    id: 'mc_my',
+    country: '马来西亚',
+    flag: '🇲🇾',
+    industry: '光伏能源',
+    region: '东南亚',
+    support_level: 'TEMPLATE',
+    data_as_of: '2026-06-28',
+    headline: 'NEM 净计量配额延续，工商业屋顶需求稳定，认证路径清晰',
+    scores: {
+      demand: 66,
+      trade_momentum: 60,
+      buyer_access: 68,
+      competition: 52,
+      margin: 54,
+      channel: 70,
+      entry: 62,
+      data: 72,
+      fit: 64,
+    },
+    evidences: [
+      ev('ev_my1', 'NEM 3.0 配额延续至 2026', 'FACT', '马来西亚能源委员会（样例）', 0.86),
+      ev('ev_my2', 'SIRIM 认证周期约 8-12 周', 'FACT', 'SIRIM 官方（样例）', 0.8),
+      ev('ev_my3', '大型 EPC 偏好东盟区域仓发货', 'AI_INFERENCE', '招标条款综合推断', 0.55),
+    ],
+    risks: ['本地组件产能享受政策倾斜，进口价格空间受限'],
+  },
+  {
     id: 'mc_ng',
     country: '尼日利亚',
     flag: '🇳🇬',
@@ -297,6 +324,33 @@ export const marketCandidates: MarketCandidate[] = [
     ],
     risks: ['进口许可与外汇是硬风险，需专家确认'],
   },
+  {
+    id: 'mc_ma',
+    country: '摩洛哥',
+    flag: '🇲🇦',
+    industry: '建材',
+    region: '非洲',
+    support_level: 'TEMPLATE',
+    data_as_of: '2026-06-28',
+    headline: '2030 世界杯基建潮 + 欧非转口区位，法语区渠道需本地化',
+    scores: {
+      demand: 74,
+      trade_momentum: 70,
+      buyer_access: 60,
+      competition: 55,
+      margin: 58,
+      channel: 62,
+      entry: 56,
+      data: 60,
+      fit: 66,
+    },
+    evidences: [
+      ev('ev_ma1', '场馆与配套基建招标集中释放', 'FACT', '公开招标信息（样例）', 0.8),
+      ev('ev_ma2', 'NM 认证与欧标 EN 部分互认', 'FACT', 'IMANOR 官方（样例）', 0.78),
+      ev('ev_ma3', '某商会称可对接 200 家进口商', 'VENDOR_CLAIM', '商会宣传（样例）', 0.35),
+    ],
+    risks: ['法语/阿拉伯语商务本地化成本', '项目类采购集中于少数总包商'],
+  },
 ];
 
 // ---- PG-004 研究工作台：进行中的研究项目 ----
@@ -320,6 +374,7 @@ export const QUESTION_STATUS_LABELS: Record<QuestionStatus, { label: string; cls
 
 export const activeResearch = {
   id: 'rp_001',
+  market_id: 'mc_vn', // 对应 marketCandidates，工作台据此判断所选市场是否已有进行中研究
   title: '越南屋顶光伏市场深度研究',
   brief: {
     offering: '晶阳新能源 · 550W 双玻组件 + 混合逆变器',
