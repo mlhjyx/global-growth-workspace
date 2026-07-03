@@ -5,6 +5,8 @@ import ApprovalsCard from './components/ApprovalsCard';
 import AnomalyCard from './components/AnomalyCard';
 import OpportunityCard from './components/OpportunityCard';
 import DailyBriefModal from './components/DailyBriefModal';
+import GoalLauncher from './components/GoalLauncher';
+import SystemHealthCard from './components/SystemHealthCard';
 import { EvidenceDrawer, type EvidenceItem, type ApprovalProposal } from '@/components/governance';
 import {
   mockStats,
@@ -50,13 +52,15 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* Bento grid layout */}
+      {/* Bento grid layout（PG-001 六区：目标启动器/今日重点/审批/异常/机会/系统健康） */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
+        <GoalLauncher />
         <StatsBar stats={mockStats} />
         <NextActionsCard actions={mockNextActions} />
         <ApprovalsCard proposals={mockApprovalProposals} onShowEvidence={showEvidence} />
         <AnomalyCard anomalies={mockAnomalies} />
         <OpportunityCard opportunities={mockOpportunities} />
+        <SystemHealthCard />
       </div>
 
       {briefOpen && <DailyBriefModal onClose={() => setBriefOpen(false)} />}
