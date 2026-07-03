@@ -267,13 +267,7 @@ export default function ICPBuilder({ icps, selectedICPId, onSelectICP }: ICPBuil
           </div>
 
           {/* EPIC-M0-03 T4：样例回测 + 查询预览（PG-005 后两区域，LED-004/005） */}
-          <ICPValidation
-            icpId={selectedICP.id}
-            icpIndex={Math.max(
-              icps.findIndex((i) => i.id === selectedICP.id),
-              0,
-            )}
-          />
+          <ICPValidation icpId={selectedICP.id} />
         </div>
       )}
     </div>
