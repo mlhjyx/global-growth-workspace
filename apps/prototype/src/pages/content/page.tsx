@@ -3,6 +3,7 @@ import ContentLibrary from './components/ContentLibrary';
 import ContentComparison from './components/ContentComparison';
 import ContentAI from './components/ContentAI';
 import ContentActivityStream from './components/ContentActivity';
+import ClaimReferences from './components/ClaimReferences';
 import {
   mockContentItems,
   mockLocalizations,
@@ -65,6 +66,13 @@ export default function ContentPage() {
             <i className="ri-send-plane-line"></i>
             发布中心
           </Link>
+          <Link
+            to="/video"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-foreground-400 border border-white/10 hover:text-foreground-200 transition-colors whitespace-nowrap"
+          >
+            <i className="ri-film-line"></i>
+            视频工作室
+          </Link>
         </div>
         <div className="flex flex-wrap items-center gap-1.5 md:gap-4 text-[11px] md:text-xs">
           <div className="flex items-center gap-1.5 text-foreground-500">
@@ -101,6 +109,9 @@ export default function ContentPage() {
           </div>
         </div>
       </div>
+
+      {/* Claim 引用条（EPIC-M0-04 T3：关键说法必须引用 Approved Claim） */}
+      <ClaimReferences contentId={selectedContentId} />
 
       {/* Three-column layout */}
       <div className="flex flex-col md:flex-row flex-1 md:overflow-hidden overflow-y-auto">

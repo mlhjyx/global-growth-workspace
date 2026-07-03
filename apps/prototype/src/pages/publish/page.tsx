@@ -178,12 +178,12 @@ export default function PublishPage() {
               {publishing ? (
                 <>
                   <i className="ri-loader-4-line animate-spin"></i>
-                  发布中...
+                  生成提案中...
                 </>
               ) : (
                 <>
-                  <i className="ri-send-plane-fill"></i>
-                  {scheduleMode === 'now' ? '一键发布' : '定时发布'}
+                  <i className="ri-flask-line"></i>
+                  {scheduleMode === 'now' ? '发布预检（Dry Run）' : '排期预检（Dry Run）'}
                 </>
               )}
             </button>
@@ -193,10 +193,11 @@ export default function PublishPage() {
         {/* Success toast */}
         {publishSuccess && (
           <div className="mb-5 px-4 py-3 rounded-lg bg-green-500/8 border border-green-500/15 flex items-center gap-2.5">
-            <i className="ri-checkbox-circle-line text-green-400"></i>
+            <i className="ri-file-shield-2-line text-green-400"></i>
             <span className="text-green-400 text-sm">
-              内容已成功{scheduleMode === 'now' ? '发布' : '排期'}至 {selectedConnected.length}{' '}
-              个平台
+              发布提案已提交审批（模拟）：{selectedConnected.length} 个平台，批准后由执行器按授权
+              {scheduleMode === 'now' ? '发布' : '按排期发布'}
+              ，不会直接发送
             </span>
           </div>
         )}
@@ -293,17 +294,36 @@ export default function PublishPage() {
           <div className="relative w-full max-w-md mx-4 rounded-2xl bg-[#1a1a2e] border border-white/[0.06] p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-primary-500/10 flex items-center justify-center">
-                <i className="ri-question-line text-primary-400 text-lg"></i>
+                <i className="ri-flask-line text-primary-400 text-lg"></i>
               </div>
               <div>
-                <h3 className="text-white font-semibold">
-                  确认{scheduleMode === 'now' ? '发布' : '排期'}？
-                </h3>
+                <h3 className="text-white font-semibold">Dry Run 预检 · 生成发布提案</h3>
                 <p className="text-foreground-600 text-xs mt-0.5">
-                  内容将{scheduleMode === 'now' ? '立即' : `于 ${scheduleDate} ${scheduleTime}`}
-                  分发至以下平台
+                  {scheduleMode === 'now'
+                    ? '批准后执行'
+                    : `批准后于 ${scheduleDate} ${scheduleTime} 执行`}
+                  ；提交不等于发送——对外发布默认人工审批（硬边界 1）
                 </p>
               </div>
+            </div>
+
+            {/* 预检结果（M0 模拟：字符/权利/Claim/策略四项） */}
+            <div className="space-y-1 mb-3 text-[11px]">
+              <p className="text-success">
+                <i className="ri-checkbox-circle-line mr-1"></i>
+                字符限制检查通过（{selectedConnected.length} 个平台）
+              </p>
+              <p className="text-success">
+                <i className="ri-checkbox-circle-line mr-1"></i>素材权利：无外部素材引用
+              </p>
+              <p className="text-warning">
+                <i className="ri-alert-line mr-1"></i>
+                关键说法 Claim 引用未标注——审批人需人工核对（KNW-006）
+              </p>
+              <p className="text-primary-300">
+                <i className="ri-shield-check-line mr-1"></i>
+                策略：REQUIRE_APPROVAL（对外发布属默认人工审批动作）
+              </p>
             </div>
             <div className="space-y-1.5 mb-4 max-h-[180px] overflow-y-auto">
               {selectedConnected.map((pid) => {
@@ -334,8 +354,8 @@ export default function PublishPage() {
                 onClick={confirmPublish}
                 className="flex-1 py-2.5 rounded-lg bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium transition-colors cursor-pointer flex items-center justify-center gap-2"
               >
-                <i className="ri-send-plane-fill"></i>
-                确认{scheduleMode === 'now' ? '发布' : '排期'}
+                <i className="ri-file-shield-2-line"></i>
+                提交审批（生成提案）
               </button>
             </div>
           </div>

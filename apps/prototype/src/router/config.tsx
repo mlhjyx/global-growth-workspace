@@ -9,6 +9,7 @@ import EngagementPage from '../pages/engagement/page';
 import InsightsPage from '../pages/insights/page';
 import OnboardingPage from '../pages/onboarding/page';
 import PublishPage from '../pages/publish/page';
+import VideoPage from '../pages/video/page';
 import Layout from '../components/feature/Layout';
 
 import KnowledgePage from '../pages/knowledge/page';
@@ -49,6 +50,11 @@ const routes: RouteObject[] = [
       {
         path: '/publish',
         element: <PublishPage />,
+      },
+      {
+        // PG-008 Video Studio 占位（内容域子入口，EPIC-M0-04 T3）
+        path: '/video',
+        element: <VideoPage />,
       },
       {
         path: '/engagement',

@@ -6,6 +6,9 @@ build
 coverage
 pnpm-lock.yaml
 
+# unplugin-auto-import 每次构建自动生成，不参与格式检查（曾多次导致 CI 红）
+apps/prototype/auto-imports.d.ts
+
 # 文档人工排版（母本、ADR、README），不由 prettier 重排
 docs/
 *.md

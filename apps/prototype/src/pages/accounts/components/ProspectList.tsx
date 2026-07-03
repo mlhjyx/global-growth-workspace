@@ -9,6 +9,9 @@ import {
   SCORE_METHOD_LABELS,
   VERIFICATION_LABELS,
 } from '@/mocks/accountData';
+import ScoreExplainDrawer from './ScoreExplainDrawer';
+import BatchDiffPreview from './BatchDiffPreview';
+import SuppressionView from './SuppressionView';
 
 interface ProspectListProps {
   accounts: Account[];
@@ -27,6 +30,11 @@ export default function ProspectList({ accounts }: ProspectListProps) {
   );
   const [filterQueue, setFilterQueue] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'score' | 'date' | 'quality'>('score');
+  // EPIC-M0-04 T1：评分解释抽屉 / 批量差异预览 / Suppression 名单
+  const [explainFocus, setExplainFocus] = useState<string | null>(null);
+  const [explainOpen, setExplainOpen] = useState(false);
+  const [batchOpen, setBatchOpen] = useState(false);
+  const [suppressionOpen, setSuppressionOpen] = useState(false);
 
   const filtered = accounts.filter((a) => filterQueue === 'all' || a.queue === filterQueue);
   const sorted = [...filtered].sort((a, b) => {
@@ -63,18 +71,6 @@ export default function ProspectList({ accounts }: ProspectListProps) {
         </div>
         <div className="flex items-center gap-2">
           <select
-            value={filterQueue}
-            onChange={(e) => setFilterQueue(e.target.value)}
-            className="text-xs py-1 px-2 bg-input-bg border-input-border rounded-md"
-          >
-            <option value="all">全部队列</option>
-            {QUEUE_FILTERS.map((q) => (
-              <option key={q} value={q}>
-                {queueConfig[q].label}
-              </option>
-            ))}
-          </select>
-          <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'score' | 'date' | 'quality')}
             className="text-xs py-1 px-2 bg-input-bg border-input-border rounded-md"
@@ -83,11 +79,59 @@ export default function ProspectList({ accounts }: ProspectListProps) {
             <option value="date">按最近验证</option>
             <option value="quality">按数据质量</option>
           </select>
+          <button
+            onClick={() => setBatchOpen(true)}
+            className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1"
+            title="批量重评分先预览差异，确认后才应用"
+          >
+            <i className="ri-refresh-line text-xs"></i>
+            批量重评分
+          </button>
+          <button
+            onClick={() => setSuppressionOpen(true)}
+            className="text-xs px-3 py-1.5 flex items-center gap-1 rounded-lg text-error border border-error/30 hover:bg-error/10 cursor-pointer"
+            title="全局禁止联系与硬性排除名单"
+          >
+            <i className="ri-forbid-line text-xs"></i>
+            Suppression
+          </button>
           <button className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1">
             <i className="ri-add-line text-xs"></i>
             导入
           </button>
         </div>
+      </div>
+
+      {/* 四队列 tab（LED-011：推荐/待确认/已拒绝/禁止联系，替代下拉筛选） */}
+      <div className="flex flex-wrap gap-1.5 px-4 py-2 border-b border-primary-500/10 shrink-0">
+        <button
+          onClick={() => setFilterQueue('all')}
+          className={`px-2.5 py-1 rounded-lg text-[11px] cursor-pointer border ${
+            filterQueue === 'all'
+              ? 'bg-primary-500/15 text-primary-300 border-primary-500/30'
+              : 'text-foreground-500 border-white/10 hover:text-foreground-300'
+          }`}
+        >
+          全部 {accounts.length}
+        </button>
+        {QUEUE_FILTERS.map((q) => {
+          const count = accounts.filter((a) => a.queue === q).length;
+          const cfg = queueConfig[q];
+          return (
+            <button
+              key={q}
+              onClick={() => setFilterQueue(q)}
+              className={`px-2.5 py-1 rounded-lg text-[11px] cursor-pointer border flex items-center gap-1 ${
+                filterQueue === q
+                  ? `${cfg.bg} ${cfg.color} border-current/30`
+                  : 'text-foreground-500 border-white/10 hover:text-foreground-300'
+              }`}
+            >
+              {cfg.icon && <i className={`${cfg.icon} text-[10px]`}></i>}
+              {cfg.label} {count}
+            </button>
+          );
+        })}
       </div>
 
       {/* Table */}
@@ -286,10 +330,27 @@ export default function ProspectList({ accounts }: ProspectListProps) {
               <span className="normal-case text-foreground-700">
                 综合优先级 {selectedAccount.score}（按 ICP 权重组合，各维度独立展示）
               </span>
+              <button
+                onClick={() => {
+                  setExplainFocus(null);
+                  setExplainOpen(true);
+                }}
+                className="normal-case ml-2 text-primary-400 hover:text-primary-300 cursor-pointer"
+              >
+                <i className="ri-file-search-line"></i> 完整解释
+              </button>
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
               {selectedAccount.dimensions.map((dim) => (
-                <div key={dim.key} className="glass-card px-2.5 py-1.5">
+                <div
+                  key={dim.key}
+                  onClick={() => {
+                    setExplainFocus(dim.key);
+                    setExplainOpen(true);
+                  }}
+                  title={`查看「${dim.label}」评分证据（${dim.evidence.length} 条）`}
+                  className="glass-card px-2.5 py-1.5 cursor-pointer hover:border-primary-500/40"
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-foreground-500 text-[10px]">{dim.label}</span>
                     <span className="text-foreground-700 text-[9px]">
@@ -416,6 +477,22 @@ export default function ProspectList({ accounts }: ProspectListProps) {
           </div>
         </div>
       )}
+
+      {/* EPIC-M0-04 T1 覆盖层 */}
+      <ScoreExplainDrawer
+        account={explainOpen ? selectedAccount : null}
+        focusKey={explainFocus}
+        onClose={() => setExplainOpen(false)}
+      />
+      {/* 条件挂载：关闭即卸载，“已应用”状态不会在重开时残留 */}
+      {batchOpen && (
+        <BatchDiffPreview open accounts={accounts} onClose={() => setBatchOpen(false)} />
+      )}
+      <SuppressionView
+        open={suppressionOpen}
+        accounts={accounts}
+        onClose={() => setSuppressionOpen(false)}
+      />
     </div>
   );
 }
