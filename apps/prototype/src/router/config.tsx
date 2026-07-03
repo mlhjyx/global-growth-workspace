@@ -10,6 +10,8 @@ import InsightsPage from '../pages/insights/page';
 import OnboardingPage from '../pages/onboarding/page';
 import PublishPage from '../pages/publish/page';
 import VideoPage from '../pages/video/page';
+import ExpertPage from '../pages/expert/page';
+import OpsPage from '../pages/ops/page';
 import Layout from '../components/feature/Layout';
 
 import KnowledgePage from '../pages/knowledge/page';
@@ -55,6 +57,16 @@ const routes: RouteObject[] = [
         // PG-008 Video Studio 占位（内容域子入口，EPIC-M0-04 T3）
         path: '/video',
         element: <VideoPage />,
+      },
+      {
+        // PG-011 Expert Workspace 占位（EPIC-M0-05 T3）
+        path: '/expert',
+        element: <ExpertPage />,
+      },
+      {
+        // PG-013 Operations Console 占位（EPIC-M0-05 T3）
+        path: '/ops',
+        element: <OpsPage />,
       },
       {
         path: '/engagement',

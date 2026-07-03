@@ -6,6 +6,7 @@ import ChannelBreakdown from './components/ChannelBreakdown';
 import ReportGenerator from './components/ReportGenerator';
 import InsightsAI from './components/InsightsAI';
 import EventStream from './components/EventStream';
+import OutcomeChain from './components/OutcomeChain';
 import {
   mockKPIs,
   mockTrendData,
@@ -23,6 +24,9 @@ export default function InsightsPage() {
     <div className="flex flex-col md:h-[calc(100vh-3.5rem)]">
       {/* Top bar: KPI overview + time selector */}
       <KPIBar kpis={mockKPIs} selectedPeriod={selectedPeriod} onPeriodChange={setSelectedPeriod} />
+
+      {/* 三级结果链（EPIC-M0-05 T2） */}
+      <OutcomeChain />
 
       {/* Main content: full-screen dashboard grid */}
       <div className="flex-1 md:overflow-hidden overflow-y-auto">
@@ -56,6 +60,18 @@ export default function InsightsPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Gate 1 埋点看板占位（EPIC-M0-05 T3；M0-06 埋点接入后点亮） */}
+      <div className="mx-4 mb-2 rounded-lg border border-dashed border-white/10 px-3 py-2 flex flex-wrap items-center gap-x-4 gap-y-1 shrink-0">
+        <span className="text-foreground-500 text-[10px] font-medium">
+          <i className="ri-flag-line mr-1"></i>Gate 1 验证埋点（占位）
+        </span>
+        {['旅程完成率', '页面停留', '术语理解反馈', '目标→机会转化'].map((m) => (
+          <span key={m} className="text-[10px] text-foreground-600">
+            {m} <span className="text-foreground-700">待埋点（M0-06）</span>
+          </span>
+        ))}
       </div>
 
       {/* Bottom: Event stream */}

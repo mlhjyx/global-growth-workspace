@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import InboxList from './components/InboxList';
 import MessageDetail from './components/MessageDetail';
 import EngagementAI from './components/EngagementAI';
+import ContextPanel from './components/ContextPanel';
 import EngagementActivityStream from './components/EngagementActivity';
 import {
   mockEngagementMessages,
@@ -13,6 +14,8 @@ import {
 
 export default function EngagementPage() {
   const [selectedMessageId, setSelectedMessageId] = useState(mockEngagementMessages[0].id);
+  // EPIC-M0-05 T1：右栏在 Context 面板与 AI 助手间切换（PG-010）
+  const [rightTab, setRightTab] = useState<'context' | 'ai'>('context');
 
   const selectedMessage = mockEngagementMessages.find((m) => m.id === selectedMessageId) || null;
   const conversation = useMemo(
@@ -105,14 +108,39 @@ export default function EngagementPage() {
           <MessageDetail message={selectedMessage} conversation={conversation} />
         </div>
 
-        {/* Right: AI Assistant */}
+        {/* Right: Context 面板 / AI 助手（PG-010） */}
         <div
           className="w-full md:w-[300px] flex flex-col border-l border-t md:border-t-0 border-primary-500/10 shrink-0"
           style={{
             background: 'linear-gradient(180deg, rgba(12,10,26,0.9) 0%, rgba(26,16,60,0.7) 100%)',
           }}
         >
-          <EngagementAI insights={mockEngagementAIInsights} messageId={selectedMessageId} />
+          <div className="flex border-b border-primary-500/10 shrink-0">
+            {(
+              [
+                { k: 'context', label: '上下文', icon: 'ri-links-line' },
+                { k: 'ai', label: 'AI 助手', icon: 'ri-robot-2-line' },
+              ] as const
+            ).map((t) => (
+              <button
+                key={t.k}
+                onClick={() => setRightTab(t.k)}
+                className={`flex-1 py-2 text-[11px] cursor-pointer flex items-center justify-center gap-1 ${
+                  rightTab === t.k
+                    ? 'text-primary-300 border-b-2 border-primary-400'
+                    : 'text-foreground-500 hover:text-foreground-300'
+                }`}
+              >
+                <i className={t.icon}></i>
+                {t.label}
+              </button>
+            ))}
+          </div>
+          {rightTab === 'context' ? (
+            <ContextPanel messageId={selectedMessageId} />
+          ) : (
+            <EngagementAI insights={mockEngagementAIInsights} messageId={selectedMessageId} />
+          )}
         </div>
       </div>
 
