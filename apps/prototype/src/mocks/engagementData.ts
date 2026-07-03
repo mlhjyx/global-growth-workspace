@@ -584,3 +584,34 @@ export const mockEngagementActivities: EngagementActivity[] = [
     type: 'respond',
   },
 ];
+
+// ---- Inbox Context 关联（EPIC-M0-05 T1，PG-010）----
+// 模拟关联：消息按顺序映射到 fixtures 账户（M1 由 conversation.account_id 真实关联；此处仅演示）。
+// 奇数消息关联光伏 ICP 账户（前 10），偶数关联建材 ICP 账户（后 10），保证两旅程都可演示。
+import {
+  accounts as fxAccounts,
+  contactsByAccount,
+  leadByAccountId,
+  campaigns as fxCampaigns,
+  opportunities as fxOpportunities,
+  touchpoints as fxTouchpoints,
+} from '@/data/fixtures';
+
+export const contextForMessage = (messageId: string) => {
+  const idx = Math.max(
+    mockEngagementMessages.findIndex((m) => m.id === messageId),
+    0,
+  );
+  const account = fxAccounts[idx % 2 === 0 ? idx % 10 : 10 + (idx % 10)];
+  if (!account) return null;
+  const lead = leadByAccountId.get(account.id);
+  const contacts = contactsByAccount(account.id);
+  const opps = fxOpportunities.filter((o) => o.account_id === account.id);
+  const tps = fxTouchpoints
+    .filter((t) => t.account_id === account.id || opps.some((o) => o.id === t.opportunity_id))
+    .slice(0, 5);
+  const campaign =
+    fxCampaigns.find((c) => opps.some((o) => o.source_campaign_id === c.id)) ??
+    fxCampaigns[idx % fxCampaigns.length];
+  return { account, lead, contacts, opportunities: opps, touchpoints: tps, campaign };
+};
