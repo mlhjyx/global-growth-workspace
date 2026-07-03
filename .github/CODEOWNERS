@@ -1,0 +1,14 @@
+# CODEOWNERS —— 单人阶段全部映射业务负责人，多人后按角色拆分（结构先行，母本 15.2）
+# 受保护路径（R2：人工批准合并）
+/packages/contracts/            @mlhjyx
+/packages/policy/               @mlhjyx
+/docs/architecture/adr/         @mlhjyx
+/CLAUDE.md                      @mlhjyx
+/docs/出海企业AI增长平台_总产品手册与PRD_v2.1_母本.md @mlhjyx
+/.github/workflows/             @mlhjyx
+/docs/program/                  @mlhjyx
+
+# 常规域（多人阶段拆分为 @frontend-owner/@backend-owner/@ai-owner/@data-owner/@security-owner）
+/apps/                          @mlhjyx
+/packages/                      @mlhjyx
+/docs/                          @mlhjyx

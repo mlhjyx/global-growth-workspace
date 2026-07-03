@@ -1,0 +1,16 @@
+name: Spike
+description: 技术验证（开源/架构去风险；结果回填 OSS 交付卡）
+title: '[SPIKE] '
+labels: ['type:spike']
+body:
+  - type: input
+    id: target
+    attributes: { label: 验证对象, placeholder: 'Temporal / OPA / AiToEarn…' }
+    validations: { required: true }
+  - type: textarea
+    id: plan
+    attributes: { label: 验证用例与通过阈值（引用 docs/oss/<项目>.md Spike Plan） }
+    validations: { required: true }
+  - type: input
+    id: validation
+    attributes: { label: 对应验证项, placeholder: 'V-002' }

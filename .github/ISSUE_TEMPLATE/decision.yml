@@ -1,0 +1,12 @@
+name: Decision
+description: 需要业务负责人拍板的开放决策（登记入 OPEN_DECISIONS.md）
+title: '[DECISION] '
+labels: ['type:decision', 'status:blocked']
+body:
+  - type: input
+    id: od
+    attributes: { label: Open Decision ID, placeholder: 'OD-XX' }
+  - type: textarea
+    id: context
+    attributes: { label: 背景 / 可选项与代价 / 阻塞什么 / 最晚关闭点 }
+    validations: { required: true }

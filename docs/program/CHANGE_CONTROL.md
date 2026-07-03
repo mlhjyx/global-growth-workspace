@@ -1,0 +1,43 @@
+# Change Control（变更控制与合并判定协议）
+
+变更等级 L1-L5 沿用母本 15.15。本文件补充 **PR 风险分级（R0-R3）与 Claude Code 合并判定协议**——回答"下次合并你自行判断"的判断标准。
+
+## PR 风险分级
+
+| 级别 | 范围 | 合并权限 |
+|---|---|---|
+| **R0** | 纯文档、拼写、测试补充、非业务 UI 微调；不触及代码行为 | Claude Code 可自主合并 |
+| **R1** | M0 原型页面/可逆前端逻辑、mock 数据、非敏感功能；**不触及受保护路径** | Claude Code 可自主合并 |
+| **R2** | 数据库迁移、公共 API、packages/contracts Schema、Auth、Tenant、Policy、Approval 链、数据导出逻辑、AI Tool 注册、外部发送/发布代码路径、OSS 升生产依赖、许可证变化、CLAUDE.md/母本/ADR | **必须人工批准合并** |
+| **R3** | 生产部署、真实发信/发布、数据供应商生产接入、权限策略变更、Kill Switch 变更 | **必须人工批准**；Claude Code 不得执行最终发布 |
+
+分级判定：取 PR 内**最高风险文件**的级别；拿不准时升一级；PR 描述必须标注 Risk Level。
+
+## Claude Code 自主合并判定协议（R0/R1）
+
+全部满足才可合并，任何一条不满足即停止并报告：
+
+```text
+[ ] 分级正确：diff 不含 R2/R3 路径（contracts/、migrations、policy、*.state.ts、CLAUDE.md、.github/workflows、auth/tenant 代码）
+[ ] PR 非 Draft；无未解决 review thread；与 main 无冲突（mergeStateStatus 可合并）
+[ ] Required Checks 全绿：gh pr view --json statusCheckRollup 完整读取（禁止截断），全部 conclusion=SUCCESS
+[ ] PR 描述完整：Epic/需求 ID/风险/测试/回滚（模板必填项无缺）
+[ ] 本地验证已在 PR 内记录（type-check/build/format/契约按需）
+[ ] 无未登记的产品假设（对照 OPEN_DECISIONS：不涉及未关闭决策）
+[ ] 合并方式 squash；合并后 60s 内确认 main CI run=success，失败立即 revert 或修复，不留红 main
+[ ] 合并后更新 ROADMAP 状态与 TRACEABILITY_MATRIX
+```
+
+**Merged ≠ Accepted**：合并只表示进入 main；业务验收在 Gate（用户测试/Validation Report）完成后才算 Accepted。
+
+## PR 状态流程
+
+```text
+Issue/任务就绪 → 分支 → （尽早）Draft PR → 实施计划 → 开发 → 自检
+→ CI → Code Review（/code-review）→ 触及权限/租户/数据时 /security-review
+→ Ready → 按 R 级合并 → main 验证 → Preview 验证 → 更新 ROADMAP/Traceability
+```
+
+## PR 边界
+
+一个 PR 一个清晰问题；≤500-800 行人工代码（自动生成 Schema 例外，超限须解释）；不混无关重构；含测试与文档更新；有回滚方式。分支命名：`feat/<epic>-<feature>`、`fix/`、`spike/`、`docs/`、`chore/`。Commit 用 Conventional Commits。

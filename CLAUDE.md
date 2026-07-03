@@ -4,6 +4,10 @@
 `docs/出海企业AI增长平台_总产品手册与PRD_v2.1_母本.md`（下称「母本」）。本文件只做工程约束，
 **不覆盖母本的产品决策**。发生冲突时以母本为准；引用需求时用母本的稳定 ID（如 `CAM-008`、`DAT-005`、`ADR-002`）。
 
+**事实源优先级（冲突处理，docs/program/PROGRAM_CHARTER.md）**：母本 v2.1 > Approved PDR/ADR > Epic Dev-Ready Package > 机器契约（packages/contracts）> Issue/任务 > 代码与测试 > **聊天记录（不得静默改变产品）**。发现冲突：停止相关实现 → 登记 Open Decision 或 PDR/ADR 草案 → 等决策，不得自选解释。
+
+**PR 合并判定**：按 `docs/program/CHANGE_CONTROL.md` 的 R0-R3 分级与判定协议执行——R0/R1 满足全部清单项可自主合并；R2（迁移/公共 API/contracts/Auth/Tenant/Policy/外部执行路径/OSS 升生产/CLAUDE.md）与 R3（生产发布/真实发送）必须人工批准。Merged ≠ Accepted。
+
 ## 项目本质
 
 面向中国出海企业的 AI 全球客户开发与增长执行平台。平台**主动**研究全球市场、发现目标企业和决策人、
