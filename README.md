@@ -42,4 +42,6 @@ pnpm -w run test         # 测试
 
 ## 当前阶段
 
-M0 之前的**开发底座**已就绪（仓库骨架、CLAUDE.md、hooks、技术基线 ADR、CI）。下一步：关闭业务决策（见 CLAUDE.md 的 OPEN DECISIONS）→ 生成 P0 四域契约与样例数据 → M0 九页可点击原型。
+**执行状态的唯一事实源是 [docs/program/ROADMAP.md](docs/program/ROADMAP.md) 的「当前状态」块**——本节只给入口，不复制状态（防止两处过期不一致）。
+
+概要（可能滞后于 ROADMAP）：产品母本 v2.1 已批准；五域 P0 契约完成；M0 可点击原型开发中（六个 Epic 按 ROADMAP 表推进）；治理体系见 docs/program/（R0-R3 变更控制、决策账本、风险登记）；仓库已公开（PDR-004），main 由 ruleset 保护（仅 PR + CI verify 必绿）。

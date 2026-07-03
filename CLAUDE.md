@@ -72,6 +72,10 @@
 4. 三个状态严格区分，不得混用：本地全绿 ≠ PR 可合并 ≠ 已合并且 main 验证通过。
 5. CLAUDE.md/hooks 只是开发行为约束；CI、ruleset、数据库约束、运行时 Policy 才是系统约束——运行时硬约束在 M1 落地（RLS、OPA、审批链）。
 
+## Agent 分工（详表见 docs/program/CHANGE_CONTROL.md）
+
+**Claude Code = 实现**（规划/实现/测试/文档/响应审查；自查≠独立审查）；**Codex = 独立代码审查**（GitHub App 行级评论，须逐条核实并在 PR 内回复：已修复/不采纳+理由/延后+登记，结论落盘 PR 不得只存在会话）；**GitHub Actions + ruleset = 确定性 Gate**；**业务负责人 = R2/R3 批准与决策关闭**。
+
 ## 开发工作流
 
 1. **纵切片，不按层平推。** 第一条切片沿 J-A 旅程打穿骨架：Workspace/权限 → Company 知识 → ICP/Lead → Campaign 画布 →（mock 执行）。

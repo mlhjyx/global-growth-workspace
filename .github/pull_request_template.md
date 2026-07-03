@@ -19,12 +19,13 @@
 
 ## 测试与验证
 
-- [ ] type-check 通过
+- [ ] typecheck 通过
 - [ ] build 通过
 - [ ] format:check 通过
 - [ ] contracts:validate 通过（若触及契约）
-- [ ] `/code-review` 已跑并处理
+- [ ] `/code-review` 已跑，**结论落盘于本描述或 PR 评论**（不得只存在会话）
 - [ ] `/security-review` 已跑（若触及权限/租户/数据）
+- **Codex 独立审查处理：** <已修复 x / 不采纳 x（理由已回复）/ 延后 x；未触发写"未触发"——评论必须逐条核实回复（CHANGE_CONTROL Agent 分工）>
 - **测试说明：** <跑了什么、结果>
 - **截图/录屏：** <UI 变更附 Preview 截图；无 UI 变更写"无 UI 变更">
 
