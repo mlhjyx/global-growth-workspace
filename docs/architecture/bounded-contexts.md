@@ -16,4 +16,6 @@
 | Pack/Expert | 待建 | domain-pack / domain-expert | Pack 版本化快照 |
 | AI/Operations | ai-tasks 契约 | worker-ai | Trace 脱敏（ADR-016） |
 
+> 注：M1 允许领域逻辑先内联 `apps/api` `modules/<ctx>/domain/`，第二消费方出现再抽 `packages/domain-*`，见 EPIC-FOUNDATION §0.2（BE-01α 冻结）。
+
 跨 Context 只经契约与事件，不共享 ORM 模型（Python/TS 亦同，母本 11.5）。
