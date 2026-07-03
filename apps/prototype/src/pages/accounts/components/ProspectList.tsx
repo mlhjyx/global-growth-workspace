@@ -484,7 +484,10 @@ export default function ProspectList({ accounts }: ProspectListProps) {
         focusKey={explainFocus}
         onClose={() => setExplainOpen(false)}
       />
-      <BatchDiffPreview open={batchOpen} accounts={accounts} onClose={() => setBatchOpen(false)} />
+      {/* 条件挂载：关闭即卸载，“已应用”状态不会在重开时残留 */}
+      {batchOpen && (
+        <BatchDiffPreview open accounts={accounts} onClose={() => setBatchOpen(false)} />
+      )}
       <SuppressionView
         open={suppressionOpen}
         accounts={accounts}

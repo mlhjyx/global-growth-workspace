@@ -193,12 +193,15 @@ export default function GovernancePanel({ campaign }: GovernancePanelProps) {
         </div>
       </div>
 
-      <DryRunModal
-        open={dryRunOpen}
-        onClose={() => setDryRunOpen(false)}
-        report={report}
-        onDecide={(d) => setDecisions((p) => ({ ...p, [campaign.id]: d }))}
-      />
+      {/* 条件挂载：关闭即卸载，内部“已决策”状态不会泄漏到下次打开或其他 Campaign */}
+      {dryRunOpen && (
+        <DryRunModal
+          open
+          onClose={() => setDryRunOpen(false)}
+          report={report}
+          onDecide={(d) => setDecisions((p) => ({ ...p, [campaign.id]: d }))}
+        />
+      )}
     </div>
   );
 }
