@@ -104,12 +104,12 @@ const helpTips = [
   },
   {
     icon: 'ri-flag-2-line',
-    text: '在战役看板中拖拽任务卡片即可快速改变任务状态。',
+    text: '在战役看板中拖拽计划项卡片即可快速改变其状态。',
     color: 'text-foreground-400',
   },
   {
     icon: 'ri-rocket-line',
-    text: 'AI 发布中心支持一键将内容分发至 8 个平台。',
+    text: '发布中心支持将已审批内容排期到多个获授权平台（入口在「内容」域）。',
     color: 'text-ai-accent',
   },
 ];

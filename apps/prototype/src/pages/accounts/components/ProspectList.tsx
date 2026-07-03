@@ -36,7 +36,8 @@ export default function ProspectList({ accounts }: ProspectListProps) {
     return b.dataQuality - a.dataQuality;
   });
 
-  const selectedAccount = sorted.find((a) => a.id === selectedAccountId) || sorted[0];
+  // 守卫：当前队列筛选可能为空（fixtures 变化或未来接真实数据时），selectedAccount 可为 undefined
+  const selectedAccount = sorted.find((a) => a.id === selectedAccountId) ?? sorted[0] ?? null;
 
   const getScoreColor = (score: number) => {
     if (score >= 85) return 'text-success';
