@@ -16,8 +16,8 @@ EPIC-M0-05..06:              M0-05 下一个
 Foundation 状态:              设计/契约/校验基线已立；运行时实现（PG/RLS/Outbox/OPA/Temporal/认证）属 M1
 GitHub 治理:                  仓库已公开（PDR-004）；main ruleset 生效（PR 必经+verify 必绿+仅 squash+禁 force push）；
                              Codex 自动代码审查已启用；Actions 升级 #4/5/6 已合并
-Track B 后端去风险:            双轨启动计划见 docs/program/M1_BACKEND_FOUNDATION_PLAN.md（PR #19，待业务负责人最终批准）；
-                             节奏 BE-01α→M0-05→BE-02→M0-06→BE-03→Gate1；SPK-TMP/OPA/MGW 可并行；WIP=1 个 BE 运行时 PR
+Track B 后端去风险:            ✅ 计划已批准生效（PR #19 合并）；BE-01α 🔄 + SPK-TMP/OPA/MGW 🔄 并行开工；
+                             节奏 BE-01α→M0-05→BE-02→M0-06→BE-03→Gate1；WIP=1 个 BE 运行时 PR；合并授权见 GDR-003
 ```
 
 - **本文性质：** 母本 v2.1 的开发执行拆分与状态追踪，随开发滚动更新。产品真相以母本为准，本文只回答"什么顺序、拆成哪些 PR、现在做到哪了"。
