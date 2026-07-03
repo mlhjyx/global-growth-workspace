@@ -18,10 +18,7 @@
       "description": "租户边界，必须与输入一致（母本 ADR-001）"
     },
     "detected_language": {
-      "oneOf": [
-        { "$ref": "ggw://contracts/common/primitives#/$defs/locale" },
-        { "type": "null" }
-      ],
+      "oneOf": [{ "$ref": "ggw://contracts/common/primitives#/$defs/locale" }, { "type": "null" }],
       "description": "来源主要语言；无法判定时为 null"
     },
     "company_profile_candidate": {
@@ -113,11 +110,27 @@
             "section": { "type": "string", "maxLength": 500, "description": "章节/标题路径" },
             "char_start": { "type": "integer", "minimum": 0, "description": "片段起始字符偏移" },
             "char_end": { "type": "integer", "minimum": 0, "description": "片段结束字符偏移" },
-            "timecode_start_ms": { "type": "integer", "minimum": 0, "description": "音频/视频起始时间（毫秒）" },
-            "timecode_end_ms": { "type": "integer", "minimum": 0, "description": "音频/视频结束时间（毫秒）" },
+            "timecode_start_ms": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "音频/视频起始时间（毫秒）"
+            },
+            "timecode_end_ms": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "音频/视频结束时间（毫秒）"
+            },
             "sheet": { "type": "string", "maxLength": 200, "description": "工作表名（XLSX）" },
-            "cell_range": { "type": "string", "maxLength": 50, "description": "单元格范围，如 A1:C10（XLSX）" },
-            "url_fragment": { "type": "string", "maxLength": 1000, "description": "网页 URL 片段/锚点（WEBSITE）" }
+            "cell_range": {
+              "type": "string",
+              "maxLength": 50,
+              "description": "单元格范围，如 A1:C10（XLSX）"
+            },
+            "url_fragment": {
+              "type": "string",
+              "maxLength": 1000,
+              "description": "网页 URL 片段/锚点（WEBSITE）"
+            }
           },
           "additionalProperties": false
         }
@@ -159,7 +172,11 @@
       "type": "object",
       "description": "画像/产品单字段的来源与置信度（KNW-002 验收：每项候选带来源、置信度和类型；理念对齐 common/field-evidence 的字段级证据，但本对象是 knowledge 域提取候选的轻量形态）",
       "properties": {
-        "field_name": { "type": "string", "maxLength": 200, "description": "候选对象字段名（snake_case）" },
+        "field_name": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "候选对象字段名（snake_case）"
+        },
         "source_ref": { "$ref": "#/$defs/source_ref" },
         "quote": {
           "type": "string",
@@ -342,7 +359,11 @@
               "type": "object",
               "properties": {
                 "quantity": { "type": "number", "minimum": 0 },
-                "unit": { "type": "string", "maxLength": 50, "description": "计量单位，如 pcs、set、kg" },
+                "unit": {
+                  "type": "string",
+                  "maxLength": 50,
+                  "description": "计量单位，如 pcs、set、kg"
+                },
                 "notes": { "type": "string", "maxLength": 500 }
               },
               "required": ["quantity", "unit"],
@@ -418,7 +439,14 @@
           "description": "值为 null 的字段清单及原因（母本 4.8.3）"
         }
       },
-      "required": ["candidate_key", "name", "offering_type", "confidence", "source_refs", "missing_fields"],
+      "required": [
+        "candidate_key",
+        "name",
+        "offering_type",
+        "confidence",
+        "source_refs",
+        "missing_fields"
+      ],
       "additionalProperties": false
     },
     "claim_candidate": {
@@ -597,7 +625,13 @@
           "description": "取值差异摘要，逐来源列出各自的值与出处，供事实审核台比较（KNW-004 版本比较；对齐 knowledge-conflict.diff_summary）"
         }
       },
-      "required": ["topic", "conflict_type", "claim_candidate_keys", "detection_method", "diff_summary"],
+      "required": [
+        "topic",
+        "conflict_type",
+        "claim_candidate_keys",
+        "detection_method",
+        "diff_summary"
+      ],
       "additionalProperties": false
     }
   }

@@ -290,7 +290,18 @@ components:
           minItems: 1
           items:
             type: string
-            enum: [NOT_ICP_FIT, WRONG_ROLE, BAD_DATA, ALREADY_CUSTOMER, COMPETITOR, BAD_TIMING, DUPLICATE, COMPLIANCE_RISK, OTHER]
+            enum:
+              [
+                NOT_ICP_FIT,
+                WRONG_ROLE,
+                BAD_DATA,
+                ALREADY_CUSTOMER,
+                COMPETITOR,
+                BAD_TIMING,
+                DUPLICATE,
+                COMPLIANCE_RISK,
+                OTHER,
+              ]
           description: 与 lead-decision.schema.json reason_codes 一致
         decided_by:
           type: string
@@ -356,7 +367,18 @@ components:
           type: string
         reason:
           type: string
-          enum: [UNSUBSCRIBED, COMPLAINT, HARD_BOUNCE, DO_NOT_CONTACT_REQUEST, DATA_SUBJECT_REQUEST, COMPETITOR, EXISTING_CUSTOMER, COMPLIANCE, MANUAL]
+          enum:
+            [
+              UNSUBSCRIBED,
+              COMPLAINT,
+              HARD_BOUNCE,
+              DO_NOT_CONTACT_REQUEST,
+              DATA_SUBJECT_REQUEST,
+              COMPETITOR,
+              EXISTING_CUSTOMER,
+              COMPLIANCE,
+              MANUAL,
+            ]
           description: 与 suppression-record.schema.json 一致
         channels:
           type: array
@@ -411,5 +433,14 @@ components:
           type: string
           enum: [AUTO, HUMAN]
           description: 高置信自动合并 / 中置信人工 Review（母本 7.4.10、DAT-009）
-      required: [entity_type, operation, operation_id, canonical_entity_id, source_entity_ids, result_entity_ids, resolved_by]
+      required:
+        [
+          entity_type,
+          operation,
+          operation_id,
+          canonical_entity_id,
+          source_entity_ids,
+          result_entity_ids,
+          resolved_by,
+        ]
       additionalProperties: false

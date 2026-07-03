@@ -21,14 +21,16 @@ export default function OnboardingPage() {
   const [isChecking, setIsChecking] = useState(true);
   const [data, setData] = useState<OnboardingData>(() => {
     const saved = sessionStorage.getItem('onboarding_data');
-    return saved ? { ...JSON.parse(saved), step: JSON.parse(saved).step || 0 } : { ...defaultOnboardingData };
+    return saved
+      ? { ...JSON.parse(saved), step: JSON.parse(saved).step || 0 }
+      : { ...defaultOnboardingData };
   });
 
   // Guard: redirect based on auth and completion state
   useEffect(() => {
-    const authToken = localStorage.getItem('growthos_auth_token');
-    const onboardingCompleted = localStorage.getItem('growthos_onboarding_completed') === 'true';
-    const goalCompleted = localStorage.getItem('growthos_goal_completed') === 'true';
+    const authToken = localStorage.getItem('ggw_auth_token');
+    const onboardingCompleted = localStorage.getItem('ggw_onboarding_completed') === 'true';
+    const goalCompleted = localStorage.getItem('ggw_goal_completed') === 'true';
 
     if (!authToken) {
       navigate('/', { replace: true });
@@ -49,7 +51,7 @@ export default function OnboardingPage() {
   }, [navigate]);
 
   const updateData = (partial: Partial<OnboardingData>) => {
-    setData(prev => {
+    setData((prev) => {
       const next = { ...prev, ...partial };
       sessionStorage.setItem('onboarding_data', JSON.stringify(next));
       return next;
@@ -80,25 +82,34 @@ export default function OnboardingPage() {
   };
 
   const handleOnboardingComplete = () => {
-    localStorage.setItem('growthos_onboarding_completed', 'true');
+    localStorage.setItem('ggw_onboarding_completed', 'true');
     navigate('/goal');
   };
 
   const canProceed = () => {
     switch (data.step) {
-      case 0: return data.companyName && data.industry;
-      case 1: return data.regions.length > 0;
-      case 2: return data.icps.length > 0;
-      case 3: return data.campaignName;
-      case 4: return true;
-      default: return false;
+      case 0:
+        return data.companyName && data.industry;
+      case 1:
+        return data.regions.length > 0;
+      case 2:
+        return data.icps.length > 0;
+      case 3:
+        return data.campaignName;
+      case 4:
+        return true;
+      default:
+        return false;
     }
   };
 
   // Show loading while checking auth state
   if (isChecking) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0C0A1A 0%, #1A103C 100%)' }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: 'linear-gradient(135deg, #0C0A1A 0%, #1A103C 100%)' }}
+      >
         <div className="flex flex-col items-center gap-3">
           <i className="ri-loader-4-line animate-spin text-2xl text-primary-400"></i>
           <span className="text-sm text-foreground-500">正在加载...</span>
@@ -108,16 +119,35 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative" style={{ background: 'linear-gradient(135deg, #0C0A1A 0%, #1A103C 100%)' }}>
+    <div
+      className="min-h-screen flex flex-col items-center justify-center p-6 relative"
+      style={{ background: 'linear-gradient(135deg, #0C0A1A 0%, #1A103C 100%)' }}
+    >
       {/* Grid texture */}
-      <div className="absolute inset-0 pointer-events-none" style={{
-        backgroundImage: 'linear-gradient(rgba(108,92,231,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(108,92,231,0.03) 1px, transparent 1px)',
-        backgroundSize: '60px 60px',
-      }}></div>
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(108,92,231,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(108,92,231,0.03) 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
+        }}
+      ></div>
 
       {/* Glow orbs */}
-      <div className="fixed w-[400px] h-[400px] rounded-full pointer-events-none z-0 top-[-10%] right-[-8%]" style={{ background: 'radial-gradient(circle, rgba(108,92,231,0.2) 0%, transparent 70%)', filter: 'blur(80px)' }}></div>
-      <div className="fixed w-[350px] h-[350px] rounded-full pointer-events-none z-0 bottom-[-8%] left-[-5%]" style={{ background: 'radial-gradient(circle, rgba(162,155,254,0.15) 0%, transparent 70%)', filter: 'blur(80px)' }}></div>
+      <div
+        className="fixed w-[400px] h-[400px] rounded-full pointer-events-none z-0 top-[-10%] right-[-8%]"
+        style={{
+          background: 'radial-gradient(circle, rgba(108,92,231,0.2) 0%, transparent 70%)',
+          filter: 'blur(80px)',
+        }}
+      ></div>
+      <div
+        className="fixed w-[350px] h-[350px] rounded-full pointer-events-none z-0 bottom-[-8%] left-[-5%]"
+        style={{
+          background: 'radial-gradient(circle, rgba(162,155,254,0.15) 0%, transparent 70%)',
+          filter: 'blur(80px)',
+        }}
+      ></div>
 
       {/* Main card */}
       <div className="relative z-10 w-full max-w-2xl">
@@ -131,21 +161,17 @@ export default function OnboardingPage() {
 
         {/* Content area */}
         <div className="glass-card p-6 md:p-8 min-h-[420px]">
-          {data.step === 0 && (
-            <CompanyProfile data={data} onChange={updateData} />
-          )}
-          {data.step === 1 && (
-            <TargetMarkets data={data} onChange={updateData} />
-          )}
+          {data.step === 0 && <CompanyProfile data={data} onChange={updateData} />}
+          {data.step === 1 && <TargetMarkets data={data} onChange={updateData} />}
           {data.step === 2 && (
-            <ICPPreview icps={data.icps} onUpdate={(icps) => updateData({ icps })} onGenerate={handleICPGenerate} />
+            <ICPPreview
+              icps={data.icps}
+              onUpdate={(icps) => updateData({ icps })}
+              onGenerate={handleICPGenerate}
+            />
           )}
-          {data.step === 3 && (
-            <FirstCampaign data={data} onChange={updateData} />
-          )}
-          {data.step === 4 && (
-            <SuccessFinish data={data} onComplete={handleOnboardingComplete} />
-          )}
+          {data.step === 3 && <FirstCampaign data={data} onChange={updateData} />}
+          {data.step === 4 && <SuccessFinish data={data} onComplete={handleOnboardingComplete} />}
         </div>
 
         {/* Navigation buttons */}

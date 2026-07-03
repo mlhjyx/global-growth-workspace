@@ -17,11 +17,9 @@ export default function GoalSelector({ options, onSelect }: GoalSelectorProps) {
           </span>
           STEP 1 / 3
         </div>
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-          我要完成什么？
-        </h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">我要完成什么？</h2>
         <p className="text-foreground-400 text-sm md:text-base max-w-lg">
-          选择一个核心目标，GrowthOS 将为你构建专属的增长作战计划
+          选择一个核心目标，Global Growth Workspace 将为你构建专属的增长作战计划
         </p>
       </div>
 
@@ -35,11 +33,15 @@ export default function GoalSelector({ options, onSelect }: GoalSelectorProps) {
             style={{ animationDelay: `${idx * 80}ms`, animationFillMode: 'both' }}
           >
             {/* Hover glow */}
-            <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${goal.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`} />
+            <div
+              className={`absolute inset-0 rounded-xl bg-gradient-to-br ${goal.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}
+            />
 
             <div className="relative z-10 flex items-start gap-4">
               {/* Icon */}
-              <div className={`w-12 h-12 flex items-center justify-center rounded-xl bg-gradient-to-br ${goal.color} border border-white/10 flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
+              <div
+                className={`w-12 h-12 flex items-center justify-center rounded-xl bg-gradient-to-br ${goal.color} border border-white/10 flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}
+              >
                 <i className={`${goal.icon} text-xl text-white`}></i>
               </div>
 

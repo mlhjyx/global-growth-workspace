@@ -38,7 +38,7 @@ export const connectedPlatforms: ConnectedPlatform[] = [
     status: 'connected',
     lastSync: '2 分钟前',
     dataSynced: '12,847 条联系人',
-    accountName: 'GrowthOS Main Org',
+    accountName: 'Global Growth Workspace Main Org',
   },
   {
     id: '2',
@@ -58,7 +58,7 @@ export const connectedPlatforms: ConnectedPlatform[] = [
     status: 'connected',
     lastSync: '1 分钟前',
     dataSynced: '3 个广告账号',
-    accountName: 'GrowthOS Official',
+    accountName: 'Global Growth Workspace Official',
   },
   {
     id: '4',
@@ -68,7 +68,7 @@ export const connectedPlatforms: ConnectedPlatform[] = [
     status: 'connected',
     lastSync: '8 分钟前',
     dataSynced: '2 个企业账号',
-    accountName: '@growthos_ai',
+    accountName: '@ggw_ai',
   },
   {
     id: '5',
@@ -78,7 +78,7 @@ export const connectedPlatforms: ConnectedPlatform[] = [
     status: 'connected',
     lastSync: '实时',
     dataSynced: '5 个频道',
-    accountName: 'GrowthOS Workspace',
+    accountName: 'Global Growth Workspace Workspace',
   },
   {
     id: '6',
@@ -88,7 +88,7 @@ export const connectedPlatforms: ConnectedPlatform[] = [
     status: 'error',
     lastSync: '3 小时前',
     dataSynced: '权限失效',
-    accountName: 'GrowthOS Property',
+    accountName: 'Global Growth Workspace Property',
   },
   {
     id: '7',

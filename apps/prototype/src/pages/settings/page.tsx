@@ -13,8 +13,8 @@ export default function SettingsPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const toggleNotif = (idx: number, field: 'email' | 'inApp' | 'slack') => {
-    setNotifSettings(prev =>
-      prev.map((item, i) => (i === idx ? { ...item, [field]: !item[field] } : item))
+    setNotifSettings((prev) =>
+      prev.map((item, i) => (i === idx ? { ...item, [field]: !item[field] } : item)),
     );
   };
 
@@ -36,7 +36,7 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-white">Leo Chen</p>
-                  <p className="text-xs text-foreground-500">管理员 · leo.chen@growthos.ai</p>
+                  <p className="text-xs text-foreground-500">管理员 · leo.chen@example.com</p>
                 </div>
                 <button className="ml-auto text-xs bg-primary-500/15 text-primary-400 px-3 py-1.5 rounded-md border border-primary-500/20 hover:bg-primary-500/25 transition-colors cursor-pointer">
                   更换头像
@@ -45,11 +45,19 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div>
                   <label className="text-xs text-foreground-500 block mb-1">显示名称</label>
-                  <input type="text" defaultValue="Leo Chen" className="w-full bg-background-100/50 border border-primary-500/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary-500/30" />
+                  <input
+                    type="text"
+                    defaultValue="Leo Chen"
+                    className="w-full bg-background-100/50 border border-primary-500/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary-500/30"
+                  />
                 </div>
                 <div>
                   <label className="text-xs text-foreground-500 block mb-1">职位</label>
-                  <input type="text" defaultValue="增长运营总监" className="w-full bg-background-100/50 border border-primary-500/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary-500/30" />
+                  <input
+                    type="text"
+                    defaultValue="增长运营总监"
+                    className="w-full bg-background-100/50 border border-primary-500/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary-500/30"
+                  />
                 </div>
                 <div>
                   <label className="text-xs text-foreground-500 block mb-1">时区</label>
@@ -85,10 +93,18 @@ export default function SettingsPage() {
               <table className="w-full min-w-[480px]">
                 <thead>
                   <tr className="border-b border-primary-500/8">
-                    <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">事件类型</th>
-                    <th className="text-center px-4 py-3 text-xs font-medium text-foreground-500">邮件</th>
-                    <th className="text-center px-4 py-3 text-xs font-medium text-foreground-500">应用内</th>
-                    <th className="text-center px-4 py-3 text-xs font-medium text-foreground-500">Slack</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">
+                      事件类型
+                    </th>
+                    <th className="text-center px-4 py-3 text-xs font-medium text-foreground-500">
+                      邮件
+                    </th>
+                    <th className="text-center px-4 py-3 text-xs font-medium text-foreground-500">
+                      应用内
+                    </th>
+                    <th className="text-center px-4 py-3 text-xs font-medium text-foreground-500">
+                      Slack
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -96,13 +112,28 @@ export default function SettingsPage() {
                     <tr key={idx} className="border-b border-primary-500/5">
                       <td className="px-4 py-3 text-xs text-white">{row.channel}</td>
                       <td className="px-4 py-3 text-center">
-                        <input type="checkbox" checked={row.email} onChange={() => toggleNotif(idx, 'email')} className="cursor-pointer" />
+                        <input
+                          type="checkbox"
+                          checked={row.email}
+                          onChange={() => toggleNotif(idx, 'email')}
+                          className="cursor-pointer"
+                        />
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <input type="checkbox" checked={row.inApp} onChange={() => toggleNotif(idx, 'inApp')} className="cursor-pointer" />
+                        <input
+                          type="checkbox"
+                          checked={row.inApp}
+                          onChange={() => toggleNotif(idx, 'inApp')}
+                          className="cursor-pointer"
+                        />
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <input type="checkbox" checked={row.slack} onChange={() => toggleNotif(idx, 'slack')} className="cursor-pointer" />
+                        <input
+                          type="checkbox"
+                          checked={row.slack}
+                          onChange={() => toggleNotif(idx, 'slack')}
+                          className="cursor-pointer"
+                        />
                       </td>
                     </tr>
                   ))}
@@ -120,7 +151,9 @@ export default function SettingsPage() {
             {/* Password */}
             <div className="bg-background-100/30 border border-primary-500/8 rounded-xl p-5 max-w-full md:max-w-xl">
               <h3 className="text-xs font-medium text-white mb-3">密码</h3>
-              <p className="text-xs text-foreground-600 mb-3">上次修改：2025-04-15 · 建议使用强密码并定期更换</p>
+              <p className="text-xs text-foreground-600 mb-3">
+                上次修改：2025-04-15 · 建议使用强密码并定期更换
+              </p>
               <button className="text-xs bg-primary-500/15 text-primary-400 px-3 py-1.5 rounded-md border border-primary-500/20 hover:bg-primary-500/25 transition-colors cursor-pointer">
                 修改密码
               </button>
@@ -131,9 +164,13 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <h3 className="text-xs font-medium text-white">双因素认证 (2FA)</h3>
-                  <p className="text-xs text-foreground-600 mt-0.5">使用身份验证器 App 增强账户安全</p>
+                  <p className="text-xs text-foreground-600 mt-0.5">
+                    使用身份验证器 App 增强账户安全
+                  </p>
                 </div>
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400">未启用</span>
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400">
+                  未启用
+                </span>
               </div>
               <button
                 onClick={() => setShowMFA(!showMFA)}
@@ -144,12 +181,26 @@ export default function SettingsPage() {
 
               {showMFA && (
                 <div className="mt-4 p-4 bg-background-100/50 rounded-lg border border-primary-500/10">
-                  <p className="text-xs text-foreground-500 mb-3">请使用身份验证器扫描以下二维码：</p>
+                  <p className="text-xs text-foreground-500 mb-3">
+                    请使用身份验证器扫描以下二维码：
+                  </p>
                   <div className="w-32 h-32 bg-white rounded-lg flex items-center justify-center mb-3">
-                    <div className="w-24 h-24 bg-foreground-950 rounded-sm" style={{ backgroundImage: 'repeating-linear-gradient(0deg, #000 0px, #000 4px, #fff 4px, #fff 8px), repeating-linear-gradient(90deg, #000 0px, #000 4px, #fff 4px, #fff 8px)' }}></div>
+                    <div
+                      className="w-24 h-24 bg-foreground-950 rounded-sm"
+                      style={{
+                        backgroundImage:
+                          'repeating-linear-gradient(0deg, #000 0px, #000 4px, #fff 4px, #fff 8px), repeating-linear-gradient(90deg, #000 0px, #000 4px, #fff 4px, #fff 8px)',
+                      }}
+                    ></div>
                   </div>
-                  <p className="text-[11px] text-foreground-600 font-mono mb-2">JBSW Y3DP EHPK 3PXP</p>
-                  <input type="text" placeholder="输入 6 位验证码" className="w-32 bg-background-100/50 border border-primary-500/10 rounded-lg px-3 py-2 text-sm text-white placeholder-foreground-600 focus:outline-none focus:border-primary-500/30" />
+                  <p className="text-[11px] text-foreground-600 font-mono mb-2">
+                    JBSW Y3DP EHPK 3PXP
+                  </p>
+                  <input
+                    type="text"
+                    placeholder="输入 6 位验证码"
+                    className="w-32 bg-background-100/50 border border-primary-500/10 rounded-lg px-3 py-2 text-sm text-white placeholder-foreground-600 focus:outline-none focus:border-primary-500/30"
+                  />
                   <button className="ml-2 text-xs bg-primary-500 text-white px-3 py-2 rounded-lg hover:bg-primary-600 transition-colors cursor-pointer">
                     验证
                   </button>
@@ -161,16 +212,23 @@ export default function SettingsPage() {
             <div className="bg-background-100/30 border border-primary-500/8 rounded-xl p-5 max-w-full md:max-w-xl">
               <h3 className="text-xs font-medium text-white mb-3">活跃会话</h3>
               <div className="space-y-3">
-                {securitySessions.map(s => (
-                  <div key={s.id} className="flex flex-col sm:flex-row sm:items-center justify-between py-2 border-b border-primary-500/5 last:border-0 gap-2">
+                {securitySessions.map((s) => (
+                  <div
+                    key={s.id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between py-2 border-b border-primary-500/5 last:border-0 gap-2"
+                  >
                     <div className="flex items-center gap-3">
                       <i className="ri-computer-line text-foreground-500 text-sm"></i>
                       <div>
                         <p className="text-xs text-white">
                           {s.device} · {s.browser}
-                          {s.isCurrent && <span className="text-[10px] text-green-400 ml-2">(当前)</span>}
+                          {s.isCurrent && (
+                            <span className="text-[10px] text-green-400 ml-2">(当前)</span>
+                          )}
                         </p>
-                        <p className="text-[11px] text-foreground-600">{s.location} · {s.ip}</p>
+                        <p className="text-[11px] text-foreground-600">
+                          {s.location} · {s.ip}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -198,11 +256,19 @@ export default function SettingsPage() {
             <div className="bg-background-100/30 border border-primary-500/8 rounded-xl p-5 space-y-4 max-w-full md:max-w-xl">
               <div>
                 <label className="text-xs text-foreground-500 block mb-1">企业名称</label>
-                <input type="text" defaultValue="GrowthOS 科技" className="w-full bg-background-100/50 border border-primary-500/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary-500/30" />
+                <input
+                  type="text"
+                  defaultValue="晶阳新能源"
+                  className="w-full bg-background-100/50 border border-primary-500/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary-500/30"
+                />
               </div>
               <div>
                 <label className="text-xs text-foreground-500 block mb-1">企业官网</label>
-                <input type="text" defaultValue="https://growthos.ai" className="w-full bg-background-100/50 border border-primary-500/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary-500/30" />
+                <input
+                  type="text"
+                  defaultValue="https://example.com"
+                  className="w-full bg-background-100/50 border border-primary-500/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary-500/30"
+                />
               </div>
               <div>
                 <label className="text-xs text-foreground-500 block mb-1">行业</label>
@@ -258,18 +324,33 @@ export default function SettingsPage() {
               <h3 className="text-xs font-medium text-white mb-4">用量概览</h3>
               <div className="space-y-4">
                 {[
-                  { label: '联系人', used: usageStats.contactsUsed, limit: usageStats.contactsLimit },
-                  { label: '战役', used: usageStats.campaignsUsed, limit: usageStats.campaignsLimit },
-                  { label: '存储空间', used: usageStats.storageUsed, limit: usageStats.storageLimit, unit: 'GB' },
+                  {
+                    label: '联系人',
+                    used: usageStats.contactsUsed,
+                    limit: usageStats.contactsLimit,
+                  },
+                  {
+                    label: '战役',
+                    used: usageStats.campaignsUsed,
+                    limit: usageStats.campaignsLimit,
+                  },
+                  {
+                    label: '存储空间',
+                    used: usageStats.storageUsed,
+                    limit: usageStats.storageLimit,
+                    unit: 'GB',
+                  },
                   { label: '团队成员', used: usageStats.teamMembers, limit: usageStats.teamLimit },
-                ].map(item => {
+                ].map((item) => {
                   const pct = (item.used / item.limit) * 100;
                   return (
                     <div key={item.label}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-foreground-500">{item.label}</span>
                         <span className="text-xs text-white">
-                          {item.used.toLocaleString()}{item.unit || ''} / {item.limit.toLocaleString()}{item.unit || ''}
+                          {item.used.toLocaleString()}
+                          {item.unit || ''} / {item.limit.toLocaleString()}
+                          {item.unit || ''}
                         </span>
                       </div>
                       <div className="h-1.5 bg-background-200/40 rounded-full overflow-hidden">
@@ -295,8 +376,10 @@ export default function SettingsPage() {
     <div className="flex flex-col md:flex-row md:h-full">
       {/* Sidebar nav */}
       <div className="w-full md:w-[220px] shrink-0 border-r border-b md:border-b-0 border-primary-500/10 p-2 md:p-4 flex flex-row md:flex-col overflow-x-auto md:overflow-visible gap-1 md:space-y-1">
-        <p className="hidden md:block px-3 py-1 text-[11px] text-foreground-600 uppercase tracking-wider font-medium mb-2">设置</p>
-        {settingSections.map(s => (
+        <p className="hidden md:block px-3 py-1 text-[11px] text-foreground-600 uppercase tracking-wider font-medium mb-2">
+          设置
+        </p>
+        {settingSections.map((s) => (
           <button
             key={s.id}
             onClick={() => setActiveSection(s.id)}
@@ -307,20 +390,24 @@ export default function SettingsPage() {
             }`}
           >
             <span className="w-5 h-5 flex items-center justify-center">
-              <i className={`${s.icon} ${activeSection === s.id ? 'text-primary-400' : 'text-foreground-600'}`}></i>
+              <i
+                className={`${s.icon} ${activeSection === s.id ? 'text-primary-400' : 'text-foreground-600'}`}
+              ></i>
             </span>
             <div className="min-w-0">
-              <p className="text-xs font-medium whitespace-nowrap md:whitespace-normal">{s.title}</p>
-              <p className="hidden md:block text-[10px] text-foreground-600 truncate">{s.description}</p>
+              <p className="text-xs font-medium whitespace-nowrap md:whitespace-normal">
+                {s.title}
+              </p>
+              <p className="hidden md:block text-[10px] text-foreground-600 truncate">
+                {s.description}
+              </p>
             </div>
           </button>
         ))}
       </div>
 
       {/* Main content */}
-      <div className="flex-1 overflow-auto px-4 md:px-6 py-4 md:py-5">
-        {renderSection()}
-      </div>
+      <div className="flex-1 overflow-auto px-4 md:px-6 py-4 md:py-5">{renderSection()}</div>
     </div>
   );
 }

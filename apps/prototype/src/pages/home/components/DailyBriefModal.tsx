@@ -31,7 +31,10 @@ export default function DailyBriefModal({ onClose }: DailyBriefModalProps) {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={onClose} />
+      <div
+        className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm animate-fade-in"
+        onClick={onClose}
+      />
 
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
@@ -70,7 +73,9 @@ export default function DailyBriefModal({ onClose }: DailyBriefModalProps) {
                 <i className="ri-robot-2-line text-primary-400 text-2xl animate-pulse"></i>
               </div>
               <p className="text-white text-sm font-medium mb-1">AI 正在分析今日数据...</p>
-              <p className="text-foreground-500 text-xs mb-6">正在扫描战役、线索、内容、互动数据</p>
+              <p className="text-foreground-500 text-xs mb-6">
+                正在扫描 Campaign、Qualified Lead、机会与互动数据
+              </p>
 
               {/* Progress */}
               <div className="w-full max-w-xs">
@@ -85,16 +90,40 @@ export default function DailyBriefModal({ onClose }: DailyBriefModalProps) {
               {/* Live status */}
               <div className="mt-6 space-y-2 w-full max-w-xs">
                 {[
-                  { icon: 'ri-database-2-line', text: '读取今日数据...', done: progressRef.current > 15 },
-                  { icon: 'ri-bar-chart-2-line', text: '分析趋势指标...', done: progressRef.current > 40 },
-                  { icon: 'ri-alert-line', text: '检测异常事件...', done: progressRef.current > 65 },
-                  { icon: 'ri-file-text-line', text: '生成简报内容...', done: progressRef.current > 85 },
+                  {
+                    icon: 'ri-database-2-line',
+                    text: '读取今日数据...',
+                    done: progressRef.current > 15,
+                  },
+                  {
+                    icon: 'ri-bar-chart-2-line',
+                    text: '分析趋势指标...',
+                    done: progressRef.current > 40,
+                  },
+                  {
+                    icon: 'ri-alert-line',
+                    text: '检测异常事件...',
+                    done: progressRef.current > 65,
+                  },
+                  {
+                    icon: 'ri-file-text-line',
+                    text: '生成简报内容...',
+                    done: progressRef.current > 85,
+                  },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-2.5">
-                    <span className={`w-4 h-4 flex items-center justify-center ${item.done ? 'text-success' : 'text-foreground-700'}`}>
-                      <i className={`${item.done ? 'ri-checkbox-circle-fill' : item.icon} text-xs`}></i>
+                    <span
+                      className={`w-4 h-4 flex items-center justify-center ${item.done ? 'text-success' : 'text-foreground-700'}`}
+                    >
+                      <i
+                        className={`${item.done ? 'ri-checkbox-circle-fill' : item.icon} text-xs`}
+                      ></i>
                     </span>
-                    <span className={`text-xs ${item.done ? 'text-foreground-400' : 'text-foreground-600'}`}>{item.text}</span>
+                    <span
+                      className={`text-xs ${item.done ? 'text-foreground-400' : 'text-foreground-600'}`}
+                    >
+                      {item.text}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -106,20 +135,29 @@ export default function DailyBriefModal({ onClose }: DailyBriefModalProps) {
               <div className="rounded-xl bg-white/[0.02] border border-primary-500/8 p-4">
                 <h4 className="text-white text-sm font-semibold mb-2">总体摘要</h4>
                 <p className="text-foreground-400 text-xs leading-relaxed">
-                  今日系统运行正常。{mockStats.length} 项核心指标中，{mockStats.filter(s => s.trend === 'up').length} 项呈上升趋势。
-                  本周新增线索 {mockStats[1]?.value || '47'} 条（环比{mockStats[1]?.change || '+18%'}），活跃互动消息 {mockStats[3]?.value || '156'} 条（环比{mockStats[3]?.change || '+32%'}）。
-                  待处理事项 {mockNextActions.length} 项，其中高优先级 {mockNextActions.filter(a => a.priority === 'high').length} 项。
+                  今日系统运行正常。北极星口径：本月新增 SAO {mockStats[0]?.value} 个，Qualified
+                  Lead {mockStats[1]?.value} 条， 单位 SAO 成本 {mockStats[2]?.value}，运行中
+                  Campaign {mockStats[3]?.value} 个。 待处理事项 {mockNextActions.length}{' '}
+                  项，其中高优先级 {mockNextActions.filter((a) => a.priority === 'high').length}{' '}
+                  项。
                 </p>
               </div>
 
               {/* Key metrics */}
               <div>
-                <h4 className="text-foreground-500 text-[10px] font-medium uppercase tracking-wider mb-2">核心指标</h4>
+                <h4 className="text-foreground-500 text-[10px] font-medium uppercase tracking-wider mb-2">
+                  北极星指标
+                </h4>
                 <div className="grid grid-cols-2 gap-2">
                   {mockStats.map((stat) => (
-                    <div key={stat.label} className="rounded-lg bg-white/[0.02] border border-primary-500/8 p-3 flex items-center justify-between">
+                    <div
+                      key={stat.label}
+                      className="rounded-lg bg-white/[0.02] border border-primary-500/8 p-3 flex items-center justify-between"
+                    >
                       <span className="text-foreground-500 text-xs">{stat.label}</span>
-                      <span className={`text-sm font-semibold ${stat.trend === 'up' ? 'text-success' : stat.trend === 'down' ? 'text-error' : 'text-foreground-300'}`}>
+                      <span
+                        className={`text-sm font-semibold ${stat.trend === 'up' ? 'text-success' : stat.trend === 'down' ? 'text-error' : 'text-foreground-300'}`}
+                      >
                         {stat.value} <span className="text-[10px] font-normal">{stat.change}</span>
                       </span>
                     </div>
@@ -129,14 +167,27 @@ export default function DailyBriefModal({ onClose }: DailyBriefModalProps) {
 
               {/* Anomalies */}
               <div>
-                <h4 className="text-foreground-500 text-[10px] font-medium uppercase tracking-wider mb-2">异常关注</h4>
+                <h4 className="text-foreground-500 text-[10px] font-medium uppercase tracking-wider mb-2">
+                  异常关注
+                </h4>
                 <div className="space-y-1.5">
                   {mockAnomalies.map((a) => (
-                    <div key={a.id} className="flex items-start gap-2.5 rounded-lg bg-white/[0.02] border border-primary-500/8 p-3">
-                      <span className={`w-5 h-5 flex items-center justify-center shrink-0 mt-0.5 rounded-md ${
-                        a.severity === 'critical' ? 'bg-error/10 text-error' : a.severity === 'warning' ? 'bg-warning/10 text-warning' : 'bg-info/10 text-info'
-                      }`}>
-                        <i className={`${a.severity === 'critical' ? 'ri-error-warning-fill' : a.severity === 'warning' ? 'ri-alert-fill' : 'ri-information-fill'} text-xs`}></i>
+                    <div
+                      key={a.id}
+                      className="flex items-start gap-2.5 rounded-lg bg-white/[0.02] border border-primary-500/8 p-3"
+                    >
+                      <span
+                        className={`w-5 h-5 flex items-center justify-center shrink-0 mt-0.5 rounded-md ${
+                          a.severity === 'critical'
+                            ? 'bg-error/10 text-error'
+                            : a.severity === 'warning'
+                              ? 'bg-warning/10 text-warning'
+                              : 'bg-info/10 text-info'
+                        }`}
+                      >
+                        <i
+                          className={`${a.severity === 'critical' ? 'ri-error-warning-fill' : a.severity === 'warning' ? 'ri-alert-fill' : 'ri-information-fill'} text-xs`}
+                        ></i>
                       </span>
                       <div>
                         <p className="text-white text-xs font-medium">{a.title}</p>
@@ -149,20 +200,30 @@ export default function DailyBriefModal({ onClose }: DailyBriefModalProps) {
 
               {/* Top opportunities */}
               <div>
-                <h4 className="text-foreground-500 text-[10px] font-medium uppercase tracking-wider mb-2">高意向机会 TOP 3</h4>
+                <h4 className="text-foreground-500 text-[10px] font-medium uppercase tracking-wider mb-2">
+                  商业机会进展 TOP 3
+                </h4>
                 <div className="space-y-1.5">
                   {mockOpportunities.slice(0, 3).map((o) => (
-                    <div key={o.id} className="flex items-center justify-between rounded-lg bg-white/[0.02] border border-primary-500/8 p-3">
+                    <div
+                      key={o.id}
+                      className="flex items-center justify-between rounded-lg bg-white/[0.02] border border-primary-500/8 p-3"
+                    >
                       <div className="flex items-center gap-2.5">
-                        <span className="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center text-xs font-bold text-primary-400">
-                          {o.score}
+                        <span className="min-w-8 h-8 px-1.5 rounded-lg bg-primary-500/10 flex items-center justify-center text-[11px] font-bold text-primary-400 whitespace-nowrap">
+                          {o.stageLabel}
                         </span>
                         <div>
-                          <p className="text-white text-xs font-medium">{o.company}</p>
-                          <p className="text-foreground-500 text-[11px]">{o.signalDetail}</p>
+                          <p className="text-white text-xs font-medium">
+                            {o.company}{' '}
+                            <span className="text-foreground-500 font-normal">· {o.signal}</span>
+                          </p>
+                          <p className="text-foreground-500 text-[11px]">
+                            下一步：{o.signalDetail}
+                          </p>
                         </div>
                       </div>
-                      <span className="text-foreground-600 text-[10px]">{o.country}</span>
+                      <span className="text-foreground-600 text-[10px] shrink-0">{o.country}</span>
                     </div>
                   ))}
                 </div>
@@ -170,18 +231,31 @@ export default function DailyBriefModal({ onClose }: DailyBriefModalProps) {
 
               {/* Next actions */}
               <div>
-                <h4 className="text-foreground-500 text-[10px] font-medium uppercase tracking-wider mb-2">今日行动建议</h4>
+                <h4 className="text-foreground-500 text-[10px] font-medium uppercase tracking-wider mb-2">
+                  今日行动建议
+                </h4>
                 <div className="space-y-1.5">
                   {mockNextActions.map((action) => (
-                    <div key={action.id} className="flex items-start gap-2.5 rounded-lg bg-white/[0.02] border border-primary-500/8 p-3">
-                      <span className={`w-5 h-5 flex items-center justify-center shrink-0 mt-0.5 rounded-md ${
-                        action.priority === 'high' ? 'bg-error/10 text-error' : action.priority === 'medium' ? 'bg-warning/10 text-warning' : 'bg-foreground-500/10 text-foreground-500'
-                      }`}>
+                    <div
+                      key={action.id}
+                      className="flex items-start gap-2.5 rounded-lg bg-white/[0.02] border border-primary-500/8 p-3"
+                    >
+                      <span
+                        className={`w-5 h-5 flex items-center justify-center shrink-0 mt-0.5 rounded-md ${
+                          action.priority === 'high'
+                            ? 'bg-error/10 text-error'
+                            : action.priority === 'medium'
+                              ? 'bg-warning/10 text-warning'
+                              : 'bg-foreground-500/10 text-foreground-500'
+                        }`}
+                      >
                         <i className="ri-flag-2-fill text-xs"></i>
                       </span>
                       <div>
                         <p className="text-white text-xs font-medium">{action.title}</p>
-                        <p className="text-foreground-500 text-[11px] mt-0.5">{action.description}</p>
+                        <p className="text-foreground-500 text-[11px] mt-0.5">
+                          {action.description}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -198,12 +272,15 @@ export default function DailyBriefModal({ onClose }: DailyBriefModalProps) {
                 </button>
                 <button
                   onClick={() => {
-                    const text = `GrowthOS AI 今日简报 - ${dateStr}\n\n=== 核心指标 ===\n${mockStats.map(s => `${s.label}: ${s.value} (${s.change})`).join('\n')}\n\n=== 异常关注 ===\n${mockAnomalies.map(a => `- ${a.title}: ${a.description}`).join('\n')}\n\n=== 高意向机会 ===\n${mockOpportunities.map(o => `- ${o.company} (${o.score}分): ${o.signalDetail}`).join('\n')}\n\n=== 今日行动 ===\n${mockNextActions.map(a => `- ${a.title}`).join('\n')}`;
-                    navigator.clipboard.writeText(text).then(() => {
-                      alert('简报已复制到剪贴板');
-                    }).catch(() => {
-                      alert('复制失败，请重试');
-                    });
+                    const text = `Global Growth Workspace AI 今日简报 - ${dateStr}\n\n=== 北极星指标 ===\n${mockStats.map((s) => `${s.label}: ${s.value} (${s.change})`).join('\n')}\n\n=== 异常关注 ===\n${mockAnomalies.map((a) => `- ${a.title}: ${a.description}`).join('\n')}\n\n=== 商业机会（三级结果链） ===\n${mockOpportunities.map((o) => `- ${o.company} [${o.signal} · ${o.stageLabel}] 下一步: ${o.signalDetail}`).join('\n')}\n\n=== 今日行动 ===\n${mockNextActions.map((a) => `- ${a.title}`).join('\n')}`;
+                    navigator.clipboard
+                      .writeText(text)
+                      .then(() => {
+                        alert('简报已复制到剪贴板');
+                      })
+                      .catch(() => {
+                        alert('复制失败，请重试');
+                      });
                   }}
                   className="py-2.5 px-4 rounded-xl bg-white/[0.03] border border-primary-500/12 text-foreground-400 text-sm hover:text-white hover:border-primary-500/25 transition-all cursor-pointer"
                 >

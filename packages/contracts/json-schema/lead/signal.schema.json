@@ -60,7 +60,10 @@
       "type": "object",
       "description": "来源与证据（母本 8.10 FieldEvidence；7.5.4 数据来源可见）",
       "properties": {
-        "provider_id": { "type": "string", "description": "Provider 标识；公开采集为 source registry ID" },
+        "provider_id": {
+          "type": "string",
+          "description": "Provider 标识；公开采集为 source registry ID"
+        },
         "source_url": { "type": "string", "format": "uri" },
         "evidence_id": { "type": "string", "description": "Evidence Store 快照引用" }
       },

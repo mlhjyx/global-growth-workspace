@@ -1,42 +1,48 @@
-import { EventStreamItem } from '@/mocks/insightsData';
+import { EventStreamItem, TOUCHPOINT_TYPE_LABELS } from '@/mocks/insightsData';
 
 interface EventStreamProps {
   events: EventStreamItem[];
 }
 
+// 类型对齐 contracts/opportunity/touchpoint.schema.json 枚举（ANA-001）
 const typeConfig: Record<string, { icon: string; color: string }> = {
-  conversion: { icon: 'ri-exchange-dollar-line', color: '#00D4AA' },
-  click: { icon: 'ri-cursor-line', color: '#60A5FA' },
-  impression: { icon: 'ri-eye-line', color: '#A29BFE' },
-  lead: { icon: 'ri-user-add-line', color: '#FBBF24' },
-  alert: { icon: 'ri-error-warning-line', color: '#FF6B6B' },
-  system: { icon: 'ri-settings-3-line', color: '#8B7FF0' },
+  IMPRESSION: { icon: 'ri-eye-line', color: '#A29BFE' },
+  CLICK: { icon: 'ri-cursor-line', color: '#60A5FA' },
+  REPLY: { icon: 'ri-reply-line', color: '#00D4AA' },
+  COMMENT: { icon: 'ri-message-2-line', color: '#8B7FF0' },
+  FORM_SUBMIT: { icon: 'ri-file-list-3-line', color: '#FBBF24' },
+  MEETING: { icon: 'ri-video-chat-line', color: '#00D4AA' },
+  SAMPLE: { icon: 'ri-inbox-unarchive-line', color: '#FBBF24' },
+  QUOTE: { icon: 'ri-file-paper-2-line', color: '#FF9F43' },
+  STAGE_CHANGE: { icon: 'ri-git-branch-line', color: '#FF6B6B' },
 };
 
 export default function EventStream({ events }: EventStreamProps) {
   return (
     <div
       className="h-full border-t border-primary-500/10 px-5 py-3 overflow-hidden"
-      style={{ background: 'linear-gradient(90deg, rgba(12,10,26,0.95) 0%, rgba(26,16,60,0.85) 100%)' }}
+      style={{
+        background: 'linear-gradient(90deg, rgba(12,10,26,0.95) 0%, rgba(26,16,60,0.85) 100%)',
+      }}
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <h3 className="text-white text-sm font-semibold">实时事件流</h3>
+          <h3 className="text-white text-sm font-semibold">Touchpoint 事件流</h3>
           <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span>
           <span className="text-success text-xs">Live</span>
         </div>
         <div className="flex items-center gap-3 text-xs">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-success"></span>
-            <span className="text-foreground-500">转化</span>
+            <span className="text-foreground-500">回复/会议</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-warning"></span>
-            <span className="text-foreground-500">线索</span>
+            <span className="text-foreground-500">表单/样品</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-error"></span>
-            <span className="text-foreground-500">告警</span>
+            <span className="text-foreground-500">阶段变化</span>
           </div>
           <button className="text-foreground-500 hover:text-white transition-colors whitespace-nowrap">
             <span className="w-4 h-4 flex items-center justify-center">
@@ -48,7 +54,7 @@ export default function EventStream({ events }: EventStreamProps) {
 
       {/* Horizontal scroll event cards */}
       <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-thin">
-        {events.map(event => {
+        {events.map((event) => {
           const config = typeConfig[event.type];
           return (
             <div
@@ -71,18 +77,16 @@ export default function EventStream({ events }: EventStreamProps) {
                       className="text-xs font-medium px-1.5 py-0.5 rounded"
                       style={{ backgroundColor: `${config.color}15`, color: config.color }}
                     >
-                      {event.type === 'conversion' ? '转化' :
-                       event.type === 'click' ? '点击' :
-                       event.type === 'impression' ? '曝光' :
-                       event.type === 'lead' ? '线索' :
-                       event.type === 'alert' ? '告警' : '系统'}
+                      {TOUCHPOINT_TYPE_LABELS[event.type]}
                     </span>
                   </div>
                   <p className="text-foreground-300 text-xs leading-relaxed line-clamp-2 group-hover:line-clamp-none transition-all">
                     {event.title}
                   </p>
                   {event.value && (
-                    <span className="text-primary-400 text-xs font-mono mt-1 block">{event.value}</span>
+                    <span className="text-primary-400 text-xs font-mono mt-1 block">
+                      {event.value}
+                    </span>
                   )}
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-foreground-500 text-xs">{event.source}</span>

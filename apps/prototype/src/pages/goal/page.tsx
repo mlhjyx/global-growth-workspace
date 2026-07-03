@@ -13,14 +13,21 @@ export default function GoalPage() {
   const [step, setStep] = useState<WizardStep>('select');
   const [selectedGoal, setSelectedGoal] = useState<GoalOption | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedPlan, setGeneratedPlan] = useState<typeof samplePlanMap[keyof typeof samplePlanMap] | null>(null);
+  const [generatedPlan, setGeneratedPlan] = useState<
+    (typeof samplePlanMap)[keyof typeof samplePlanMap] | null
+  >(null);
   const [isChecking, setIsChecking] = useState(true);
 
   // Onboarding guard: redirect based on auth and completion state
+  // localStorage key 迁移：growthos_* → ggw_*（读取时兼容旧 key，避免未迁移页面写入旧 key 时断流）
   useEffect(() => {
-    const authToken = localStorage.getItem('growthos_auth_token');
-    const onboardingCompleted = localStorage.getItem('growthos_onboarding_completed');
-    const goalCompleted = localStorage.getItem('growthos_goal_completed');
+    const authToken =
+      localStorage.getItem('ggw_auth_token') ?? localStorage.getItem('growthos_auth_token');
+    const onboardingCompleted =
+      localStorage.getItem('ggw_onboarding_completed') ??
+      localStorage.getItem('growthos_onboarding_completed');
+    const goalCompleted =
+      localStorage.getItem('ggw_goal_completed') ?? localStorage.getItem('growthos_goal_completed');
 
     if (!authToken) {
       // Not logged in -> back to landing
@@ -92,7 +99,8 @@ export default function GoalPage() {
       <div className="glow-orb glow-orb-3"></div>
 
       {/* Grid texture */}
-      <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.04]"
+      <div
+        className="pointer-events-none fixed inset-0 z-0 opacity-[0.04]"
         style={{
           backgroundImage: `
             linear-gradient(rgba(108, 92, 231, 0.5) 1px, transparent 1px),
@@ -108,7 +116,9 @@ export default function GoalPage() {
           <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary-500/20 text-primary-400">
             <i className="ri-hexagon-line text-lg"></i>
           </span>
-          <span className="text-lg font-bold text-white tracking-wider">GrowthOS</span>
+          <span className="text-lg font-bold text-white tracking-wider">
+            Global Growth Workspace
+          </span>
         </div>
         <div className="flex items-center gap-3">
           {step !== 'select' && (
@@ -126,15 +136,11 @@ export default function GoalPage() {
       </nav>
 
       {/* Main content */}
-      <main className="relative z-10 flex flex-col items-center justify-center py-10 md:py-16 px-4"
+      <main
+        className="relative z-10 flex flex-col items-center justify-center py-10 md:py-16 px-4"
         style={{ minHeight: 'calc(100vh - 80px)' }}
       >
-        {step === 'select' && (
-          <GoalSelector
-            options={goalOptions}
-            onSelect={handleGoalSelect}
-          />
-        )}
+        {step === 'select' && <GoalSelector options={goalOptions} onSelect={handleGoalSelect} />}
 
         {step === 'questions' && selectedGoal && (
           <GoalQuestions
@@ -147,11 +153,7 @@ export default function GoalPage() {
         )}
 
         {step === 'plan' && selectedGoal && generatedPlan && (
-          <PlanBuilder
-            goal={selectedGoal}
-            plan={generatedPlan}
-            onBack={handleBackToQuestions}
-          />
+          <PlanBuilder goal={selectedGoal} plan={generatedPlan} onBack={handleBackToQuestions} />
         )}
       </main>
     </div>

@@ -44,7 +44,8 @@ export const knowledgeDocs: KnowledgeDoc[] = [
     views: 2847,
     bookmarks: 156,
     isBookmarked: true,
-    summary: '针对德国、奥地利和瑞士地区的技术决策者的完整触达策略，包含本地化内容框架、合规注意事项和渠道优先级排序。',
+    summary:
+      '针对德国、奥地利和瑞士地区的技术决策者的完整触达策略，包含本地化内容框架、合规注意事项和渠道优先级排序。',
   },
   {
     id: '2',
@@ -59,7 +60,8 @@ export const knowledgeDocs: KnowledgeDoc[] = [
     views: 4120,
     bookmarks: 312,
     isBookmarked: true,
-    summary: '基于 500+ 北美 SaaS 企业数据的 ICP 构建方法论，包含信号权重模型、评分算法和动态调整策略。',
+    summary:
+      '基于 500+ 北美 SaaS 企业数据的 ICP 构建方法论，包含信号权重模型、评分算法和动态调整策略。',
   },
   {
     id: '3',
@@ -74,7 +76,8 @@ export const knowledgeDocs: KnowledgeDoc[] = [
     views: 1893,
     bookmarks: 89,
     isBookmarked: false,
-    summary: '针对金融服务和医疗健康行业的出海内容合规检查清单，覆盖 FDA、SEC、GDPR 和行业特定监管要求。',
+    summary:
+      '针对金融服务和医疗健康行业的出海内容合规检查清单，覆盖 FDA、SEC、GDPR 和行业特定监管要求。',
   },
   {
     id: '4',
@@ -89,7 +92,8 @@ export const knowledgeDocs: KnowledgeDoc[] = [
     views: 5634,
     bookmarks: 478,
     isBookmarked: true,
-    summary: '从基础设置到高级 ABM 策略的完整 LinkedIn 自动化战役指南，包含受众细分、消息序列设计和 A/B 测试框架。',
+    summary:
+      '从基础设置到高级 ABM 策略的完整 LinkedIn 自动化战役指南，包含受众细分、消息序列设计和 A/B 测试框架。',
   },
   {
     id: '5',
@@ -104,11 +108,12 @@ export const knowledgeDocs: KnowledgeDoc[] = [
     views: 3201,
     bookmarks: 267,
     isBookmarked: false,
-    summary: '覆盖英语、德语、法语和日语的冷邮件序列模板，包含开场白、跟进节奏和转化触发器，已根据各地文化习惯优化。',
+    summary:
+      '覆盖英语、德语、法语和日语的冷邮件序列模板，包含开场白、跟进节奏和转化触发器，已根据各地文化习惯优化。',
   },
   {
     id: '6',
-    title: '如何将 GrowthOS 数据同步到 Salesforce',
+    title: '如何将 Global Growth Workspace 数据同步到 Salesforce',
     type: 'guide',
     category: 'integration',
     tags: ['Salesforce', 'API', '同步', 'CRM'],
@@ -119,7 +124,8 @@ export const knowledgeDocs: KnowledgeDoc[] = [
     views: 1456,
     bookmarks: 98,
     isBookmarked: false,
-    summary: '逐步指南：配置 GrowthOS 与 Salesforce 的双向同步，包含字段映射、冲突解决和实时 Webhook 设置。',
+    summary:
+      '逐步指南：配置 Global Growth Workspace 与 Salesforce 的双向同步，包含字段映射、冲突解决和实时 Webhook 设置。',
   },
   {
     id: '7',
@@ -134,7 +140,8 @@ export const knowledgeDocs: KnowledgeDoc[] = [
     views: 2134,
     bookmarks: 134,
     isBookmarked: false,
-    summary: '针对新加坡、马来西亚和印尼市场的 DTC 品牌线索评分模型，结合社交媒体信号和购买意图指标。',
+    summary:
+      '针对新加坡、马来西亚和印尼市场的 DTC 品牌线索评分模型，结合社交媒体信号和购买意图指标。',
   },
   {
     id: '8',
@@ -149,7 +156,8 @@ export const knowledgeDocs: KnowledgeDoc[] = [
     views: 1782,
     bookmarks: 112,
     isBookmarked: false,
-    summary: '标准内容审批流程模板，包含多级审批节点、角色权限矩阵和 SLA 时间要求，适用于中型出海团队。',
+    summary:
+      '标准内容审批流程模板，包含多级审批节点、角色权限矩阵和 SLA 时间要求，适用于中型出海团队。',
   },
   {
     id: '9',
@@ -194,7 +202,8 @@ export const knowledgeDocs: KnowledgeDoc[] = [
     views: 892,
     bookmarks: 67,
     isBookmarked: false,
-    summary: 'GrowthOS API 的所有端点速率限制和错误码速查表，包含重试策略和最佳实践建议。',
+    summary:
+      'Global Growth Workspace API 的所有端点速率限制和错误码速查表，包含重试策略和最佳实践建议。',
   },
   {
     id: '12',
@@ -209,14 +218,9 @@ export const knowledgeDocs: KnowledgeDoc[] = [
     views: 1567,
     bookmarks: 198,
     isBookmarked: true,
-    summary: '根据企业规模、渠道组合和销售周期的归因模型选择决策树，包含首次触点、末次触点和多触点模型对比。',
+    summary:
+      '根据企业规模、渠道组合和销售周期的归因模型选择决策树，包含首次触点、末次触点和多触点模型对比。',
   },
 ];
 
-export const recentSearches = [
-  'LinkedIn 自动化',
-  'ICP 画像',
-  '内容合规',
-  '邮件序列',
-  'API 同步',
-];
+export const recentSearches = ['LinkedIn 自动化', 'ICP 画像', '内容合规', '邮件序列', 'API 同步'];

@@ -1,5 +1,11 @@
 import { useState } from 'react';
 import type { ICPProfile } from '@/mocks/accountData';
+import {
+  ICP_STATUS_LABELS,
+  BUYING_ROLE_LABELS,
+  SCORE_DIMENSION_LABELS,
+  signalTypeConfig,
+} from '@/mocks/accountData';
 
 interface ICPBuilderProps {
   icps: ICPProfile[];
@@ -10,7 +16,7 @@ interface ICPBuilderProps {
 export default function ICPBuilder({ icps, selectedICPId, onSelectICP }: ICPBuilderProps) {
   const [activeTab, setActiveTab] = useState<'profiles' | 'create'>('profiles');
 
-  const selectedICP = icps.find(i => i.id === selectedICPId) || icps[0];
+  const selectedICP = icps.find((i) => i.id === selectedICPId) || icps[0];
 
   return (
     <div className="flex flex-col h-full">
@@ -41,35 +47,40 @@ export default function ICPBuilder({ icps, selectedICPId, onSelectICP }: ICPBuil
                 key={icp.id}
                 onClick={() => onSelectICP(icp.id)}
                 className={`w-full text-left p-3 rounded-lg transition-all duration-200 cursor-pointer
-                  ${isSelected
-                    ? 'bg-primary-500/15 border border-primary-500/25'
-                    : 'bg-white/[0.02] hover:bg-white/[0.05] border border-transparent hover:border-primary-500/10'
+                  ${
+                    isSelected
+                      ? 'bg-primary-500/15 border border-primary-500/25'
+                      : 'bg-white/[0.02] hover:bg-white/[0.05] border border-transparent hover:border-primary-500/10'
                   }`}
               >
                 <div className="flex items-center gap-2 mb-1.5">
-                  <span className={`text-xs ${isSelected ? 'text-primary-400' : 'text-foreground-500'}`}>
-                    {icp.aiGenerated ? (
-                      <span className="badge-ai text-[10px]">AI 生成</span>
-                    ) : (
-                      <span className="text-foreground-600 text-[10px]">手动</span>
-                    )}
-                  </span>
-                  {icp.active && (
-                    <span className="badge-success text-[10px]">激活中</span>
+                  {icp.active ? (
+                    <span className="badge-success text-[10px]">
+                      {ICP_STATUS_LABELS[icp.status] ?? icp.status}
+                    </span>
+                  ) : (
+                    <span className="text-foreground-600 text-[10px]">
+                      {ICP_STATUS_LABELS[icp.status] ?? icp.status}
+                    </span>
                   )}
+                  {icp.backtestPassed && <span className="badge-ai text-[10px]">回测通过</span>}
+                  <span className="text-foreground-600 text-[10px]">v{icp.version}</span>
                 </div>
-                <p className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-foreground-300'}`}>
+                <p
+                  className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-foreground-300'}`}
+                >
                   {icp.name}
                 </p>
-                <p className="text-foreground-600 text-xs mt-0.5 line-clamp-2">
-                  {icp.description}
-                </p>
+                <p className="text-foreground-600 text-xs mt-0.5 line-clamp-2">{icp.description}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-foreground-600 text-[11px]">
-                    <i className="ri-user-search-line mr-0.5 text-[10px]"></i>{icp.matchCount} 匹配
+                    <i className="ri-user-search-line mr-0.5 text-[10px]"></i>
+                    {icp.matchCount} 命中账户
                   </span>
                   <span className="text-foreground-700">·</span>
-                  <span className="text-foreground-600 text-[11px]">{icp.createdBy}</span>
+                  <span className="text-foreground-600 text-[11px]">
+                    {icp.marketScope.length} 个市场
+                  </span>
                 </div>
               </button>
             );
@@ -78,42 +89,132 @@ export default function ICPBuilder({ icps, selectedICPId, onSelectICP }: ICPBuil
           {/* Selected ICP detail */}
           {selectedICP && (
             <div className="mt-3 p-3 rounded-lg bg-white/[0.02] border border-primary-500/10">
-              <p className="text-foreground-500 text-[11px] uppercase tracking-wider font-medium mb-2">画像详情</p>
+              <p className="text-foreground-500 text-[11px] uppercase tracking-wider font-medium mb-2">
+                画像详情
+              </p>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <div>
-                  <p className="text-foreground-600 text-[11px] mb-1">公司规模</p>
-                  <p className="text-white text-xs">{selectedICP.criteria.companySize}</p>
-                </div>
-                <div>
-                  <p className="text-foreground-600 text-[11px] mb-1">行业</p>
+                  <p className="text-foreground-600 text-[11px] mb-1">市场范围</p>
                   <div className="flex flex-wrap gap-1">
-                    {selectedICP.criteria.industry.map(i => (
-                      <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-foreground-400">{i}</span>
+                    {selectedICP.marketScope.map((g) => (
+                      <span
+                        key={g}
+                        className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-foreground-400"
+                      >
+                        {g}
+                      </span>
                     ))}
                   </div>
                 </div>
+
                 <div>
-                  <p className="text-foreground-600 text-[11px] mb-1">地区</p>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedICP.criteria.geography.map(g => (
-                      <span key={g} className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-foreground-400">{g}</span>
+                  <p className="text-foreground-600 text-[11px] mb-1">公司条件（Must / Nice）</p>
+                  <div className="space-y-1">
+                    {selectedICP.criteria.map((c) => (
+                      <div key={c.criterionId} className="flex items-start gap-1.5">
+                        <span
+                          className={`text-[9px] px-1 py-0.5 rounded shrink-0 mt-0.5 ${
+                            c.requirementLevel === 'MUST_HAVE'
+                              ? 'bg-primary-500/15 text-primary-400'
+                              : 'bg-white/5 text-foreground-500'
+                          }`}
+                        >
+                          {c.requirementLevel === 'MUST_HAVE' ? 'Must' : 'Nice'}
+                        </span>
+                        <span
+                          className="text-foreground-400 text-[10px] leading-snug"
+                          title={c.rationale}
+                        >
+                          {c.field} {c.operator}{' '}
+                          {Array.isArray(c.value) ? c.value.join(', ') : String(c.value ?? '')}
+                          {typeof c.weight === 'number' && (
+                            <span className="text-foreground-700"> · 权重 {c.weight}</span>
+                          )}
+                        </span>
+                      </div>
                     ))}
                   </div>
                 </div>
+
                 <div>
-                  <p className="text-foreground-600 text-[11px] mb-1">目标客户</p>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedICP.persona.title.map(t => (
-                      <span key={t} className="text-[10px] px-1.5 py-0.5 rounded bg-primary-500/10 text-primary-400">{t}</span>
+                  <p className="text-foreground-600 text-[11px] mb-1">
+                    排除条件（硬性，模型不可覆盖）
+                  </p>
+                  <div className="space-y-1">
+                    {selectedICP.exclusions.map((x) => (
+                      <div key={x.criterionId} className="flex items-start gap-1.5">
+                        <span className="text-[9px] px-1 py-0.5 rounded bg-error/10 text-error shrink-0 mt-0.5">
+                          排除
+                        </span>
+                        <span
+                          className="text-foreground-500 text-[10px] leading-snug"
+                          title={x.reason}
+                        >
+                          {x.reason}
+                        </span>
+                      </div>
                     ))}
                   </div>
                 </div>
+
                 <div>
-                  <p className="text-foreground-600 text-[11px] mb-1">购买信号</p>
+                  <p className="text-foreground-600 text-[11px] mb-1">触发信号</p>
                   <div className="flex flex-wrap gap-1">
-                    {selectedICP.criteria.buyingSignals.map(s => (
-                      <span key={s} className="text-[10px] px-1.5 py-0.5 rounded bg-success/10 text-success">{s}</span>
+                    {selectedICP.triggerSignals.map((s) => {
+                      const cfg = signalTypeConfig[s.signalType];
+                      return (
+                        <span
+                          key={`${s.signalType}-${s.subtype}`}
+                          className="text-[10px] px-1.5 py-0.5 rounded bg-success/10 text-success"
+                          title={`${s.subtype} · 回看 ${s.lookbackDays} 天 · 最低强度 ${s.minStrength}`}
+                        >
+                          <i className={`${cfg.icon} mr-0.5 text-[10px]`}></i>
+                          {cfg.label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-foreground-600 text-[11px] mb-1">购买委员会</p>
+                  <div className="space-y-1">
+                    {selectedICP.committee.map((r) => (
+                      <div key={r.id} className="p-1.5 rounded bg-white/[0.03]">
+                        <p className="text-foreground-300 text-[10px]">
+                          <span className="text-primary-400">
+                            {BUYING_ROLE_LABELS[r.roleType] ?? r.roleType}
+                          </span>
+                          {' · '}
+                          {r.name}
+                          {r.requiredForQualification && (
+                            <span
+                              className="ml-1 text-warning text-[9px]"
+                              title="确认合格线索所必需的角色"
+                            >
+                              必需
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-foreground-600 text-[9px] mt-0.5">
+                          {r.typicalTitles.join(' / ')}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-foreground-600 text-[11px] mb-1">六维评分权重</p>
+                  <div className="flex flex-wrap gap-1">
+                    {Object.entries(selectedICP.weights).map(([k, w]) => (
+                      <span
+                        key={k}
+                        className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-foreground-400"
+                      >
+                        {SCORE_DIMENSION_LABELS[k] ?? k} {w}
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -130,10 +231,12 @@ export default function ICPBuilder({ icps, selectedICPId, onSelectICP }: ICPBuil
               <i className="ri-robot-2-line text-primary-400 text-xl"></i>
             </div>
             <p className="text-white text-sm font-medium mb-1">AI 辅助 ICP 构建</p>
-            <p className="text-foreground-600 text-xs mb-4">描述您的目标客户，AI 将自动生成画像</p>
+            <p className="text-foreground-600 text-xs mb-4">
+              描述您的目标客户，AI 将生成画像草案（Hypothesis，回测通过前不可激活）
+            </p>
             <div className="relative">
               <textarea
-                placeholder="例如：我们希望触达年收入 1000 万美元以上的 SaaS 企业，技术决策者关注数据分析和 AI 自动化..."
+                placeholder="例如：我们向东南亚出口 TOPCon 光伏组件，目标是越南、泰国有组件进口记录或在建项目管道的进口商与 EPC..."
                 className="w-full h-24 text-xs resize-none"
               />
             </div>
@@ -146,8 +249,16 @@ export default function ICPBuilder({ icps, selectedICPId, onSelectICP }: ICPBuil
           <div className="mt-4 p-3 rounded-lg bg-white/[0.02] border border-primary-500/10">
             <p className="text-foreground-500 text-[11px] font-medium mb-2">或选择快速模板</p>
             <div className="space-y-1">
-              {['B2B SaaS 决策者', '制造业采购方', '金融科技 CTO', 'DTC 品牌创始人'].map(t => (
-                <button key={t} className="w-full text-left px-2.5 py-1.5 rounded-md text-xs text-foreground-400 hover:bg-white/5 hover:text-foreground-300 transition-colors cursor-pointer">
+              {[
+                '东南亚光伏进口商 / EPC',
+                '非洲建材经销商',
+                '中东建材项目采购方',
+                '南美光伏分销商',
+              ].map((t) => (
+                <button
+                  key={t}
+                  className="w-full text-left px-2.5 py-1.5 rounded-md text-xs text-foreground-400 hover:bg-white/5 hover:text-foreground-300 transition-colors cursor-pointer"
+                >
                   {t}
                 </button>
               ))}

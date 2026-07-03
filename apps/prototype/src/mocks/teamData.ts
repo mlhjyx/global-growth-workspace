@@ -40,7 +40,7 @@ export const teamMembers: TeamMember[] = [
   {
     id: '1',
     name: 'Leo Chen',
-    email: 'leo.chen@growthos.ai',
+    email: 'leo.chen@example.com',
     role: '管理员',
     department: '管理',
     avatar: 'L',
@@ -52,7 +52,7 @@ export const teamMembers: TeamMember[] = [
   {
     id: '2',
     name: 'Sarah Weber',
-    email: 'sarah.weber@growthos.ai',
+    email: 'sarah.weber@example.com',
     role: '战役主管',
     department: '营销',
     avatar: 'S',
@@ -64,7 +64,7 @@ export const teamMembers: TeamMember[] = [
   {
     id: '3',
     name: 'David Müller',
-    email: 'david.m@growthos.ai',
+    email: 'david.m@example.com',
     role: '内容策略师',
     department: '内容',
     avatar: 'D',
@@ -76,7 +76,7 @@ export const teamMembers: TeamMember[] = [
   {
     id: '4',
     name: 'Anna Kowalski',
-    email: 'anna.k@growthos.ai',
+    email: 'anna.k@example.com',
     role: '合规专员',
     department: '合规',
     avatar: 'A',
@@ -88,7 +88,7 @@ export const teamMembers: TeamMember[] = [
   {
     id: '5',
     name: 'James Watanabe',
-    email: 'james.w@growthos.ai',
+    email: 'james.w@example.com',
     role: '数据分析师',
     department: '分析',
     avatar: 'J',
@@ -100,7 +100,7 @@ export const teamMembers: TeamMember[] = [
   {
     id: '6',
     name: 'Elena Rossi',
-    email: 'elena.r@growthos.ai',
+    email: 'elena.r@example.com',
     role: '区域经理',
     department: '销售',
     avatar: 'E',
@@ -112,7 +112,7 @@ export const teamMembers: TeamMember[] = [
   {
     id: '7',
     name: 'Michael Anderson',
-    email: 'michael.a@growthos.ai',
+    email: 'michael.a@example.com',
     role: '技术顾问',
     department: '技术',
     avatar: 'M',
@@ -124,7 +124,7 @@ export const teamMembers: TeamMember[] = [
   {
     id: '8',
     name: 'Lisa Park',
-    email: 'lisa.p@growthos.ai',
+    email: 'lisa.p@example.com',
     role: '客户成功',
     department: '客户成功',
     avatar: 'L',
@@ -145,7 +145,8 @@ export const pendingApprovals: PendingApproval[] = [
     department: '营销',
     submittedAt: '2025-06-30 09:30',
     priority: 'urgent',
-    description: '针对北美 500+ 技术决策者的 LinkedIn + 邮件组合战役，预算 $45,000，目标获取 200 条 MQL。',
+    description:
+      '面向东南亚光伏 EPC 与进口商的邮件+获授权渠道 Campaign，预算 USD 45,000，目标产出 20 个 Qualified Lead、5 个 SAO。',
     budget: '$45,000',
     deadline: '2025-07-15',
   },
@@ -183,7 +184,8 @@ export const pendingApprovals: PendingApproval[] = [
     department: '管理',
     submittedAt: '2025-06-27 14:00',
     priority: 'normal',
-    description: '为实习生开通 Salesforce 只读权限和 GrowthOS 完整权限，期限 3 个月。',
+    description:
+      '为实习生开通 Salesforce 只读权限和 Global Growth Workspace 完整权限，期限 3 个月。',
   },
   {
     id: '5',

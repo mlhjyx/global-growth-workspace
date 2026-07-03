@@ -34,7 +34,8 @@ export default function ICPPreview({ icps, onUpdate, onGenerate }: ICPPreviewPro
         </div>
         <h2 className="text-white text-2xl font-bold mb-2">AI 生成理想客户画像</h2>
         <p className="text-foreground-500 text-sm">
-          基于你的企业信息和目标市场，AI 自动生成了 {icps.length > 0 ? icps.length : '3'} 个 ICP 画像
+          基于你的企业信息和目标市场，AI 自动生成了 {icps.length > 0 ? icps.length : '3'} 个 ICP
+          画像
         </p>
       </div>
 
@@ -50,16 +51,23 @@ export default function ICPPreview({ icps, onUpdate, onGenerate }: ICPPreviewPro
               </div>
               <div>
                 <p className="text-white font-medium mb-1">AI 正在分析你的业务数据...</p>
-                <p className="text-foreground-500 text-sm">识别市场信号 · 匹配行业模式 · 构建精准画像</p>
+                <p className="text-foreground-500 text-sm">
+                  识别市场信号 · 匹配行业模式 · 构建精准画像
+                </p>
               </div>
               {/* Loading steps */}
               <div className="space-y-2 max-w-xs mx-auto mt-4">
-                {['分析目标市场特征...', '识别高价值客户模式...', '生成 ICP 画像草稿...'].map((step, idx) => (
-                  <div key={idx} className="flex items-center gap-2 text-xs text-foreground-500">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary-500/50 animate-pulse" style={{ animationDelay: `${idx * 0.3}s` }}></span>
-                    {step}
-                  </div>
-                ))}
+                {['分析目标市场特征...', '识别高价值客户模式...', '生成 ICP 画像草稿...'].map(
+                  (step, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-xs text-foreground-500">
+                      <span
+                        className="w-1.5 h-1.5 rounded-full bg-primary-500/50 animate-pulse"
+                        style={{ animationDelay: `${idx * 0.3}s` }}
+                      ></span>
+                      {step}
+                    </div>
+                  ),
+                )}
               </div>
             </div>
           ) : (
@@ -100,7 +108,9 @@ export default function ICPPreview({ icps, onUpdate, onGenerate }: ICPPreviewPro
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="badge-ai text-xs">{icp.estimatedMatchCount} 家匹配</span>
-                    <span className={`w-6 h-6 flex items-center justify-center transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                    <span
+                      className={`w-6 h-6 flex items-center justify-center transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                    >
                       <i className="ri-arrow-down-s-line text-foreground-500"></i>
                     </span>
                   </div>
@@ -126,32 +136,52 @@ export default function ICPPreview({ icps, onUpdate, onGenerate }: ICPPreviewPro
                     <div className="mt-3">
                       <p className="text-foreground-500 text-xs mb-1.5">目标行业</p>
                       <div className="flex flex-wrap gap-1.5">
-                        {icp.criteria.industry.map(ind => (
-                          <span key={ind} className="text-xs bg-white/5 px-2 py-0.5 rounded text-foreground-400">{ind}</span>
+                        {icp.criteria.industry.map((ind) => (
+                          <span
+                            key={ind}
+                            className="text-xs bg-white/5 px-2 py-0.5 rounded text-foreground-400"
+                          >
+                            {ind}
+                          </span>
                         ))}
                       </div>
                     </div>
                     <div className="mt-3">
                       <p className="text-foreground-500 text-xs mb-1.5">地区</p>
                       <div className="flex flex-wrap gap-1.5">
-                        {icp.criteria.geography.map(geo => (
-                          <span key={geo} className="text-xs bg-white/5 px-2 py-0.5 rounded text-foreground-400">{geo}</span>
+                        {icp.criteria.geography.map((geo) => (
+                          <span
+                            key={geo}
+                            className="text-xs bg-white/5 px-2 py-0.5 rounded text-foreground-400"
+                          >
+                            {geo}
+                          </span>
                         ))}
                       </div>
                     </div>
                     <div className="mt-3">
                       <p className="text-foreground-500 text-xs mb-1.5">痛点</p>
                       <div className="flex flex-wrap gap-1.5">
-                        {icp.criteria.painPoints.map(pp => (
-                          <span key={pp} className="text-xs bg-error/10 text-error px-2 py-0.5 rounded">{pp}</span>
+                        {icp.criteria.painPoints.map((pp) => (
+                          <span
+                            key={pp}
+                            className="text-xs bg-error/10 text-error px-2 py-0.5 rounded"
+                          >
+                            {pp}
+                          </span>
                         ))}
                       </div>
                     </div>
                     <div className="mt-3">
                       <p className="text-foreground-500 text-xs mb-1.5">技术栈</p>
                       <div className="flex flex-wrap gap-1.5">
-                        {icp.criteria.techStack.map(tech => (
-                          <span key={tech} className="text-xs bg-primary-500/10 text-primary-400 px-2 py-0.5 rounded">{tech}</span>
+                        {icp.criteria.techStack.map((tech) => (
+                          <span
+                            key={tech}
+                            className="text-xs bg-primary-500/10 text-primary-400 px-2 py-0.5 rounded"
+                          >
+                            {tech}
+                          </span>
                         ))}
                       </div>
                     </div>

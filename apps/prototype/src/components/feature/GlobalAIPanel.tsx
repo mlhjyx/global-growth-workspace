@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type KeyboardEvent } from 'react';
 
 interface ChatMessage {
   id: string;
@@ -8,16 +8,33 @@ interface ChatMessage {
 }
 
 const quickActions = [
-  { icon: 'ri-file-chart-line', label: '生成本周周报', prompt: '帮我生成本周的营销数据周报，包括战役表现、线索增长和内容数据。' },
-  { icon: 'ri-lightbulb-line', label: '分析异常告警', prompt: '分析当前系统中的异常告警，给我优先级排序和行动建议。' },
-  { icon: 'ri-user-search-line', label: '推荐潜客名单', prompt: '基于我的 ICP 画像，推荐本周最值得跟进的前 5 个潜客。' },
-  { icon: 'ri-edit-line', label: '起草 LinkedIn 帖子', prompt: '帮我起草一篇关于出海企业 AI 增长趋势的 LinkedIn 帖子。' },
+  {
+    icon: 'ri-file-chart-line',
+    label: '生成本周周报',
+    prompt: '帮我生成本周的营销数据周报，包括战役表现、线索增长和内容数据。',
+  },
+  {
+    icon: 'ri-lightbulb-line',
+    label: '分析异常告警',
+    prompt: '分析当前系统中的异常告警，给我优先级排序和行动建议。',
+  },
+  {
+    icon: 'ri-user-search-line',
+    label: '推荐潜客名单',
+    prompt: '基于我的 ICP 画像，推荐本周最值得跟进的前 5 个潜客。',
+  },
+  {
+    icon: 'ri-edit-line',
+    label: '起草 LinkedIn 帖子',
+    prompt: '帮我起草一篇关于出海企业 AI 增长趋势的 LinkedIn 帖子。',
+  },
 ];
 
 const mockGreeting: ChatMessage = {
   id: 'greeting',
   role: 'ai',
-  content: '你好！我是 GrowthOS 的 AI 增长助手。我可以帮你分析数据、生成内容、推荐行动策略。试试下面的快捷操作，或者直接告诉我你需要什么～',
+  content:
+    '你好！我是 Global Growth Workspace 的 AI 增长助手。我可以帮你分析数据、生成内容、推荐行动策略。试试下面的快捷操作，或者直接告诉我你需要什么～',
   time: '刚刚',
 };
 
@@ -113,7 +130,7 @@ export default function GlobalAIPanel({ onClose }: { onClose: () => void }) {
     simulateAIResponse(prompt);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -145,7 +162,7 @@ export default function GlobalAIPanel({ onClose }: { onClose: () => void }) {
             </div>
             <div>
               <h3 className="text-white text-sm font-semibold">AI 增长助手</h3>
-              <p className="text-foreground-600 text-[10px]">Powered by GrowthOS</p>
+              <p className="text-foreground-600 text-[10px]">Powered by Global Growth Workspace</p>
             </div>
           </div>
           <button
@@ -161,7 +178,10 @@ export default function GlobalAIPanel({ onClose }: { onClose: () => void }) {
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
           {messages.map((msg) => (
-            <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div
+              key={msg.id}
+              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
               <div className={`max-w-[88%] ${msg.role === 'user' ? 'order-1' : ''}`}>
                 {msg.role === 'ai' && (
                   <div className="flex items-center gap-1.5 mb-1.5">
@@ -186,7 +206,11 @@ export default function GlobalAIPanel({ onClose }: { onClose: () => void }) {
                       <p key={i} className={i > 0 ? 'mt-1' : ''}>
                         {boldParts.map((part, j) => {
                           if (part.startsWith('**') && part.endsWith('**')) {
-                            return <strong key={j} className="text-white font-semibold">{part.slice(2, -2)}</strong>;
+                            return (
+                              <strong key={j} className="text-white font-semibold">
+                                {part.slice(2, -2)}
+                              </strong>
+                            );
                           }
                           return part;
                         })}
@@ -211,9 +235,18 @@ export default function GlobalAIPanel({ onClose }: { onClose: () => void }) {
                 </div>
                 <div className="rounded-xl px-3.5 py-3 bg-white/[0.03] border border-primary-500/8 rounded-bl-md">
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-primary-400 animate-pulse" style={{ animationDelay: '0ms' }}></span>
-                    <span className="w-2 h-2 rounded-full bg-primary-400 animate-pulse" style={{ animationDelay: '200ms' }}></span>
-                    <span className="w-2 h-2 rounded-full bg-primary-400 animate-pulse" style={{ animationDelay: '400ms' }}></span>
+                    <span
+                      className="w-2 h-2 rounded-full bg-primary-400 animate-pulse"
+                      style={{ animationDelay: '0ms' }}
+                    ></span>
+                    <span
+                      className="w-2 h-2 rounded-full bg-primary-400 animate-pulse"
+                      style={{ animationDelay: '200ms' }}
+                    ></span>
+                    <span
+                      className="w-2 h-2 rounded-full bg-primary-400 animate-pulse"
+                      style={{ animationDelay: '400ms' }}
+                    ></span>
                   </div>
                 </div>
               </div>
@@ -226,7 +259,9 @@ export default function GlobalAIPanel({ onClose }: { onClose: () => void }) {
         {/* Quick actions */}
         {messages.length <= 1 && (
           <div className="px-4 pt-2 pb-3 shrink-0 border-t border-primary-500/8">
-            <p className="text-foreground-500 text-[10px] font-medium mb-2.5 uppercase tracking-wider">快捷操作</p>
+            <p className="text-foreground-500 text-[10px] font-medium mb-2.5 uppercase tracking-wider">
+              快捷操作
+            </p>
             <div className="grid grid-cols-2 gap-1.5">
               {quickActions.map((action, i) => (
                 <button
@@ -237,7 +272,9 @@ export default function GlobalAIPanel({ onClose }: { onClose: () => void }) {
                   <span className="w-5 h-5 flex items-center justify-center text-primary-400 group-hover:text-primary-300 shrink-0">
                     <i className={`${action.icon} text-xs`}></i>
                   </span>
-                  <span className="text-foreground-200 text-xs leading-tight group-hover:text-white">{action.label}</span>
+                  <span className="text-foreground-200 text-xs leading-tight group-hover:text-white">
+                    {action.label}
+                  </span>
                 </button>
               ))}
             </div>

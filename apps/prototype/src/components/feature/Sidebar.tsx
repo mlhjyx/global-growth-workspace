@@ -15,12 +15,13 @@ interface SecondaryNavItem {
   path: string;
 }
 
+// 一级导航六项，对应母本 5.2 一级信息架构（今日/研究/客户/战役/内容/互动/洞察中的七域，
+// 研究页为 M0 Batch 3 新建项；发布按母本归入「内容」域，经内容页入口进入 /publish）
 const primaryNavItems: NavItem[] = [
   { key: 'home', label: '今日', icon: 'ri-home-5-line', path: '/dashboard' },
   { key: 'campaigns', label: '战役', icon: 'ri-flag-2-line', path: '/campaigns' },
   { key: 'accounts', label: '客户', icon: 'ri-user-search-line', path: '/accounts' },
   { key: 'content', label: '内容', icon: 'ri-file-text-line', path: '/content' },
-  { key: 'publish', label: 'AI 发布', icon: 'ri-rocket-line', path: '/publish' },
   { key: 'engagement', label: '互动', icon: 'ri-chat-3-line', path: '/engagement' },
   { key: 'insights', label: '洞察', icon: 'ri-line-chart-line', path: '/insights' },
 ];
@@ -83,7 +84,9 @@ export default function Sidebar({ mobileMenuOpen, onCloseMobileMenu }: SidebarPr
             <i className="ri-rocket-2-fill text-white text-sm"></i>
           </div>
           {showLabels && (
-            <span className="text-white font-semibold text-sm whitespace-nowrap">GrowthOS</span>
+            <span className="text-white font-semibold text-sm whitespace-nowrap">
+              Global Growth Workspace
+            </span>
           )}
         </button>
       </div>
@@ -98,18 +101,19 @@ export default function Sidebar({ mobileMenuOpen, onCloseMobileMenu }: SidebarPr
                 key={item.key}
                 onClick={() => handleNavClick(item.path)}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-150 cursor-pointer group
-                  ${active
-                    ? 'bg-primary-500/10 text-white'
-                    : 'text-foreground-500 hover:text-foreground-300 hover:bg-white/[0.03]'
+                  ${
+                    active
+                      ? 'bg-primary-500/10 text-white'
+                      : 'text-foreground-500 hover:text-foreground-300 hover:bg-white/[0.03]'
                   }
                   ${collapsed && !isMobile ? 'justify-center px-2' : ''}`}
               >
-                <span className={`w-5 h-5 flex items-center justify-center shrink-0 ${active ? 'text-primary-400' : ''}`}>
+                <span
+                  className={`w-5 h-5 flex items-center justify-center shrink-0 ${active ? 'text-primary-400' : ''}`}
+                >
                   <i className={`${item.icon} text-base`}></i>
                 </span>
-                {showLabels && (
-                  <span className="text-sm whitespace-nowrap">{item.label}</span>
-                )}
+                {showLabels && <span className="text-sm whitespace-nowrap">{item.label}</span>}
               </button>
             );
           })}
@@ -127,18 +131,19 @@ export default function Sidebar({ mobileMenuOpen, onCloseMobileMenu }: SidebarPr
                 key={item.key}
                 onClick={() => handleNavClick(item.path)}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-150 cursor-pointer group
-                  ${active
-                    ? 'bg-primary-500/10 text-white'
-                    : 'text-foreground-500 hover:text-foreground-300 hover:bg-white/[0.03]'
+                  ${
+                    active
+                      ? 'bg-primary-500/10 text-white'
+                      : 'text-foreground-500 hover:text-foreground-300 hover:bg-white/[0.03]'
                   }
                   ${collapsed && !isMobile ? 'justify-center px-2' : ''}`}
               >
-                <span className={`w-5 h-5 flex items-center justify-center shrink-0 ${active ? 'text-primary-400' : ''}`}>
+                <span
+                  className={`w-5 h-5 flex items-center justify-center shrink-0 ${active ? 'text-primary-400' : ''}`}
+                >
                   <i className={`${item.icon} text-base`}></i>
                 </span>
-                {showLabels && (
-                  <span className="text-sm whitespace-nowrap">{item.label}</span>
-                )}
+                {showLabels && <span className="text-sm whitespace-nowrap">{item.label}</span>}
               </button>
             );
           })}

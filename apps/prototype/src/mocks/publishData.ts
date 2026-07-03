@@ -114,7 +114,8 @@ export const publishHistory: PublishRecord[] = [
   {
     id: 'pub-001',
     title: '2024 B2B 出海增长白皮书：AI 驱动的精准获客方法论',
-    content: '基于 GrowthOS 平台 10,000+ 企业客户的数据洞察，我们发布了这份年度出海增长白皮书...',
+    content:
+      '基于 Global Growth Workspace 平台 10,000+ 企业客户的数据洞察，我们发布了这份年度出海增长白皮书...',
     platforms: ['linkedin', 'wechat'],
     status: 'published',
     publishedAt: '2026-06-28 09:30',
@@ -133,7 +134,7 @@ export const publishHistory: PublishRecord[] = [
   },
   {
     id: 'pub-003',
-    title: 'GrowthOS 新功能发布：AI 内容助手 2.0',
+    title: 'Global Growth Workspace 新功能发布：AI 内容助手 2.0',
     content: '我们很高兴宣布 AI 内容助手迎来重大升级，新增多语言生成、风格迁移和一键合规检查...',
     platforms: ['linkedin', 'twitter', 'wechat', 'facebook'],
     status: 'published',
@@ -153,7 +154,7 @@ export const publishHistory: PublishRecord[] = [
   {
     id: 'pub-005',
     title: '客户案例：某工业软件企业 6 个月实现海外营收翻倍',
-    content: '这家位于苏州的工业软件企业，通过 GrowthOS 的 AI 获客引擎...',
+    content: '这家位于苏州的工业软件企业，通过 Global Growth Workspace 的 AI 获客引擎...',
     platforms: ['linkedin', 'wechat'],
     status: 'scheduled',
     scheduledAt: '2026-07-08 14:30',

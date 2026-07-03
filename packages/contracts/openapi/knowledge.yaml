@@ -700,7 +700,13 @@ paths:
           schema:
             type: string
             enum:
-              [VALUE_MISMATCH, VALIDITY_OVERLAP, SOURCE_CONTRADICTION, DUPLICATE, VERSION_DIVERGENCE]
+              [
+                VALUE_MISMATCH,
+                VALIDITY_OVERLAP,
+                SOURCE_CONTRADICTION,
+                DUPLICATE,
+                VERSION_DIVERGENCE,
+              ]
       responses:
         '200':
           description: 冲突分页列表

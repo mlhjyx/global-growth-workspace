@@ -25,17 +25,30 @@
           "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
           "description": "操作后的实体集合"
         },
-        "operated_by": { "type": "string", "description": "操作者：用户 ID 或 system（母本 7.4.10：高置信自动合并，中置信人工 Review）" },
+        "operated_by": {
+          "type": "string",
+          "description": "操作者：用户 ID 或 system（母本 7.4.10：高置信自动合并，中置信人工 Review）"
+        },
         "operated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
         "confidence": {
           "$ref": "ggw://contracts/common/primitives#/$defs/confidence",
           "description": "匹配置信度（母本 8.8 IdentityLink；高风险合并不得仅依赖 LLM）"
         },
         "reason": { "type": "string" },
-        "undo_of_operation_id": { "type": "string", "description": "撤销的目标操作 ID（operation 为 UNDO_* 时必填）" },
+        "undo_of_operation_id": {
+          "type": "string",
+          "description": "撤销的目标操作 ID（operation 为 UNDO_* 时必填）"
+        },
         "audit_log_id": { "type": "string", "description": "审计记录引用" }
       },
-      "required": ["operation_id", "operation", "source_entity_ids", "result_entity_ids", "operated_by", "operated_at"],
+      "required": [
+        "operation_id",
+        "operation",
+        "source_entity_ids",
+        "result_entity_ids",
+        "operated_by",
+        "operated_at"
+      ],
       "additionalProperties": false
     },
     "company_relationship": {
@@ -68,7 +81,12 @@
       "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
       "description": "指向 Data Hub CanonicalCompany（母本 8.8、附录 C）。业务主对象只引用 Canonical 实体，Provider ID 不得泄漏（母本 7.4.13）；重新解析不得破坏本引用（母本 7.4.10）"
     },
-    "name": { "type": "string", "minLength": 1, "maxLength": 500, "description": "法律名称（附录 C legal_name）" },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "法律名称（附录 C legal_name）"
+    },
     "trading_names": {
       "type": "array",
       "items": { "type": "string" },
@@ -85,8 +103,14 @@
       "items": { "type": "string" },
       "description": "行业标签（附录 C industries）"
     },
-    "employee_range": { "type": "string", "description": "员工规模区间，如 51-200（附录 C employee_range）" },
-    "revenue_range": { "type": "string", "description": "营收区间，如 10M-50M USD（附录 C revenue_range）" },
+    "employee_range": {
+      "type": "string",
+      "description": "员工规模区间，如 51-200（附录 C employee_range）"
+    },
+    "revenue_range": {
+      "type": "string",
+      "description": "营收区间，如 10M-50M USD（附录 C revenue_range）"
+    },
     "registry_ids": {
       "type": "array",
       "items": {

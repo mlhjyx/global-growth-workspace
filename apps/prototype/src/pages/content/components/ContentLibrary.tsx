@@ -63,7 +63,9 @@ export default function ContentLibrary({ items, selectedId, onSelect }: Props) {
     <div className="flex flex-col h-full">
       <div className="px-4 pt-4 pb-2 shrink-0">
         <h3 className="text-white text-sm font-semibold mb-3 flex items-center gap-2">
-          <span className="w-4 h-4 flex items-center justify-center text-primary-400"><i className="ri-folder-3-line"></i></span>
+          <span className="w-4 h-4 flex items-center justify-center text-primary-400">
+            <i className="ri-folder-3-line"></i>
+          </span>
           内容库
           <span className="text-foreground-600 text-xs font-normal ml-auto">{items.length} 条</span>
         </h3>
@@ -74,13 +76,13 @@ export default function ContentLibrary({ items, selectedId, onSelect }: Props) {
           <input
             type="text"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="搜索内容..."
             className="w-full bg-white/5 border border-primary-500/10 rounded-lg py-1.5 pl-7.5 pr-3 text-white text-xs placeholder:text-foreground-600 focus:outline-none focus:border-primary-500/30"
           />
         </div>
         <div className="flex gap-1 flex-wrap">
-          {['all', 'whitepaper', 'social', 'email', 'landing', 'blog'].map(t => (
+          {['all', 'whitepaper', 'social', 'email', 'landing', 'blog'].map((t) => (
             <button
               key={t}
               onClick={() => setTypeFilter(t)}
@@ -101,7 +103,7 @@ export default function ContentLibrary({ items, selectedId, onSelect }: Props) {
           <div className="text-center py-6 text-foreground-600 text-xs">无匹配内容</div>
         ) : (
           <div className="space-y-1">
-            {filtered.map(item => (
+            {filtered.map((item) => (
               <button
                 key={item.id}
                 onClick={() => onSelect(item.id)}
@@ -112,13 +114,17 @@ export default function ContentLibrary({ items, selectedId, onSelect }: Props) {
                 }`}
               >
                 <div className="flex items-start gap-2">
-                  <span className={`w-5 h-5 flex items-center justify-center text-xs mt-0.5 shrink-0 ${item.id === selectedId ? 'text-primary-400' : 'text-foreground-500'}`}>
+                  <span
+                    className={`w-5 h-5 flex items-center justify-center text-xs mt-0.5 shrink-0 ${item.id === selectedId ? 'text-primary-400' : 'text-foreground-500'}`}
+                  >
                     <i className={typeIcons[item.type] || 'ri-file-line'}></i>
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-white text-xs font-medium truncate">{item.title}</p>
                     <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${statusColor[item.status]}`}>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded ${statusColor[item.status]}`}
+                      >
                         {statusLabels[item.status]}
                       </span>
                       <span className={`text-[10px] ${scoreColor(item.complianceScore)}`}>
@@ -126,7 +132,9 @@ export default function ContentLibrary({ items, selectedId, onSelect }: Props) {
                       </span>
                     </div>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-foreground-600 text-[10px]">{item.language.toUpperCase()}</span>
+                      <span className="text-foreground-600 text-[10px]">
+                        {item.language.toUpperCase()}
+                      </span>
                       <span className="text-foreground-600 text-[10px]">{item.targetMarket}</span>
                       <span className="text-foreground-600 text-[10px]">{item.wordCount}字</span>
                     </div>

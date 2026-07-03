@@ -24,7 +24,16 @@
     },
     "status": {
       "type": "string",
-      "enum": ["DISCOVERED", "ENRICHING", "REVIEW", "QUALIFIED", "REJECTED", "SUPPRESSED", "CONTACTED", "CONVERTED"],
+      "enum": [
+        "DISCOVERED",
+        "ENRICHING",
+        "REVIEW",
+        "QUALIFIED",
+        "REJECTED",
+        "SUPPRESSED",
+        "CONTACTED",
+        "CONVERTED"
+      ],
       "description": "状态（母本 11.9 Lead 状态机；取值与 state-machines/lead.state.ts 一致；7.5.4：被拒绝或失效的线索保留历史但不进入发送队列）"
     },
     "queue": {
@@ -38,10 +47,21 @@
       "properties": {
         "discovery_method": {
           "type": "string",
-          "enum": ["PROVIDER_QUERY", "CSV_IMPORT", "CRM_IMPORT", "WEB_FORM", "SIGNAL", "MANUAL", "REFERRAL"],
+          "enum": [
+            "PROVIDER_QUERY",
+            "CSV_IMPORT",
+            "CRM_IMPORT",
+            "WEB_FORM",
+            "SIGNAL",
+            "MANUAL",
+            "REFERRAL"
+          ],
           "description": "发现方式（LED-005 多 Provider 查询计划；母本 7.4.12 客户自带数据）"
         },
-        "provider_id": { "type": "string", "description": "来源 Provider（发现层记录；业务对象不泄漏 Provider 原始 ID，母本 7.4.13）" },
+        "provider_id": {
+          "type": "string",
+          "description": "来源 Provider（发现层记录；业务对象不泄漏 Provider 原始 ID，母本 7.4.13）"
+        },
         "import_batch_id": { "type": "string", "description": "导入批次（母本 11.16 Batch ID）" },
         "campaign_id": {
           "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
@@ -81,7 +101,10 @@
           "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
           "description": "正在触达本联系人的 Campaign（cam_ 前缀）"
         },
-        "conflict_detected": { "type": "boolean", "description": "是否存在跨 Campaign 冲突（LED-011）" }
+        "conflict_detected": {
+          "type": "boolean",
+          "description": "是否存在跨 Campaign 冲突（LED-011）"
+        }
       },
       "additionalProperties": false
     },

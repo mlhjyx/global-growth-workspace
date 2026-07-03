@@ -11,9 +11,9 @@ export default function LandingPage() {
   const [hasCompletedGoal, setHasCompletedGoal] = useState(false);
 
   useEffect(() => {
-    const auth = localStorage.getItem('growthos_auth_token');
-    const completed = localStorage.getItem('growthos_onboarding_completed');
-    const goalDone = localStorage.getItem('growthos_goal_completed');
+    const auth = localStorage.getItem('ggw_auth_token');
+    const completed = localStorage.getItem('ggw_onboarding_completed');
+    const goalDone = localStorage.getItem('ggw_goal_completed');
     setIsLoggedIn(!!auth);
     setHasCompletedOnboarding(!!completed);
     setHasCompletedGoal(!!goalDone);
@@ -49,10 +49,7 @@ export default function LandingPage() {
   }, [isLoggedIn, hasCompletedOnboarding, hasCompletedGoal, navigate, openLogin]);
 
   return (
-    <div
-      className="relative min-h-screen w-full overflow-hidden"
-      style={{ background: '#010102' }}
-    >
+    <div className="relative min-h-screen w-full overflow-hidden" style={{ background: '#010102' }}>
       {/* ===== 弧形地平线光带 ===== */}
 
       {/* 深黑基底 */}
@@ -62,7 +59,8 @@ export default function LandingPage() {
       <div
         className="pointer-events-none absolute inset-0 z-0"
         style={{
-          background: 'radial-gradient(ellipse 60% 40% at 49% 40%, rgba(34,211,238,0.05) 0%, rgba(56,189,248,0.03) 35%, transparent 70%)',
+          background:
+            'radial-gradient(ellipse 60% 40% at 49% 40%, rgba(34,211,238,0.05) 0%, rgba(56,189,248,0.03) 35%, transparent 70%)',
           filter: 'blur(70px)',
         }}
       />
@@ -71,10 +69,12 @@ export default function LandingPage() {
       <div
         className="pointer-events-none absolute inset-0 z-0"
         style={{
-          background: 'radial-gradient(ellipse 155% 118% at 49% 130%, transparent 70%, rgba(34,211,238,0.05) 75%, rgba(56,189,248,0.08) 78%, rgba(168,85,247,0.04) 81%, transparent 87%)',
+          background:
+            'radial-gradient(ellipse 155% 118% at 49% 130%, transparent 70%, rgba(34,211,238,0.05) 75%, rgba(56,189,248,0.08) 78%, rgba(168,85,247,0.04) 81%, transparent 87%)',
           filter: 'blur(40px)',
           maskImage: 'linear-gradient(90deg, transparent 2%, #000 28%, #000 72%, transparent 98%)',
-          WebkitMaskImage: 'linear-gradient(90deg, transparent 2%, #000 28%, #000 72%, transparent 98%)',
+          WebkitMaskImage:
+            'linear-gradient(90deg, transparent 2%, #000 28%, #000 72%, transparent 98%)',
           animation: 'horizonBreatheSlow 20s ease-in-out infinite',
         }}
       />
@@ -83,10 +83,12 @@ export default function LandingPage() {
       <div
         className="pointer-events-none absolute inset-0 z-0"
         style={{
-          background: 'radial-gradient(ellipse 150% 116% at 49% 130%, transparent 75%, rgba(34,211,238,0.12) 77.4%, rgba(103,232,249,0.26) 78.2%, rgba(168,85,247,0.12) 79%, transparent 82%)',
+          background:
+            'radial-gradient(ellipse 150% 116% at 49% 130%, transparent 75%, rgba(34,211,238,0.12) 77.4%, rgba(103,232,249,0.26) 78.2%, rgba(168,85,247,0.12) 79%, transparent 82%)',
           filter: 'blur(8px)',
           maskImage: 'linear-gradient(90deg, transparent 8%, #000 34%, #000 66%, transparent 92%)',
-          WebkitMaskImage: 'linear-gradient(90deg, transparent 8%, #000 34%, #000 66%, transparent 92%)',
+          WebkitMaskImage:
+            'linear-gradient(90deg, transparent 8%, #000 34%, #000 66%, transparent 92%)',
           animation: 'horizonBreatheSlow 20s ease-in-out infinite 1s',
         }}
       />
@@ -95,10 +97,12 @@ export default function LandingPage() {
       <div
         className="pointer-events-none absolute inset-0 z-0"
         style={{
-          background: 'radial-gradient(ellipse 148% 115% at 49% 130%, transparent 77.3%, rgba(34,211,238,0.50) 77.9%, rgba(190,242,255,0.88) 78.15%, rgba(168,85,247,0.45) 78.4%, transparent 79%)',
+          background:
+            'radial-gradient(ellipse 148% 115% at 49% 130%, transparent 77.3%, rgba(34,211,238,0.50) 77.9%, rgba(190,242,255,0.88) 78.15%, rgba(168,85,247,0.45) 78.4%, transparent 79%)',
           filter: 'blur(1px)',
           maskImage: 'linear-gradient(90deg, transparent 15%, #000 40%, #000 60%, transparent 85%)',
-          WebkitMaskImage: 'linear-gradient(90deg, transparent 15%, #000 40%, #000 60%, transparent 85%)',
+          WebkitMaskImage:
+            'linear-gradient(90deg, transparent 15%, #000 40%, #000 60%, transparent 85%)',
           animation: 'horizonBreatheSlow 20s ease-in-out infinite 0.5s',
         }}
       />
@@ -107,7 +111,8 @@ export default function LandingPage() {
       <div
         className="pointer-events-none absolute inset-0 z-0"
         style={{
-          background: 'radial-gradient(ellipse 26% 14% at 49% 40%, rgba(190,242,255,0.28) 0%, rgba(103,232,249,0.10) 45%, transparent 72%)',
+          background:
+            'radial-gradient(ellipse 26% 14% at 49% 40%, rgba(190,242,255,0.28) 0%, rgba(103,232,249,0.10) 45%, transparent 72%)',
           filter: 'blur(14px)',
           animation: 'horizonBreatheSlow 20s ease-in-out infinite 0.5s',
         }}
@@ -121,9 +126,16 @@ export default function LandingPage() {
           </span>
           <span
             className="text-lg text-white"
-            style={{ fontFamily: '"Clash Display", Outfit, sans-serif', fontWeight: 600, letterSpacing: '-0.005em' }}
+            style={{
+              fontFamily: '"Clash Display", Outfit, sans-serif',
+              fontWeight: 600,
+              letterSpacing: '-0.005em',
+            }}
           >
-            Growth<span className="text-cyan-300" style={{ fontWeight: 500 }}>OS</span>
+            Growth
+            <span className="text-cyan-300" style={{ fontWeight: 500 }}>
+              OS
+            </span>
           </span>
         </div>
         <div className="flex items-center gap-4">
@@ -157,7 +169,10 @@ export default function LandingPage() {
             letterSpacing: '-0.02em',
           }}
         >
-          Growth<span className="text-cyan-300" style={{ fontWeight: 500 }}>OS</span>
+          Growth
+          <span className="text-cyan-300" style={{ fontWeight: 500 }}>
+            OS
+          </span>
         </h1>
 
         {/* Subtitle */}
@@ -165,7 +180,8 @@ export default function LandingPage() {
           className="text-base sm:text-lg md:text-xl text-cyan-100/90 font-light tracking-[0.42em] uppercase mb-9 pl-[0.42em]"
           style={{
             fontFamily: '"Noto Sans SC", Sora, sans-serif',
-            textShadow: '0 0 20px rgba(34,211,238,0.35), 0 0 50px rgba(34,211,238,0.15), 0 0 100px rgba(34,211,238,0.06)',
+            textShadow:
+              '0 0 20px rgba(34,211,238,0.35), 0 0 50px rgba(34,211,238,0.15), 0 0 100px rgba(34,211,238,0.06)',
           }}
         >
           AI 原生增长引擎
@@ -174,7 +190,11 @@ export default function LandingPage() {
         {/* Description */}
         <p
           className="text-white/35 text-sm sm:text-base max-w-xl mb-14 leading-loose"
-          style={{ fontFamily: '"Noto Sans SC", Sora, sans-serif', fontWeight: 300, letterSpacing: '0.03em' }}
+          style={{
+            fontFamily: '"Noto Sans SC", Sora, sans-serif',
+            fontWeight: 300,
+            letterSpacing: '0.03em',
+          }}
         >
           面向中国出海企业的智能增长工作台
           <br />

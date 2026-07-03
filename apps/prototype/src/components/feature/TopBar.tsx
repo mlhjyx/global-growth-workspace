@@ -92,10 +92,26 @@ const helpShortcuts = [
 ];
 
 const helpTips = [
-  { icon: 'ri-robot-2-line', text: '使用 AI 助手可以自动生成内容、分析数据和回复评论。', color: 'text-ai-accent' },
-  { icon: 'ri-search-line', text: '全局搜索支持跨模块查找战役、客户、内容和机会信号。', color: 'text-primary-400' },
-  { icon: 'ri-flag-2-line', text: '在战役看板中拖拽任务卡片即可快速改变任务状态。', color: 'text-foreground-400' },
-  { icon: 'ri-rocket-line', text: 'AI 发布中心支持一键将内容分发至 8 个平台。', color: 'text-ai-accent' },
+  {
+    icon: 'ri-robot-2-line',
+    text: '使用 AI 助手可以自动生成内容、分析数据和回复评论。',
+    color: 'text-ai-accent',
+  },
+  {
+    icon: 'ri-search-line',
+    text: '全局搜索支持跨模块查找战役、客户、内容和机会信号。',
+    color: 'text-primary-400',
+  },
+  {
+    icon: 'ri-flag-2-line',
+    text: '在战役看板中拖拽计划项卡片即可快速改变其状态。',
+    color: 'text-foreground-400',
+  },
+  {
+    icon: 'ri-rocket-line',
+    text: '发布中心支持将已审批内容排期到多个获授权平台（入口在「内容」域）。',
+    color: 'text-ai-accent',
+  },
 ];
 
 export default function TopBar({ onToggleMobileMenu, mobileMenuOpen }: TopBarProps) {
@@ -111,7 +127,7 @@ export default function TopBar({ onToggleMobileMenu, mobileMenuOpen }: TopBarPro
   const notifRef = useRef<HTMLDivElement>(null);
   const helpRef = useRef<HTMLDivElement>(null);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -174,7 +190,11 @@ export default function TopBar({ onToggleMobileMenu, mobileMenuOpen }: TopBarPro
     });
 
     mockAccounts.forEach((a) => {
-      if (a.company.toLowerCase().includes(q) || a.industry.toLowerCase().includes(q) || a.country.toLowerCase().includes(q)) {
+      if (
+        a.company.toLowerCase().includes(q) ||
+        a.industry.toLowerCase().includes(q) ||
+        a.country.toLowerCase().includes(q)
+      ) {
         results.push({
           id: `account-${a.id}`,
           title: a.company,
@@ -188,7 +208,7 @@ export default function TopBar({ onToggleMobileMenu, mobileMenuOpen }: TopBarPro
     });
 
     mockContentItems.forEach((c) => {
-      if (c.title.toLowerCase().includes(q) || c.tags.some(t => t.toLowerCase().includes(q))) {
+      if (c.title.toLowerCase().includes(q) || c.tags.some((t) => t.toLowerCase().includes(q))) {
         results.push({
           id: `content-${c.id}`,
           title: c.title,
@@ -202,7 +222,11 @@ export default function TopBar({ onToggleMobileMenu, mobileMenuOpen }: TopBarPro
     });
 
     mockOpportunities.forEach((o) => {
-      if (o.company.toLowerCase().includes(q) || o.signal.toLowerCase().includes(q) || o.industry.toLowerCase().includes(q)) {
+      if (
+        o.company.toLowerCase().includes(q) ||
+        o.signal.toLowerCase().includes(q) ||
+        o.industry.toLowerCase().includes(q)
+      ) {
         results.push({
           id: `opportunity-${o.id}`,
           title: `${o.company} · ${o.signal}`,
@@ -218,20 +242,26 @@ export default function TopBar({ onToggleMobileMenu, mobileMenuOpen }: TopBarPro
     return results.slice(0, 8);
   }, [searchValue]);
 
-  const handleSearchSelect = useCallback((item: SearchResultItem) => {
-    setSearchFocused(false);
-    setSearchValue('');
-    navigate(item.path);
-  }, [navigate]);
+  const handleSearchSelect = useCallback(
+    (item: SearchResultItem) => {
+      setSearchFocused(false);
+      setSearchValue('');
+      navigate(item.path);
+    },
+    [navigate],
+  );
 
-  const handleNotifClick = useCallback((item: NotificationItem) => {
-    setNotifications(prev => prev.map(n => n.id === item.id ? { ...n, read: true } : n));
-    setNotifOpen(false);
-    if (item.path) navigate(item.path);
-  }, [navigate]);
+  const handleNotifClick = useCallback(
+    (item: NotificationItem) => {
+      setNotifications((prev) => prev.map((n) => (n.id === item.id ? { ...n, read: true } : n)));
+      setNotifOpen(false);
+      if (item.path) navigate(item.path);
+    },
+    [navigate],
+  );
 
   const markAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
   const categoryIconColor: Record<string, string> = {
@@ -249,8 +279,12 @@ export default function TopBar({ onToggleMobileMenu, mobileMenuOpen }: TopBarPro
   };
 
   return (
-    <header className="sticky top-0 z-40 h-14 flex items-center justify-between px-3 md:px-5 border-b border-primary-500/10"
-      style={{ background: 'linear-gradient(90deg, rgba(12,10,26,0.95) 0%, rgba(26,16,60,0.95) 100%)', backdropFilter: 'blur(16px)' }}
+    <header
+      className="sticky top-0 z-40 h-14 flex items-center justify-between px-3 md:px-5 border-b border-primary-500/10"
+      style={{
+        background: 'linear-gradient(90deg, rgba(12,10,26,0.95) 0%, rgba(26,16,60,0.95) 100%)',
+        backdropFilter: 'blur(16px)',
+      }}
     >
       {/* Left: Mobile menu + Search */}
       <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -284,8 +318,14 @@ export default function TopBar({ onToggleMobileMenu, mobileMenuOpen }: TopBarPro
 
           {/* Search results dropdown */}
           {searchFocused && searchValue.trim() && (
-            <div className="absolute left-0 top-full mt-2 w-full rounded-xl py-2 animate-fade-in z-50"
-              style={{ background: 'linear-gradient(135deg, rgba(22,18,48,0.98) 0%, rgba(30,20,56,0.98) 100%)', backdropFilter: 'blur(20px)', border: '1px solid rgba(108,92,231,0.15)' }}
+            <div
+              className="absolute left-0 top-full mt-2 w-full rounded-xl py-2 animate-fade-in z-50"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(22,18,48,0.98) 0%, rgba(30,20,56,0.98) 100%)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(108,92,231,0.15)',
+              }}
             >
               {searchResults.length > 0 ? (
                 <>
@@ -301,15 +341,21 @@ export default function TopBar({ onToggleMobileMenu, mobileMenuOpen }: TopBarPro
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/5 transition-all duration-150 cursor-pointer group"
                     >
                       <span className="w-8 h-8 rounded-lg bg-white/[0.03] flex items-center justify-center shrink-0 group-hover:bg-white/[0.06] transition-colors">
-                        <span className={`w-4 h-4 flex items-center justify-center ${categoryIconColor[item.category] || 'text-foreground-500'}`}>
+                        <span
+                          className={`w-4 h-4 flex items-center justify-center ${categoryIconColor[item.category] || 'text-foreground-500'}`}
+                        >
                           <i className={`${item.icon} text-sm`}></i>
                         </span>
                       </span>
                       <div className="flex flex-col min-w-0 flex-1">
                         <span className="text-white text-sm truncate">{item.title}</span>
-                        <span className="text-foreground-500 text-xs truncate">{item.subtitle}</span>
+                        <span className="text-foreground-500 text-xs truncate">
+                          {item.subtitle}
+                        </span>
                       </div>
-                      <span className="text-foreground-600 text-[11px] shrink-0">{item.categoryLabel}</span>
+                      <span className="text-foreground-600 text-[11px] shrink-0">
+                        {item.categoryLabel}
+                      </span>
                     </button>
                   ))}
                 </>
@@ -346,11 +392,19 @@ export default function TopBar({ onToggleMobileMenu, mobileMenuOpen }: TopBarPro
           </button>
 
           {notifOpen && (
-            <div className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-80 rounded-xl py-2 animate-fade-in z-50"
-              style={{ background: 'linear-gradient(135deg, rgba(22,18,48,0.98) 0%, rgba(30,20,56,0.98) 100%)', backdropFilter: 'blur(20px)', border: '1px solid rgba(108,92,231,0.15)' }}
+            <div
+              className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-80 rounded-xl py-2 animate-fade-in z-50"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(22,18,48,0.98) 0%, rgba(30,20,56,0.98) 100%)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(108,92,231,0.15)',
+              }}
             >
               <div className="px-3 pb-1.5 flex items-center justify-between">
-                <p className="text-foreground-500 text-[11px] font-medium tracking-wider uppercase">通知</p>
+                <p className="text-foreground-500 text-[11px] font-medium tracking-wider uppercase">
+                  通知
+                </p>
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllRead}
@@ -367,29 +421,39 @@ export default function TopBar({ onToggleMobileMenu, mobileMenuOpen }: TopBarPro
                     onClick={() => handleNotifClick(item)}
                     className="w-full flex items-start gap-3 px-3 py-2.5 text-left hover:bg-white/5 transition-all duration-150 cursor-pointer group"
                   >
-                    <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${notifTypeColor[item.type]}`}>
+                    <span
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${notifTypeColor[item.type]}`}
+                    >
                       <span className="w-4 h-4 flex items-center justify-center">
                         <i className={`${item.icon} text-sm`}></i>
                       </span>
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className={`text-white text-xs font-medium ${!item.read ? '' : 'text-foreground-400'}`}>
+                        <span
+                          className={`text-white text-xs font-medium ${!item.read ? '' : 'text-foreground-400'}`}
+                        >
                           {item.title}
                         </span>
                         {!item.read && (
                           <span className="w-2 h-2 rounded-full bg-primary-400 shrink-0"></span>
                         )}
                       </div>
-                      <p className="text-foreground-500 text-[11px] mt-0.5 line-clamp-2">{item.description}</p>
-                      <span className="text-foreground-700 text-[10px] mt-1 block">{item.time}</span>
+                      <p className="text-foreground-500 text-[11px] mt-0.5 line-clamp-2">
+                        {item.description}
+                      </p>
+                      <span className="text-foreground-700 text-[10px] mt-1 block">
+                        {item.time}
+                      </span>
                     </div>
                   </button>
                 ))}
               </div>
               <div className="px-3 pt-2 border-t border-primary-500/10 mt-1">
                 <button
-                  onClick={() => { setNotifOpen(false); }}
+                  onClick={() => {
+                    setNotifOpen(false);
+                  }}
                   className="w-full py-2 text-center text-xs text-foreground-500 hover:text-foreground-300 transition-colors cursor-pointer"
                 >
                   查看全部通知
@@ -411,15 +475,26 @@ export default function TopBar({ onToggleMobileMenu, mobileMenuOpen }: TopBarPro
           </button>
 
           {helpOpen && (
-            <div className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-72 rounded-xl py-2 animate-fade-in z-50"
-              style={{ background: 'linear-gradient(135deg, rgba(22,18,48,0.98) 0%, rgba(30,20,56,0.98) 100%)', backdropFilter: 'blur(20px)', border: '1px solid rgba(108,92,231,0.15)' }}
+            <div
+              className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-72 rounded-xl py-2 animate-fade-in z-50"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(22,18,48,0.98) 0%, rgba(30,20,56,0.98) 100%)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(108,92,231,0.15)',
+              }}
             >
               {/* Keyboard shortcuts */}
               <div className="px-3 pb-2">
-                <p className="text-foreground-500 text-[11px] font-medium tracking-wider uppercase mb-2">键盘快捷键</p>
+                <p className="text-foreground-500 text-[11px] font-medium tracking-wider uppercase mb-2">
+                  键盘快捷键
+                </p>
                 <div className="space-y-1">
                   {helpShortcuts.map((sc, i) => (
-                    <div key={i} className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-white/5 transition-colors">
+                    <div
+                      key={i}
+                      className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
+                    >
                       <div className="flex items-center gap-2">
                         <span className="w-4 h-4 flex items-center justify-center text-foreground-500">
                           <i className={`${sc.icon} text-xs`}></i>
@@ -428,7 +503,10 @@ export default function TopBar({ onToggleMobileMenu, mobileMenuOpen }: TopBarPro
                       </div>
                       <div className="flex items-center gap-1">
                         {sc.keys.map((k, j) => (
-                          <span key={j} className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-foreground-500 font-mono">
+                          <span
+                            key={j}
+                            className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-foreground-500 font-mono"
+                          >
                             {k}
                           </span>
                         ))}
@@ -442,14 +520,23 @@ export default function TopBar({ onToggleMobileMenu, mobileMenuOpen }: TopBarPro
 
               {/* Tips */}
               <div className="px-3 pt-2">
-                <p className="text-foreground-500 text-[11px] font-medium tracking-wider uppercase mb-2">使用技巧</p>
+                <p className="text-foreground-500 text-[11px] font-medium tracking-wider uppercase mb-2">
+                  使用技巧
+                </p>
                 <div className="space-y-2">
                   {helpTips.map((tip, i) => (
-                    <div key={i} className="flex items-start gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 transition-colors">
-                      <span className={`w-4 h-4 flex items-center justify-center shrink-0 mt-0.5 ${tip.color}`}>
+                    <div
+                      key={i}
+                      className="flex items-start gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
+                    >
+                      <span
+                        className={`w-4 h-4 flex items-center justify-center shrink-0 mt-0.5 ${tip.color}`}
+                      >
                         <i className={`${tip.icon} text-xs`}></i>
                       </span>
-                      <span className="text-foreground-500 text-xs leading-relaxed">{tip.text}</span>
+                      <span className="text-foreground-500 text-xs leading-relaxed">
+                        {tip.text}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -459,8 +546,12 @@ export default function TopBar({ onToggleMobileMenu, mobileMenuOpen }: TopBarPro
 
               {/* Footer links */}
               <div className="px-3 flex items-center justify-between text-[10px] text-foreground-600">
-                <a href="#" className="hover:text-foreground-400 transition-colors cursor-pointer">帮助中心</a>
-                <a href="#" className="hover:text-foreground-400 transition-colors cursor-pointer">反馈建议</a>
+                <a href="#" className="hover:text-foreground-400 transition-colors cursor-pointer">
+                  帮助中心
+                </a>
+                <a href="#" className="hover:text-foreground-400 transition-colors cursor-pointer">
+                  反馈建议
+                </a>
                 <span className="text-foreground-800">v2.4.1</span>
               </div>
             </div>

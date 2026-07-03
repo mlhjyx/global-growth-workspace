@@ -98,14 +98,6 @@
     "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
     "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
   },
-  "required": [
-    "id",
-    "workspace_id",
-    "brand_name",
-    "status",
-    "created_at",
-    "updated_at",
-    "version"
-  ],
+  "required": ["id", "workspace_id", "brand_name", "status", "created_at", "updated_at", "version"],
   "additionalProperties": false
 }

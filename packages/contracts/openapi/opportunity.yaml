@@ -650,7 +650,8 @@ components:
 
     WithdrawReasonCode:
       type: string
-      enum: [DUPLICATE_MERGED, NO_LONGER_QUALIFIED, INVALID_DATA, CUSTOMER_WITHDREW, CORRECTION, OTHER]
+      enum:
+        [DUPLICATE_MERGED, NO_LONGER_QUALIFIED, INVALID_DATA, CUSTOMER_WITHDREW, CORRECTION, OTHER]
       description: 撤回/降级/撤销原因码（ENG-017/ANA-014；与 asyncapi/opportunity.events.yaml withdraw_reason_code 一致）
 
     ReportImpact:

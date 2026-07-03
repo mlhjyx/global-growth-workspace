@@ -55,7 +55,15 @@
       "properties": {
         "unit": {
           "type": "string",
-          "enum": ["TOKENS", "CREDITS", "RECORDS", "EMAILS", "RENDER_MINUTES", "EXPERT_HOURS", "API_CALLS"],
+          "enum": [
+            "TOKENS",
+            "CREDITS",
+            "RECORDS",
+            "EMAILS",
+            "RENDER_MINUTES",
+            "EXPERT_HOURS",
+            "API_CALLS"
+          ],
           "description": "配额单位：TOKENS/CREDITS=模型；RECORDS=数据记录数；EMAILS=邮件发送量；RENDER_MINUTES=媒体渲染时长；EXPERT_HOURS=专家工时；API_CALLS=调用次数"
         },
         "soft_quota": {

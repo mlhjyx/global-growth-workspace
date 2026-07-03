@@ -8,7 +8,11 @@
       "goal_statement": "在 90 天内为耐水耐火石膏板产品线在尼日利亚与肯尼亚招募合格区域经销商，产出至少 5 个销售接受的伙伴机会（母本 13.9 J-B 经销商招募旅程）。",
       "qualification_caliber": "SAO",
       "success_metrics": [
-        { "metric_name": "sales_accepted_partner_opportunities", "target_value": 5, "unit": "count" },
+        {
+          "metric_name": "sales_accepted_partner_opportunities",
+          "target_value": 5,
+          "unit": "count"
+        },
         { "metric_name": "qualified_dealer_leads", "target_value": 40, "unit": "count" },
         { "metric_name": "reply_rate", "target_value": 8, "unit": "percent" }
       ]
@@ -44,11 +48,22 @@
       "snapshot_at": "2026-06-18T09:00:00Z",
       "snapshot_hash": "sha256:strat9f2c4e6a8b0d2f4a6c8e0b1d3f57",
       "audience_tiers": [
-        { "tier_name": "Tier1 有石膏制品进口记录的经销商", "criteria_summary": "近 12 个月 HS 6809 进口记录且为分销业态", "priority": 1 },
-        { "tier_name": "Tier2 关联建材品类经销商", "criteria_summary": "经营板材/吊顶/管材等关联品类，无直接进口记录", "priority": 2 }
+        {
+          "tier_name": "Tier1 有石膏制品进口记录的经销商",
+          "criteria_summary": "近 12 个月 HS 6809 进口记录且为分销业态",
+          "priority": 1
+        },
+        {
+          "tier_name": "Tier2 关联建材品类经销商",
+          "criteria_summary": "经营板材/吊顶/管材等关联品类，无直接进口记录",
+          "priority": 2
+        }
       ],
       "channel_cadence": [
-        { "channel": "EMAIL", "cadence_summary": "每联系人每周不超过 2 封，间隔至少 72 小时，当地时间工作日 9:00-17:00 发送" },
+        {
+          "channel": "EMAIL",
+          "cadence_summary": "每联系人每周不超过 2 封，间隔至少 72 小时，当地时间工作日 9:00-17:00 发送"
+        },
         { "channel": "LINKEDIN", "cadence_summary": "仅对 Tier1 决策人在邮件无回复后补充 DM 触达" }
       ],
       "content_themes": [
@@ -97,12 +112,49 @@
       "snapshot_hash": "sha256:audq7d1e3f5a9c2b4d6f8a0c2e4b6d80"
     },
     "members": [
-      { "entity_type": "LEAD", "entity_id": "led_01JZ1EAD000000000000000011", "membership_status": "ACCEPTED", "accepted_at": "2026-06-18T08:30:00Z", "accepted_by": "mem_01JZMEMB000000000000000002" },
-      { "entity_type": "LEAD", "entity_id": "led_01JZ1EAD000000000000000012", "membership_status": "ACCEPTED", "accepted_at": "2026-06-18T08:30:00Z", "accepted_by": "mem_01JZMEMB000000000000000002" },
-      { "entity_type": "LEAD", "entity_id": "led_01JZ1EAD000000000000000013", "membership_status": "ACCEPTED", "accepted_at": "2026-06-18T08:31:00Z", "accepted_by": "mem_01JZMEMB000000000000000002" },
-      { "entity_type": "LEAD", "entity_id": "led_01JZ1EAD000000000000000015", "membership_status": "ACCEPTED", "accepted_at": "2026-06-18T08:31:00Z", "accepted_by": "mem_01JZMEMB000000000000000002" },
-      { "entity_type": "LEAD", "entity_id": "led_01JZ1EAD000000000000000020", "membership_status": "ACCEPTED", "accepted_at": "2026-06-18T08:32:00Z", "accepted_by": "mem_01JZMEMB000000000000000002" },
-      { "entity_type": "LEAD", "entity_id": "led_01JZ1EAD000000000000000018", "membership_status": "REMOVED", "accepted_at": "2026-06-18T08:32:00Z", "accepted_by": "mem_01JZMEMB000000000000000002", "removed_reason": "复核发现命中硬性排除（终端施工方），人工移出名单（LED-003）" }
+      {
+        "entity_type": "LEAD",
+        "entity_id": "led_01JZ1EAD000000000000000011",
+        "membership_status": "ACCEPTED",
+        "accepted_at": "2026-06-18T08:30:00Z",
+        "accepted_by": "mem_01JZMEMB000000000000000002"
+      },
+      {
+        "entity_type": "LEAD",
+        "entity_id": "led_01JZ1EAD000000000000000012",
+        "membership_status": "ACCEPTED",
+        "accepted_at": "2026-06-18T08:30:00Z",
+        "accepted_by": "mem_01JZMEMB000000000000000002"
+      },
+      {
+        "entity_type": "LEAD",
+        "entity_id": "led_01JZ1EAD000000000000000013",
+        "membership_status": "ACCEPTED",
+        "accepted_at": "2026-06-18T08:31:00Z",
+        "accepted_by": "mem_01JZMEMB000000000000000002"
+      },
+      {
+        "entity_type": "LEAD",
+        "entity_id": "led_01JZ1EAD000000000000000015",
+        "membership_status": "ACCEPTED",
+        "accepted_at": "2026-06-18T08:31:00Z",
+        "accepted_by": "mem_01JZMEMB000000000000000002"
+      },
+      {
+        "entity_type": "LEAD",
+        "entity_id": "led_01JZ1EAD000000000000000020",
+        "membership_status": "ACCEPTED",
+        "accepted_at": "2026-06-18T08:32:00Z",
+        "accepted_by": "mem_01JZMEMB000000000000000002"
+      },
+      {
+        "entity_type": "LEAD",
+        "entity_id": "led_01JZ1EAD000000000000000018",
+        "membership_status": "REMOVED",
+        "accepted_at": "2026-06-18T08:32:00Z",
+        "accepted_by": "mem_01JZMEMB000000000000000002",
+        "removed_reason": "复核发现命中硬性排除（终端施工方），人工移出名单（LED-003）"
+      }
     ],
     "member_count": 5,
     "frozen_at": "2026-06-18T08:35:00Z",
@@ -140,7 +192,14 @@
         "entry_condition": "NO_REPLY"
       }
     ],
-    "exit_conditions": ["REPLIED", "UNSUBSCRIBED", "BOUNCED", "COMPLAINT", "MEETING_BOOKED", "SUPPRESSED"],
+    "exit_conditions": [
+      "REPLIED",
+      "UNSUBSCRIBED",
+      "BOUNCED",
+      "COMPLAINT",
+      "MEETING_BOOKED",
+      "SUPPRESSED"
+    ],
     "created_at": "2026-06-17T07:00:00Z",
     "updated_at": "2026-06-19T09:00:00Z",
     "version": 4
@@ -167,9 +226,18 @@
       "max_total_actions": 900
     },
     "templates": [
-      { "template_ref": "cnt_dealer_intro_en_v2", "content_hash": "sha256:tpl1a3c5e7092b4d6f8a0c2e4d6f8a0b2" },
-      { "template_ref": "cnt_dealer_case_follow_en_v1", "content_hash": "sha256:tpl2b4d6f80a1c3e5f7092b4d6e8f0a1c3" },
-      { "template_ref": "cnt_dealer_dm_en_v1", "content_hash": "sha256:tpl3c5e7a90b2d4f60a1c3e5d7f90b2d4e" }
+      {
+        "template_ref": "cnt_dealer_intro_en_v2",
+        "content_hash": "sha256:tpl1a3c5e7092b4d6f8a0c2e4d6f8a0b2"
+      },
+      {
+        "template_ref": "cnt_dealer_case_follow_en_v1",
+        "content_hash": "sha256:tpl2b4d6f80a1c3e5f7092b4d6e8f0a1c3"
+      },
+      {
+        "template_ref": "cnt_dealer_dm_en_v1",
+        "content_hash": "sha256:tpl3c5e7a90b2d4f60a1c3e5d7f90b2d4e"
+      }
     ],
     "frequency_caps": {
       "max_actions_per_day": 60,

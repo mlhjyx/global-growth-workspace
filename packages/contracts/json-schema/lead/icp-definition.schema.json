@@ -13,7 +13,22 @@
         "field": { "type": "string", "description": "被评估的公司字段路径" },
         "operator": {
           "type": "string",
-          "enum": ["EQ", "NEQ", "IN", "NOT_IN", "GT", "GTE", "LT", "LTE", "RANGE", "CONTAINS", "NOT_CONTAINS", "EXISTS", "NOT_EXISTS", "MATCHES"],
+          "enum": [
+            "EQ",
+            "NEQ",
+            "IN",
+            "NOT_IN",
+            "GT",
+            "GTE",
+            "LT",
+            "LTE",
+            "RANGE",
+            "CONTAINS",
+            "NOT_CONTAINS",
+            "EXISTS",
+            "NOT_EXISTS",
+            "MATCHES"
+          ],
           "description": "比较算子"
         },
         "value": { "description": "比较值；类型随 field 而定（string/number/array/object）" },
@@ -22,8 +37,16 @@
           "enum": ["MUST_HAVE", "NICE_TO_HAVE"],
           "description": "LED-003：Must-have / Nice-to-have"
         },
-        "weight": { "type": "number", "minimum": 0, "maximum": 1, "description": "参与 Fit 评分的权重（附录 C weights）" },
-        "rationale": { "type": "string", "description": "该条件的业务理由，用于可解释性（母本 4.4）" }
+        "weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "参与 Fit 评分的权重（附录 C weights）"
+        },
+        "rationale": {
+          "type": "string",
+          "description": "该条件的业务理由，用于可解释性（母本 4.4）"
+        }
       },
       "required": ["field", "operator", "requirement_level"],
       "additionalProperties": false
@@ -36,7 +59,22 @@
         "field": { "type": "string" },
         "operator": {
           "type": "string",
-          "enum": ["EQ", "NEQ", "IN", "NOT_IN", "GT", "GTE", "LT", "LTE", "RANGE", "CONTAINS", "NOT_CONTAINS", "EXISTS", "NOT_EXISTS", "MATCHES"]
+          "enum": [
+            "EQ",
+            "NEQ",
+            "IN",
+            "NOT_IN",
+            "GT",
+            "GTE",
+            "LT",
+            "LTE",
+            "RANGE",
+            "CONTAINS",
+            "NOT_CONTAINS",
+            "EXISTS",
+            "NOT_EXISTS",
+            "MATCHES"
+          ]
         },
         "value": { "description": "比较值；类型随 field 而定" },
         "reason": { "type": "string", "description": "排除理由" }
@@ -50,12 +88,34 @@
       "properties": {
         "signal_type": {
           "type": "string",
-          "enum": ["TRADE", "HIRING", "FUNDING", "WEBSITE", "CONTENT", "RELATIONSHIP_CHANGE", "EVENT"]
+          "enum": [
+            "TRADE",
+            "HIRING",
+            "FUNDING",
+            "WEBSITE",
+            "CONTENT",
+            "RELATIONSHIP_CHANGE",
+            "EVENT"
+          ]
         },
         "subtype": { "type": "string", "description": "类型内细分，如 HIRING 下的岗位类别" },
-        "min_strength": { "type": "number", "minimum": 0, "maximum": 1, "description": "计入评分所需的最低信号强度" },
-        "lookback_days": { "type": "integer", "minimum": 1, "description": "信号回看窗口（天）；配合 Signal.expires_at 过期降低 Intent（LED-014 验收）" },
-        "weight": { "type": "number", "minimum": 0, "maximum": 1, "description": "参与 Intent 评分的权重" }
+        "min_strength": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "计入评分所需的最低信号强度"
+        },
+        "lookback_days": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "信号回看窗口（天）；配合 Signal.expires_at 过期降低 Intent（LED-014 验收）"
+        },
+        "weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "参与 Intent 评分的权重"
+        }
       },
       "required": ["signal_type"],
       "additionalProperties": false
@@ -69,7 +129,10 @@
           "enum": ["SAMPLE_ACCOUNTS", "PUBLIC_DATA", "HISTORICAL_RESULTS"],
           "description": "回测方法（LED-004）"
         },
-        "dataset_ref": { "type": "string", "description": "回测数据集引用（样例账户列表 / 数据快照 ID）" },
+        "dataset_ref": {
+          "type": "string",
+          "description": "回测数据集引用（样例账户列表 / 数据快照 ID）"
+        },
         "sample_size": { "type": "integer", "minimum": 1 },
         "precision": { "type": "number", "minimum": 0, "maximum": 1 },
         "recall": { "type": "number", "minimum": 0, "maximum": 1 },

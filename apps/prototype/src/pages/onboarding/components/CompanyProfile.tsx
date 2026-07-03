@@ -25,11 +25,13 @@ export default function CompanyProfile({ data, onChange }: CompanyProfileProps) 
         {/* Company name + website */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-foreground-300 text-xs font-medium mb-1.5">公司名称 *</label>
+            <label className="block text-foreground-300 text-xs font-medium mb-1.5">
+              公司名称 *
+            </label>
             <input
               type="text"
               value={data.companyName}
-              onChange={e => onChange({ companyName: e.target.value })}
+              onChange={(e) => onChange({ companyName: e.target.value })}
               placeholder="例如：GrowthTech Inc."
               className="w-full"
             />
@@ -39,7 +41,7 @@ export default function CompanyProfile({ data, onChange }: CompanyProfileProps) 
             <input
               type="text"
               value={data.companyWebsite}
-              onChange={e => onChange({ companyWebsite: e.target.value })}
+              onChange={(e) => onChange({ companyWebsite: e.target.value })}
               placeholder="例如：www.growthtech.com"
               className="w-full"
             />
@@ -49,15 +51,19 @@ export default function CompanyProfile({ data, onChange }: CompanyProfileProps) 
         {/* Industry + Company size */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-foreground-300 text-xs font-medium mb-1.5">所属行业 *</label>
+            <label className="block text-foreground-300 text-xs font-medium mb-1.5">
+              所属行业 *
+            </label>
             <select
               value={data.industry}
-              onChange={e => onChange({ industry: e.target.value })}
+              onChange={(e) => onChange({ industry: e.target.value })}
               className="w-full"
             >
               <option value="">请选择行业</option>
-              {industryOptions.map(ind => (
-                <option key={ind} value={ind}>{ind}</option>
+              {industryOptions.map((ind) => (
+                <option key={ind} value={ind}>
+                  {ind}
+                </option>
               ))}
             </select>
           </div>
@@ -65,12 +71,14 @@ export default function CompanyProfile({ data, onChange }: CompanyProfileProps) 
             <label className="block text-foreground-300 text-xs font-medium mb-1.5">公司规模</label>
             <select
               value={data.companySize}
-              onChange={e => onChange({ companySize: e.target.value })}
+              onChange={(e) => onChange({ companySize: e.target.value })}
               className="w-full"
             >
               <option value="">请选择规模</option>
-              {companySizeOptions.map(size => (
-                <option key={size} value={size}>{size}</option>
+              {companySizeOptions.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
               ))}
             </select>
           </div>
@@ -78,10 +86,12 @@ export default function CompanyProfile({ data, onChange }: CompanyProfileProps) 
 
         {/* Company description */}
         <div>
-          <label className="block text-foreground-300 text-xs font-medium mb-1.5">一句话描述你的业务</label>
+          <label className="block text-foreground-300 text-xs font-medium mb-1.5">
+            一句话描述你的业务
+          </label>
           <textarea
             value={data.companyDescription}
-            onChange={e => onChange({ companyDescription: e.target.value })}
+            onChange={(e) => onChange({ companyDescription: e.target.value })}
             placeholder="例如：我们帮助出海企业在海外市场实现高效获客和增长..."
             className="w-full h-24 resize-none"
           />
@@ -89,10 +99,12 @@ export default function CompanyProfile({ data, onChange }: CompanyProfileProps) 
 
         {/* Target customers */}
         <div>
-          <label className="block text-foreground-300 text-xs font-medium mb-1.5">你的目标客户是谁？</label>
+          <label className="block text-foreground-300 text-xs font-medium mb-1.5">
+            你的目标客户是谁？
+          </label>
           <textarea
             value={data.targetCustomers}
-            onChange={e => onChange({ targetCustomers: e.target.value })}
+            onChange={(e) => onChange({ targetCustomers: e.target.value })}
             placeholder="例如：北美市场的中型 SaaS 公司技术决策者..."
             className="w-full h-20 resize-none"
           />

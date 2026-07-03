@@ -425,7 +425,16 @@ components:
           $ref: '../json-schema/common/primitives.schema.json#/$defs/locale'
         business_type:
           type: string
-          enum: [MANUFACTURER, TRADER, SAAS, PROFESSIONAL_SERVICE, BRAND_ECOMMERCE, AGENCY_SERVICE, OTHER]
+          enum:
+            [
+              MANUFACTURER,
+              TRADER,
+              SAAS,
+              PROFESSIONAL_SERVICE,
+              BRAND_ECOMMERCE,
+              AGENCY_SERVICE,
+              OTHER,
+            ]
         created_by:
           type: string
           pattern: '^usr_[0-9A-HJKMNP-TV-Z]{26}$'
@@ -556,7 +565,19 @@ components:
           pattern: '^pol_[0-9A-HJKMNP-TV-Z]{26}$'
         policy_type:
           type: string
-          enum: [DATA_RIGHTS, PRIVACY_COMPLIANCE, MODEL_ROUTING, CONTENT_GOVERNANCE, CHANNEL_GOVERNANCE, OUTREACH_LIMIT, EXPORT_CONTROL, RETENTION, APPROVAL_GOVERNANCE, BUDGET_ENFORCEMENT]
+          enum:
+            [
+              DATA_RIGHTS,
+              PRIVACY_COMPLIANCE,
+              MODEL_ROUTING,
+              CONTENT_GOVERNANCE,
+              CHANNEL_GOVERNANCE,
+              OUTREACH_LIMIT,
+              EXPORT_CONTROL,
+              RETENTION,
+              APPROVAL_GOVERNANCE,
+              BUDGET_ENFORCEMENT,
+            ]
         change_type:
           type: string
           enum: [CREATED, UPDATED, ARCHIVED]
@@ -646,7 +667,20 @@ components:
           type: array
           items:
             type: string
-            enum: [CAMPAIGN_LAUNCH, CONTENT_PUBLISH, OUTBOUND_SEND, DATA_EXPORT, DATA_PURCHASE, CROSS_BORDER_MODEL_CALL, BUDGET_CHANGE, POLICY_CHANGE, MEMBER_ROLE_CHANGE, EXPERT_ENGAGEMENT, HIGH_RISK_REPLY]
+            enum:
+              [
+                CAMPAIGN_LAUNCH,
+                CONTENT_PUBLISH,
+                OUTBOUND_SEND,
+                DATA_EXPORT,
+                DATA_PURCHASE,
+                CROSS_BORDER_MODEL_CALL,
+                BUDGET_CHANGE,
+                POLICY_CHANGE,
+                MEMBER_ROLE_CHANGE,
+                EXPERT_ENGAGEMENT,
+                HIGH_RISK_REPLY,
+              ]
         changed_by:
           type: string
           pattern: '^usr_[0-9A-HJKMNP-TV-Z]{26}$'

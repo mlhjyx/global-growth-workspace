@@ -88,13 +88,7 @@
       "type": "array",
       "items": {
         "type": "string",
-        "enum": [
-          "CONTENT_GENERATION",
-          "OUTREACH",
-          "SALES_REPLY",
-          "RESEARCH",
-          "INTERNAL_REFERENCE"
-        ]
+        "enum": ["CONTENT_GENERATION", "OUTREACH", "SALES_REPLY", "RESEARCH", "INTERNAL_REFERENCE"]
       },
       "description": "可使用场景/用途（KNW-005 使用目的、母本 4.8.2 可使用场景；空数组表示不限用途）"
     },

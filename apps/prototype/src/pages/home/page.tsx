@@ -5,7 +5,15 @@ import ApprovalsCard from './components/ApprovalsCard';
 import AnomalyCard from './components/AnomalyCard';
 import OpportunityCard from './components/OpportunityCard';
 import DailyBriefModal from './components/DailyBriefModal';
-import { mockStats, mockNextActions, mockPendingApprovals, mockAnomalies, mockOpportunities } from '@/mocks/todayData';
+import {
+  mockStats,
+  mockNextActions,
+  mockPendingApprovals,
+  mockAnomalies,
+  mockOpportunities,
+  workspaceName,
+  DATA_AS_OF,
+} from '@/mocks/todayData';
 
 export default function Home() {
   const [showBrief, setShowBrief] = useState(false);
@@ -22,29 +30,40 @@ export default function Home() {
 
   const handleExportDaily = () => {
     const text = [
-      `GrowthOS 日报 - ${dateStr}`,
+      `Global Growth Workspace 日报 - ${dateStr}（数据截止 ${DATA_AS_OF}）`,
       '',
-      '=== 核心指标 ===',
-      ...mockStats.map(s => `${s.label}: ${s.value} (${s.change})`),
+      '=== 北极星指标 ===',
+      ...mockStats.map((s) => `${s.label}: ${s.value} (${s.change})`),
       '',
       '=== 待办事项 ===',
-      ...mockNextActions.map(a => `[${a.priority === 'high' ? '高' : a.priority === 'medium' ? '中' : '低'}] ${a.title}`),
+      ...mockNextActions.map(
+        (a) =>
+          `[${a.priority === 'high' ? '高' : a.priority === 'medium' ? '中' : '低'}] ${a.title}`,
+      ),
       '',
       '=== 待审批 ===',
-      ...mockPendingApprovals.map(a => `- ${a.title} (提交人: ${a.submittedBy})`),
+      ...mockPendingApprovals.map((a) => `- ${a.title} (提交人: ${a.submittedBy})`),
       '',
       '=== 异常告警 ===',
-      ...mockAnomalies.map(a => `[${a.severity === 'critical' ? '严重' : a.severity === 'warning' ? '警告' : '提示'}] ${a.title}`),
+      ...mockAnomalies.map(
+        (a) =>
+          `[${a.severity === 'critical' ? '严重' : a.severity === 'warning' ? '警告' : '提示'}] ${a.title}`,
+      ),
       '',
-      '=== 机会信号 ===',
-      ...mockOpportunities.map(o => `- ${o.company} (${o.score}分) ${o.signal}: ${o.signalDetail}`),
+      '=== 商业机会（三级结果链） ===',
+      ...mockOpportunities.map(
+        (o) => `- ${o.company} [${o.signal} · ${o.stageLabel}] 下一步: ${o.signalDetail}`,
+      ),
     ].join('\n');
 
-    navigator.clipboard.writeText(text).then(() => {
-      alert('日报内容已复制到剪贴板');
-    }).catch(() => {
-      alert('复制失败，请手动复制');
-    });
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        alert('日报内容已复制到剪贴板');
+      })
+      .catch(() => {
+        alert('复制失败，请手动复制');
+      });
   };
 
   return (
@@ -53,18 +72,26 @@ export default function Home() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
         <div>
           <h1 className="text-white text-xl font-semibold">
-            {greeting}，<span className="text-primary-400">Leo</span>
+            {greeting}，<span className="text-primary-400">{workspaceName}</span>
           </h1>
-          <p className="text-foreground-500 text-sm mt-0.5">{dateStr} · 今日待办 {mockNextActions.length} 项</p>
+          <p className="text-foreground-500 text-sm mt-0.5">
+            {dateStr} · 今日待办 {mockNextActions.length} 项 · 数据截止 {DATA_AS_OF}
+          </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleExportDaily} className="btn-secondary flex items-center gap-1.5 px-3 py-2 text-sm cursor-pointer">
+          <button
+            onClick={handleExportDaily}
+            className="btn-secondary flex items-center gap-1.5 px-3 py-2 text-sm cursor-pointer"
+          >
             <span className="w-4 h-4 flex items-center justify-center">
               <i className="ri-download-line text-sm"></i>
             </span>
             导出日报
           </button>
-          <button onClick={() => setShowBrief(true)} className="btn-primary flex items-center gap-1.5 px-4 py-2 text-sm cursor-pointer">
+          <button
+            onClick={() => setShowBrief(true)}
+            className="btn-primary flex items-center gap-1.5 px-4 py-2 text-sm cursor-pointer"
+          >
             <span className="w-4 h-4 flex items-center justify-center">
               <i className="ri-robot-2-line text-sm"></i>
             </span>

@@ -40,13 +40,14 @@ export default function ActivityStream({ activities }: ActivityStreamProps) {
               key={item.id}
               className="flex items-start gap-2 p-2 rounded-lg hover:bg-white/[0.02] transition-colors"
             >
-              <span className={`w-5 h-5 flex items-center justify-center ${typeColor[item.type]} shrink-0 mt-0.5`}>
+              <span
+                className={`w-5 h-5 flex items-center justify-center ${typeColor[item.type]} shrink-0 mt-0.5`}
+              >
                 <i className={`${typeIcon[item.type]} text-sm`}></i>
               </span>
               <div className="flex-1 min-w-0">
                 <p className="text-foreground-400 text-xs">
-                  <span className="text-foreground-300 font-medium">{item.user}</span>
-                  {' '}{item.action}{' '}
+                  <span className="text-foreground-300 font-medium">{item.user}</span> {item.action}{' '}
                   <span className="text-primary-400">{item.target}</span>
                 </p>
                 <p className="text-foreground-700 text-[11px] mt-0.5">{item.time}</p>

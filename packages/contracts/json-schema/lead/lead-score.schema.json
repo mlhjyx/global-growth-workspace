@@ -9,7 +9,10 @@
       "type": "object",
       "description": "单条评分证据（LED-006 验收：各维度有独立证据和时间；7.5.4：评分理由可见）",
       "properties": {
-        "evidence_id": { "type": "string", "description": "FieldEvidence/Signal/Evidence Store 引用" },
+        "evidence_id": {
+          "type": "string",
+          "description": "FieldEvidence/Signal/Evidence Store 引用"
+        },
         "evidence_type": {
           "type": "string",
           "enum": ["FIELD_EVIDENCE", "SIGNAL", "RULE_HIT", "MODEL_INFERENCE", "HUMAN_FEEDBACK"],
@@ -80,11 +83,26 @@
       "description": "六个维度（LED-006），全部必填、独立展示（母本 4.5.3）",
       "properties": {
         "fit": { "$ref": "#/$defs/score_dimension", "description": "公司与 ICP 匹配度" },
-        "role": { "$ref": "#/$defs/score_dimension", "description": "联系人是否为正确角色（LED-002 购买委员会）" },
-        "intent": { "$ref": "#/$defs/score_dimension", "description": "当前意向/触发信号（LED-014；信号过期自动降低本维度）" },
-        "data_quality": { "$ref": "#/$defs/score_dimension", "description": "数据完整性、时效性和验证状态" },
-        "reachability": { "$ref": "#/$defs/score_dimension", "description": "可触达性：已验证联系方式、未被抑制、渠道可用" },
-        "engagement": { "$ref": "#/$defs/score_dimension", "description": "与企业内容、邮件和网站的互动程度" }
+        "role": {
+          "$ref": "#/$defs/score_dimension",
+          "description": "联系人是否为正确角色（LED-002 购买委员会）"
+        },
+        "intent": {
+          "$ref": "#/$defs/score_dimension",
+          "description": "当前意向/触发信号（LED-014；信号过期自动降低本维度）"
+        },
+        "data_quality": {
+          "$ref": "#/$defs/score_dimension",
+          "description": "数据完整性、时效性和验证状态"
+        },
+        "reachability": {
+          "$ref": "#/$defs/score_dimension",
+          "description": "可触达性：已验证联系方式、未被抑制、渠道可用"
+        },
+        "engagement": {
+          "$ref": "#/$defs/score_dimension",
+          "description": "与企业内容、邮件和网站的互动程度"
+        }
       },
       "required": ["fit", "role", "intent", "data_quality", "reachability", "engagement"],
       "additionalProperties": false

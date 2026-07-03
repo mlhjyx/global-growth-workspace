@@ -355,7 +355,11 @@
       { "name": "口径范围", "value": "20-110", "unit": "mm" },
       { "name": "耐温", "value": "95", "unit": "℃" }
     ],
-    "moq": { "quantity": 1, "unit": "20GP_container", "notes": "混装整柜起订，单柜货值不低于 1.5 万美元" },
+    "moq": {
+      "quantity": 1,
+      "unit": "20GP_container",
+      "notes": "混装整柜起订，单柜货值不低于 1.5 万美元"
+    },
     "lead_time": { "min_days": 12, "max_days": 20 },
     "certifications": ["SGS 型式检测"],
     "applications": ["住宅冷热水系统", "商业楼宇给水"],
@@ -376,7 +380,11 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "claim_type": "CERTIFICATION",
     "statement": "580W TOPCon 双玻组件已通过 IEC 61215:2021 性能认证，证书编号 TR-JY-2024-1183（虚构样例），发证机构 TUV Rheinland。",
-    "structured_value": { "certification": "IEC 61215:2021", "issuer": "TUV Rheinland", "certificate_no": "TR-JY-2024-1183" },
+    "structured_value": {
+      "certification": "IEC 61215:2021",
+      "issuer": "TUV Rheinland",
+      "certificate_no": "TR-JY-2024-1183"
+    },
     "locale": "zh-CN",
     "status": "APPROVED",
     "confidence": 0.98,
@@ -405,7 +413,11 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "claim_type": "CERTIFICATION",
     "statement": "580W TOPCon 双玻组件已通过 IEC 61730-1/-2 安全认证，证书编号 TR-JY-2024-1184（虚构样例）。",
-    "structured_value": { "certification": "IEC 61730-1/-2", "issuer": "TUV Rheinland", "certificate_no": "TR-JY-2024-1184" },
+    "structured_value": {
+      "certification": "IEC 61730-1/-2",
+      "issuer": "TUV Rheinland",
+      "certificate_no": "TR-JY-2024-1184"
+    },
     "locale": "zh-CN",
     "status": "APPROVED",
     "confidence": 0.97,
@@ -501,7 +513,10 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "claim_type": "CERTIFICATION",
     "statement": "TUV 工厂检验报告（2023 年度）已于 2025 年底到期，等待 2026 年度复审报告替换。",
-    "structured_value": { "certification": "TUV Factory Inspection 2023", "issuer": "TUV Rheinland" },
+    "structured_value": {
+      "certification": "TUV Factory Inspection 2023",
+      "issuer": "TUV Rheinland"
+    },
     "locale": "zh-CN",
     "status": "EXPIRED",
     "confidence": 0.99,
@@ -547,7 +562,11 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "claim_type": "CERTIFICATION",
     "statement": "SY-50KTL-G3 逆变器已通过 IEC 62109-1/-2 安全认证，证书编号 CB-SY-2025-0472（虚构样例）。",
-    "structured_value": { "certification": "IEC 62109-1/-2", "issuer": "CB Scheme", "certificate_no": "CB-SY-2025-0472" },
+    "structured_value": {
+      "certification": "IEC 62109-1/-2",
+      "issuer": "CB Scheme",
+      "certificate_no": "CB-SY-2025-0472"
+    },
     "locale": "zh-CN",
     "status": "APPROVED",
     "confidence": 0.96,
@@ -689,7 +708,11 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "claim_type": "CERTIFICATION",
     "statement": "12mm 耐水耐火石膏板已取得尼日利亚 SONCAP 产品认证证书，证书编号 SON-PC-2025-8841（虚构样例），可用于尼日利亚清关。",
-    "structured_value": { "certification": "SONCAP Product Certificate", "issuer": "Standards Organisation of Nigeria", "certificate_no": "SON-PC-2025-8841" },
+    "structured_value": {
+      "certification": "SONCAP Product Certificate",
+      "issuer": "Standards Organisation of Nigeria",
+      "certificate_no": "SON-PC-2025-8841"
+    },
     "locale": "zh-CN",
     "status": "APPROVED",
     "confidence": 0.97,
@@ -879,7 +902,11 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "claim_type": "CERTIFICATION",
     "statement": "KEBS 认证（肯尼亚标准局，PVoC 清关必需）申请已提交，取证前不得对肯尼亚客户宣称「已认证」。",
-    "structured_value": { "certification": "KEBS Standardization Mark", "issuer": "Kenya Bureau of Standards", "application_status": "submitted" },
+    "structured_value": {
+      "certification": "KEBS Standardization Mark",
+      "issuer": "Kenya Bureau of Standards",
+      "application_status": "submitted"
+    },
     "locale": "zh-CN",
     "status": "NEEDS_REVIEW",
     "confidence": 0.62,

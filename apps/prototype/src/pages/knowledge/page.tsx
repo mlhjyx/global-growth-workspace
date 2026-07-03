@@ -1,9 +1,5 @@
 import { useState, useMemo } from 'react';
-import {
-  knowledgeCategories,
-  knowledgeDocs,
-  recentSearches,
-} from '@/mocks/knowledgeData';
+import { knowledgeCategories, knowledgeDocs, recentSearches } from '@/mocks/knowledgeData';
 import type { KnowledgeDoc } from '@/mocks/knowledgeData';
 
 const typeColors: Record<string, { bg: string; text: string; icon: string }> = {
@@ -26,29 +22,29 @@ export default function KnowledgePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(
-    () => new Set(knowledgeDocs.filter(d => d.isBookmarked).map(d => d.id))
+    () => new Set(knowledgeDocs.filter((d) => d.isBookmarked).map((d) => d.id)),
   );
 
   const filteredDocs = useMemo(() => {
     let docs = [...knowledgeDocs];
     if (activeCategory !== 'all') {
-      docs = docs.filter(d => d.category === activeCategory);
+      docs = docs.filter((d) => d.category === activeCategory);
     }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       docs = docs.filter(
-        d =>
+        (d) =>
           d.title.toLowerCase().includes(q) ||
-          d.tags.some(t => t.toLowerCase().includes(q)) ||
+          d.tags.some((t) => t.toLowerCase().includes(q)) ||
           d.author.toLowerCase().includes(q) ||
-          d.summary.toLowerCase().includes(q)
+          d.summary.toLowerCase().includes(q),
       );
     }
     return docs;
   }, [searchQuery, activeCategory]);
 
   const toggleBookmark = (id: string) => {
-    setBookmarkedIds(prev => {
+    setBookmarkedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -87,7 +83,7 @@ export default function KnowledgePage() {
               type="text"
               placeholder="搜索文档、标签、作者..."
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-background-100/40 border border-primary-500/10 rounded-lg pl-9 pr-4 py-2 text-sm text-white placeholder-foreground-600 focus:outline-none focus:border-primary-500/30"
             />
           </div>
@@ -102,7 +98,7 @@ export default function KnowledgePage() {
             >
               全部
             </button>
-            {knowledgeCategories.map(cat => (
+            {knowledgeCategories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
@@ -122,7 +118,7 @@ export default function KnowledgePage() {
         {recentSearches.length > 0 && !searchQuery && (
           <div className="flex items-center gap-2 mt-3">
             <span className="text-xs text-foreground-600">最近搜索：</span>
-            {recentSearches.map(s => (
+            {recentSearches.map((s) => (
               <button
                 key={s}
                 onClick={() => setSearchQuery(s)}
@@ -144,7 +140,10 @@ export default function KnowledgePage() {
             </div>
             <p className="text-foreground-500 text-sm">未找到匹配的文档</p>
             <button
-              onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}
+              onClick={() => {
+                setSearchQuery('');
+                setActiveCategory('all');
+              }}
               className="text-xs text-primary-400 mt-2 hover:underline cursor-pointer"
             >
               清除筛选
@@ -168,7 +167,7 @@ export default function KnowledgePage() {
                       {typeLabels[doc.type]}
                     </span>
                     <button
-                      onClick={e => {
+                      onClick={(e) => {
                         e.stopPropagation();
                         toggleBookmark(doc.id);
                       }}
@@ -196,7 +195,7 @@ export default function KnowledgePage() {
 
                   {/* Tags */}
                   <div className="flex items-center gap-1.5 mb-3 flex-wrap">
-                    {doc.tags.slice(0, 3).map(tag => (
+                    {doc.tags.slice(0, 3).map((tag) => (
                       <span
                         key={tag}
                         className="px-1.5 py-0.5 rounded bg-background-200/40 text-[10px] text-foreground-600"
@@ -220,8 +219,14 @@ export default function KnowledgePage() {
                       <span className="text-[11px] text-foreground-500">{doc.author}</span>
                     </div>
                     <div className="flex items-center gap-3 text-[11px] text-foreground-600">
-                      <span><i className="ri-time-line mr-0.5"></i>{doc.readTime}</span>
-                      <span><i className="ri-eye-line mr-0.5"></i>{doc.views.toLocaleString()}</span>
+                      <span>
+                        <i className="ri-time-line mr-0.5"></i>
+                        {doc.readTime}
+                      </span>
+                      <span>
+                        <i className="ri-eye-line mr-0.5"></i>
+                        {doc.views.toLocaleString()}
+                      </span>
                     </div>
                   </div>
                 </div>

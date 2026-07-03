@@ -6,7 +6,12 @@ interface AIAssistantPanelProps {
 }
 
 const typeConfig: Record<string, { icon: string; color: string; bg: string; label: string }> = {
-  suggestion: { icon: 'ri-lightbulb-line', color: 'text-primary-400', bg: 'bg-primary-500/10', label: '建议' },
+  suggestion: {
+    icon: 'ri-lightbulb-line',
+    color: 'text-primary-400',
+    bg: 'bg-primary-500/10',
+    label: '建议',
+  },
   warning: { icon: 'ri-alert-line', color: 'text-warning', bg: 'bg-warning/10', label: '预警' },
   evidence: { icon: 'ri-bar-chart-2-line', color: 'text-info', bg: 'bg-info/10', label: '证据' },
   risk: { icon: 'ri-error-warning-line', color: 'text-error', bg: 'bg-error/10', label: '风险' },
@@ -40,9 +45,10 @@ export default function AIAssistantPanel({ insights }: AIAssistantPanelProps) {
             <div
               key={insight.id}
               className={`rounded-lg border transition-all duration-200 overflow-hidden
-                ${isExpanded
-                  ? 'bg-primary-500/5 border-primary-500/15'
-                  : 'bg-white/[0.02] border-transparent hover:border-primary-500/10'
+                ${
+                  isExpanded
+                    ? 'bg-primary-500/5 border-primary-500/15'
+                    : 'bg-white/[0.02] border-transparent hover:border-primary-500/10'
                 }`}
             >
               <button
@@ -50,17 +56,25 @@ export default function AIAssistantPanel({ insights }: AIAssistantPanelProps) {
                 className="w-full text-left p-2.5 cursor-pointer"
               >
                 <div className="flex items-start gap-2">
-                  <div className={`w-6 h-6 rounded-md ${config.bg} flex items-center justify-center shrink-0 mt-0.5`}>
-                    <span className={`w-3.5 h-3.5 flex items-center justify-center ${config.color}`}>
+                  <div
+                    className={`w-6 h-6 rounded-md ${config.bg} flex items-center justify-center shrink-0 mt-0.5`}
+                  >
+                    <span
+                      className={`w-3.5 h-3.5 flex items-center justify-center ${config.color}`}
+                    >
                       <i className={`${config.icon} text-xs`}></i>
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${config.bg} ${config.color}`}>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded ${config.bg} ${config.color}`}
+                      >
                         {config.label}
                       </span>
-                      <span className="text-foreground-600 text-[10px]">{insight.confidence}% 置信度</span>
+                      <span className="text-foreground-600 text-[10px]">
+                        {insight.confidence}% 置信度
+                      </span>
                     </div>
                     <p className="text-white text-sm font-medium mt-1 truncate">{insight.title}</p>
                     {insight.relatedTo && (

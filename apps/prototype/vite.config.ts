@@ -1,9 +1,9 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import { resolve } from "node:path";
-import AutoImport from "unplugin-auto-import/vite";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { resolve } from 'node:path';
+import AutoImport from 'unplugin-auto-import/vite';
 
-const base = process.env.BASE_PATH || "/";
+const base = process.env.BASE_PATH || '/';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -16,47 +16,47 @@ export default defineConfig({
       imports: [
         {
           react: [
-            ["default", "React"],
-            "useState",
-            "useEffect",
-            "useContext",
-            "useReducer",
-            "useCallback",
-            "useMemo",
-            "useRef",
-            "useImperativeHandle",
-            "useLayoutEffect",
-            "useDebugValue",
-            "useDeferredValue",
-            "useId",
-            "useInsertionEffect",
-            "useSyncExternalStore",
-            "useTransition",
-            "startTransition",
-            "lazy",
-            "memo",
-            "forwardRef",
-            "createContext",
-            "createElement",
-            "cloneElement",
-            "isValidElement",
+            ['default', 'React'],
+            'useState',
+            'useEffect',
+            'useContext',
+            'useReducer',
+            'useCallback',
+            'useMemo',
+            'useRef',
+            'useImperativeHandle',
+            'useLayoutEffect',
+            'useDebugValue',
+            'useDeferredValue',
+            'useId',
+            'useInsertionEffect',
+            'useSyncExternalStore',
+            'useTransition',
+            'startTransition',
+            'lazy',
+            'memo',
+            'forwardRef',
+            'createContext',
+            'createElement',
+            'cloneElement',
+            'isValidElement',
           ],
         },
         {
-          "react-router-dom": [
-            "useNavigate",
-            "useLocation",
-            "useParams",
-            "useSearchParams",
-            "Link",
-            "NavLink",
-            "Navigate",
-            "Outlet",
+          'react-router-dom': [
+            'useNavigate',
+            'useLocation',
+            'useParams',
+            'useSearchParams',
+            'Link',
+            'NavLink',
+            'Navigate',
+            'Outlet',
           ],
         },
         // React i18n
         {
-          "react-i18next": ["useTranslation", "Trans"],
+          'react-i18next': ['useTranslation', 'Trans'],
         },
       ],
       dts: true,
@@ -65,15 +65,15 @@ export default defineConfig({
   base,
   build: {
     sourcemap: true,
-    outDir: "out",
+    outDir: 'out',
   },
   resolve: {
     alias: {
-      "@": resolve(__dirname, "./src"),
+      '@': resolve(__dirname, './src'),
     },
   },
   server: {
     port: 3000,
-    host: "0.0.0.0",
+    host: '0.0.0.0',
   },
 });

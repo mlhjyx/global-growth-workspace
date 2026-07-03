@@ -26,7 +26,11 @@ export default function PublishCalendar() {
         <span
           key={pid}
           className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded"
-          style={{ backgroundColor: `${info.color}15`, color: info.color, border: `1px solid ${info.color}25` }}
+          style={{
+            backgroundColor: `${info.color}15`,
+            color: info.color,
+            border: `1px solid ${info.color}25`,
+          }}
         >
           <i className={info.icon}></i>
           {info.name}
@@ -37,14 +41,36 @@ export default function PublishCalendar() {
 
   const statusBadge = (status: string) => {
     const map: Record<string, { bg: string; text: string; label: string; icon: string }> = {
-      published: { bg: 'bg-green-500/10', text: 'text-green-400', label: '已发布', icon: 'ri-checkbox-circle-line' },
-      scheduled: { bg: 'bg-primary-500/10', text: 'text-primary-400', label: '已排期', icon: 'ri-time-line' },
-      failed: { bg: 'bg-red-500/10', text: 'text-red-400', label: '发布失败', icon: 'ri-error-warning-line' },
-      draft: { bg: 'bg-foreground-900/30', text: 'text-foreground-600', label: '草稿', icon: 'ri-draft-line' },
+      published: {
+        bg: 'bg-green-500/10',
+        text: 'text-green-400',
+        label: '已发布',
+        icon: 'ri-checkbox-circle-line',
+      },
+      scheduled: {
+        bg: 'bg-primary-500/10',
+        text: 'text-primary-400',
+        label: '已排期',
+        icon: 'ri-time-line',
+      },
+      failed: {
+        bg: 'bg-red-500/10',
+        text: 'text-red-400',
+        label: '发布失败',
+        icon: 'ri-error-warning-line',
+      },
+      draft: {
+        bg: 'bg-foreground-900/30',
+        text: 'text-foreground-600',
+        label: '草稿',
+        icon: 'ri-draft-line',
+      },
     };
     const s = map[status] || map.draft;
     return (
-      <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full ${s.bg} ${s.text} border border-current/20`}>
+      <span
+        className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full ${s.bg} ${s.text} border border-current/20`}
+      >
         <i className={s.icon}></i>
         {s.label}
       </span>
@@ -99,9 +125,15 @@ export default function PublishCalendar() {
                   className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
                 >
                   <div className="shrink-0 w-12 text-center">
-                    <div className="text-[10px] text-foreground-700">{item.scheduledAt?.split(' ')[0].split('-')[1]}月</div>
-                    <div className="text-lg font-bold text-white leading-tight">{item.scheduledAt?.split(' ')[0].split('-')[2]}</div>
-                    <div className="text-[10px] text-foreground-700">{item.scheduledAt?.split(' ')[1]}</div>
+                    <div className="text-[10px] text-foreground-700">
+                      {item.scheduledAt?.split(' ')[0].split('-')[1]}月
+                    </div>
+                    <div className="text-lg font-bold text-white leading-tight">
+                      {item.scheduledAt?.split(' ')[0].split('-')[2]}
+                    </div>
+                    <div className="text-[10px] text-foreground-700">
+                      {item.scheduledAt?.split(' ')[1]}
+                    </div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-white text-sm font-medium truncate">{item.title}</div>
@@ -122,7 +154,9 @@ export default function PublishCalendar() {
                     <div className="text-lg font-bold text-foreground-600 leading-tight">—</div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-foreground-400 text-sm font-medium truncate">{item.title}</div>
+                    <div className="text-foreground-400 text-sm font-medium truncate">
+                      {item.title}
+                    </div>
                     <div className="flex flex-wrap gap-1 mt-1.5">
                       {platformBadge(item.platforms)}
                     </div>
@@ -147,14 +181,16 @@ export default function PublishCalendar() {
                 className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
               >
                 <div className="shrink-0 w-12 text-center">
-                  <div className="text-[10px] text-foreground-700">{item.publishedAt?.split(' ')[0].split('-')[1]}月</div>
-                  <div className="text-lg font-bold text-white leading-tight">{item.publishedAt?.split(' ')[0].split('-')[2]}</div>
+                  <div className="text-[10px] text-foreground-700">
+                    {item.publishedAt?.split(' ')[0].split('-')[1]}月
+                  </div>
+                  <div className="text-lg font-bold text-white leading-tight">
+                    {item.publishedAt?.split(' ')[0].split('-')[2]}
+                  </div>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-white text-sm font-medium truncate">{item.title}</div>
-                  <div className="flex flex-wrap gap-1 mt-1.5">
-                    {platformBadge(item.platforms)}
-                  </div>
+                  <div className="flex flex-wrap gap-1 mt-1.5">{platformBadge(item.platforms)}</div>
                   {item.engagement && (
                     <div className="flex items-center gap-3 mt-2 text-[10px] text-foreground-700">
                       <span className="flex items-center gap-1">

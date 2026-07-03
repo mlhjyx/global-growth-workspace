@@ -9,7 +9,13 @@ interface GoalQuestionsProps {
   isGenerating: boolean;
 }
 
-export default function GoalQuestions({ goal, questions, onSubmit, onBack, isGenerating }: GoalQuestionsProps) {
+export default function GoalQuestions({
+  goal,
+  questions,
+  onSubmit,
+  onBack,
+  isGenerating,
+}: GoalQuestionsProps) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
@@ -29,7 +35,7 @@ export default function GoalQuestions({ goal, questions, onSubmit, onBack, isGen
   const handleMultiSelect = (value: string) => {
     const current = (answers[currentQuestion.id] as string[]) || [];
     const updated = current.includes(value)
-      ? current.filter(v => v !== value)
+      ? current.filter((v) => v !== value)
       : [...current, value];
     setAnswers({ ...answers, [currentQuestion.id]: updated });
   };
@@ -83,9 +89,7 @@ export default function GoalQuestions({ goal, questions, onSubmit, onBack, isGen
           <span className="text-primary-300 text-sm font-medium">{goal.title}</span>
         </div>
 
-        <h2 className="text-xl md:text-2xl font-bold text-white mb-2">
-          补充关键信息
-        </h2>
+        <h2 className="text-xl md:text-2xl font-bold text-white mb-2">补充关键信息</h2>
         <p className="text-foreground-400 text-sm">
           第 {currentIdx + 1} / {questions.length} 个问题
         </p>
@@ -100,17 +104,12 @@ export default function GoalQuestions({ goal, questions, onSubmit, onBack, isGen
       </div>
 
       {/* Question Card */}
-      <div
-        className="w-full glass-card p-6 md:p-8 animate-slide-up"
-        key={currentQuestion.id}
-      >
+      <div className="w-full glass-card p-6 md:p-8 animate-slide-up" key={currentQuestion.id}>
         <div className="mb-6">
           <h3 className="text-lg md:text-xl font-semibold text-white mb-2">
             {currentQuestion.question}
           </h3>
-          <p className="text-foreground-400 text-sm">
-            {currentQuestion.description}
-          </p>
+          <p className="text-foreground-400 text-sm">{currentQuestion.description}</p>
         </div>
 
         {/* Answers */}
@@ -151,9 +150,13 @@ export default function GoalQuestions({ goal, questions, onSubmit, onBack, isGen
                           : 'border-white/10 bg-white/[0.03] text-foreground-300 hover:border-white/20 hover:bg-white/[0.06]'
                       }`}
                     >
-                      <span className={`w-5 h-5 flex items-center justify-center rounded border transition-colors flex-shrink-0 ${
-                        selected ? 'border-primary-400 bg-primary-500 text-white' : 'border-white/20'
-                      }`}>
+                      <span
+                        className={`w-5 h-5 flex items-center justify-center rounded border transition-colors flex-shrink-0 ${
+                          selected
+                            ? 'border-primary-400 bg-primary-500 text-white'
+                            : 'border-white/20'
+                        }`}
+                      >
                         {selected && <i className="ri-check-line text-xs"></i>}
                       </span>
                       {opt}
@@ -182,7 +185,9 @@ export default function GoalQuestions({ goal, questions, onSubmit, onBack, isGen
                 >
                   <option value="">请选择...</option>
                   {currentQuestion.options.map((opt) => (
-                    <option key={opt} value={opt}>{opt}</option>
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
                   ))}
                 </select>
               ) : (
@@ -209,7 +214,7 @@ export default function GoalQuestions({ goal, questions, onSubmit, onBack, isGen
           )}
 
           {/* Navigation for text/select/textarea/multi */}
-          {(currentQuestion.type !== 'single') && (
+          {currentQuestion.type !== 'single' && (
             <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/5">
               <button
                 onClick={handleBack}
@@ -225,7 +230,7 @@ export default function GoalQuestions({ goal, questions, onSubmit, onBack, isGen
                 onClick={handleNext}
                 disabled={!canProceed() || isGenerating}
                 className={`btn-primary px-6 py-2.5 text-sm flex items-center gap-2 ${
-                  (!canProceed() || isGenerating) ? 'opacity-50 cursor-not-allowed' : ''
+                  !canProceed() || isGenerating ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
                 {isGenerating ? (

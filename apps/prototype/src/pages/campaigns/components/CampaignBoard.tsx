@@ -15,10 +15,26 @@ const priorityConfig = {
 };
 
 const statusConfig: Record<string, { bg: string; label: string; icon: string }> = {
-  completed: { bg: 'bg-success/10 text-success border-success/30', label: '已完成', icon: 'ri-check-line' },
-  in_progress: { bg: 'bg-primary-500/10 text-primary-400 border-primary-500/30', label: '进行中', icon: 'ri-loader-4-line' },
-  pending: { bg: 'bg-white/5 text-foreground-600 border-white/10', label: '待开始', icon: 'ri-time-line' },
-  blocked: { bg: 'bg-error/10 text-error border-error/30', label: '阻塞', icon: 'ri-close-circle-line' },
+  completed: {
+    bg: 'bg-success/10 text-success border-success/30',
+    label: '已完成',
+    icon: 'ri-check-line',
+  },
+  in_progress: {
+    bg: 'bg-primary-500/10 text-primary-400 border-primary-500/30',
+    label: '进行中',
+    icon: 'ri-loader-4-line',
+  },
+  pending: {
+    bg: 'bg-white/5 text-foreground-600 border-white/10',
+    label: '待开始',
+    icon: 'ri-time-line',
+  },
+  blocked: {
+    bg: 'bg-error/10 text-error border-error/30',
+    label: '阻塞',
+    icon: 'ri-close-circle-line',
+  },
 };
 
 interface NewTaskForm {
@@ -39,7 +55,11 @@ const emptyForm: NewTaskForm = {
   description: '',
 };
 
-export default function CampaignBoard({ stages, selectedStageId, onSelectStage }: CampaignBoardProps) {
+export default function CampaignBoard({
+  stages,
+  selectedStageId,
+  onSelectStage,
+}: CampaignBoardProps) {
   const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -48,15 +68,15 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
   const [localTasks, setLocalTasks] = useState<CampaignTask[]>([]);
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof NewTaskForm, string>>>();
 
-  const selectedStage = stages.find(s => s.id === selectedStageId) || stages[0];
+  const selectedStage = stages.find((s) => s.id === selectedStageId) || stages[0];
 
   const allTasks = [...selectedStage.tasks, ...localTasks];
 
   const tasksByStatus: Record<string, CampaignTask[]> = {
-    completed: allTasks.filter(t => t.status === 'completed'),
-    in_progress: allTasks.filter(t => t.status === 'in_progress'),
-    pending: allTasks.filter(t => t.status === 'pending'),
-    blocked: allTasks.filter(t => t.status === 'blocked'),
+    completed: allTasks.filter((t) => t.status === 'completed'),
+    in_progress: allTasks.filter((t) => t.status === 'in_progress'),
+    pending: allTasks.filter((t) => t.status === 'pending'),
+    blocked: allTasks.filter((t) => t.status === 'blocked'),
   };
 
   const handleOpenCreate = () => {
@@ -66,15 +86,15 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
   };
 
   const handleFormChange = (field: keyof NewTaskForm, value: string) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    setForm((prev) => ({ ...prev, [field]: value }));
     if (formErrors[field]) {
-      setFormErrors(prev => ({ ...prev, [field]: undefined }));
+      setFormErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
   const handleSubmit = () => {
     const errors: Partial<Record<keyof NewTaskForm, string>> = {};
-    if (!form.title.trim()) errors.title = '请输入任务标题';
+    if (!form.title.trim()) errors.title = '请输入计划项标题';
     if (!form.dueDate) errors.dueDate = '请选择截止日期';
 
     if (Object.keys(errors).length > 0) {
@@ -82,7 +102,7 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
       return;
     }
 
-    const assigneeMember = teamMembers.find(m => m.name === form.assignee);
+    const assigneeMember = teamMembers.find((m) => m.name === form.assignee);
     const newTask: CampaignTask = {
       id: `local-${Date.now()}`,
       title: form.title.trim(),
@@ -91,11 +111,16 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
       status: 'pending',
       priority: form.priority,
       dueDate: form.dueDate,
-      tags: form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+      tags: form.tags
+        ? form.tags
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean)
+        : [],
       description: form.description.trim() || undefined,
     };
 
-    setLocalTasks(prev => [...prev, newTask]);
+    setLocalTasks((prev) => [...prev, newTask]);
     setShowCreateModal(false);
     setForm(emptyForm);
   };
@@ -107,14 +132,16 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
 
   const handleTaskStatusChange = (task: CampaignTask, newStatus: CampaignTask['status']) => {
     if (task.id.startsWith('local-')) {
-      setLocalTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: newStatus } : t));
+      setLocalTasks((prev) =>
+        prev.map((t) => (t.id === task.id ? { ...t, status: newStatus } : t)),
+      );
     }
-    setEditingTask(prev => prev ? { ...prev, status: newStatus } : null);
+    setEditingTask((prev) => (prev ? { ...prev, status: newStatus } : null));
   };
 
   const handleDeleteTask = (task: CampaignTask) => {
     if (task.id.startsWith('local-')) {
-      setLocalTasks(prev => prev.filter(t => t.id !== task.id));
+      setLocalTasks((prev) => prev.filter((t) => t.id !== task.id));
     }
     setShowDetailModal(false);
     setEditingTask(null);
@@ -123,7 +150,7 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
   const handleSaveEdit = () => {
     if (!editingTask) return;
     if (editingTask.id.startsWith('local-')) {
-      setLocalTasks(prev => prev.map(t => t.id === editingTask.id ? editingTask : t));
+      setLocalTasks((prev) => prev.map((t) => (t.id === editingTask.id ? editingTask : t)));
     }
     setShowDetailModal(false);
     setEditingTask(null);
@@ -143,15 +170,18 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
             {selectedStage.order}. {selectedStage.name}
           </h2>
           <div className="flex items-center gap-1.5">
-            {stages.map(s => (
+            {stages.map((s) => (
               <button
                 key={s.id}
                 onClick={() => onSelectStage(s.id)}
                 className={`w-2.5 h-2.5 rounded-full transition-all duration-200 cursor-pointer ${
-                  s.id === selectedStageId ? 'bg-primary-400 ring-2 ring-primary-400/30' :
-                  s.status === 'completed' ? 'bg-success' :
-                  s.status === 'in_progress' ? 'bg-primary-500' :
-                  'bg-foreground-700'
+                  s.id === selectedStageId
+                    ? 'bg-primary-400 ring-2 ring-primary-400/30'
+                    : s.status === 'completed'
+                      ? 'bg-success'
+                      : s.status === 'in_progress'
+                        ? 'bg-primary-500'
+                        : 'bg-foreground-700'
                 }`}
                 title={s.name}
               ></button>
@@ -178,7 +208,7 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
             className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1 ml-1 cursor-pointer"
           >
             <i className="ri-add-line text-xs"></i>
-            新建任务
+            新建计划项
           </button>
         </div>
       </div>
@@ -194,9 +224,7 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
                 <div key={status} className="flex-1 min-w-[200px] flex flex-col">
                   <div className="flex items-center gap-2 mb-2 px-1">
                     <span className={`w-2 h-2 rounded-full ${config.bg.split(' ')[0]}`}></span>
-                    <span className="text-foreground-500 text-xs font-medium">
-                      {config.label}
-                    </span>
+                    <span className="text-foreground-500 text-xs font-medium">{config.label}</span>
                     <span className="text-foreground-600 text-[11px]">{tasks.length}</span>
                   </div>
                   <div className="flex-1 space-y-2 overflow-y-auto pr-1">
@@ -209,15 +237,21 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
                           className={`glass-card p-3 border-l-2 ${pri.color} hover:border-primary-500/30 transition-all duration-200 cursor-pointer group`}
                         >
                           <div className="flex items-start justify-between mb-2">
-                            <div className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${config.bg} border`}>
+                            <div
+                              className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${config.bg} border`}
+                            >
                               <i className={`${config.icon} text-[10px]`}></i>
                               {config.label}
                             </div>
-                            <span className={`text-[10px] font-medium ${
-                              task.priority === 'high' ? 'text-error' :
-                              task.priority === 'medium' ? 'text-warning' :
-                              'text-foreground-500'
-                            }`}>
+                            <span
+                              className={`text-[10px] font-medium ${
+                                task.priority === 'high'
+                                  ? 'text-error'
+                                  : task.priority === 'medium'
+                                    ? 'text-warning'
+                                    : 'text-foreground-500'
+                              }`}
+                            >
                               {pri.label}
                             </span>
                           </div>
@@ -234,13 +268,20 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
                               <span className="w-5 h-5 rounded-full bg-gradient-to-br from-primary-400 to-data-highlight flex items-center justify-center text-white text-[9px] font-semibold">
                                 {task.assigneeAvatar}
                               </span>
-                              <span className="text-foreground-600 text-[11px]">{task.assignee}</span>
+                              <span className="text-foreground-600 text-[11px]">
+                                {task.assignee}
+                              </span>
                             </div>
-                            <span className="text-foreground-700 text-[11px]">{task.dueDate.slice(5)}</span>
+                            <span className="text-foreground-700 text-[11px]">
+                              {task.dueDate.slice(5)}
+                            </span>
                           </div>
                           <div className="flex flex-wrap gap-1 mt-2">
-                            {task.tags.map(tag => (
-                              <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-foreground-500">
+                            {task.tags.map((tag) => (
+                              <span
+                                key={tag}
+                                className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-foreground-500"
+                              >
                                 {tag}
                               </span>
                             ))}
@@ -263,11 +304,19 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-primary-500/10">
-                  <th className="px-3 py-2.5 text-foreground-600 text-[11px] font-medium">任务</th>
-                  <th className="px-3 py-2.5 text-foreground-600 text-[11px] font-medium">负责人</th>
+                  <th className="px-3 py-2.5 text-foreground-600 text-[11px] font-medium">
+                    计划项
+                  </th>
+                  <th className="px-3 py-2.5 text-foreground-600 text-[11px] font-medium">
+                    负责人
+                  </th>
                   <th className="px-3 py-2.5 text-foreground-600 text-[11px] font-medium">状态</th>
-                  <th className="px-3 py-2.5 text-foreground-600 text-[11px] font-medium">优先级</th>
-                  <th className="px-3 py-2.5 text-foreground-600 text-[11px] font-medium">截止日期</th>
+                  <th className="px-3 py-2.5 text-foreground-600 text-[11px] font-medium">
+                    优先级
+                  </th>
+                  <th className="px-3 py-2.5 text-foreground-600 text-[11px] font-medium">
+                    截止日期
+                  </th>
                   <th className="px-3 py-2.5 text-foreground-600 text-[11px] font-medium">标签</th>
                 </tr>
               </thead>
@@ -276,7 +325,11 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
                   const config = statusConfig[task.status];
                   const pri = priorityConfig[task.priority];
                   return (
-                    <tr key={task.id} onClick={() => handleOpenDetail(task)} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors cursor-pointer">
+                    <tr
+                      key={task.id}
+                      onClick={() => handleOpenDetail(task)}
+                      className="border-b border-white/5 hover:bg-white/[0.02] transition-colors cursor-pointer"
+                    >
                       <td className="px-3 py-2.5">
                         <p className="text-white text-sm">{task.title}</p>
                       </td>
@@ -289,25 +342,36 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
                         </div>
                       </td>
                       <td className="px-3 py-2.5">
-                        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] ${config.bg} border`}>
+                        <span
+                          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] ${config.bg} border`}
+                        >
                           <i className={`${config.icon} text-[10px]`}></i>
                           {config.label}
                         </span>
                       </td>
                       <td className="px-3 py-2.5">
-                        <span className={`text-xs ${
-                          task.priority === 'high' ? 'text-error' :
-                          task.priority === 'medium' ? 'text-warning' :
-                          'text-foreground-500'
-                        }`}>
+                        <span
+                          className={`text-xs ${
+                            task.priority === 'high'
+                              ? 'text-error'
+                              : task.priority === 'medium'
+                                ? 'text-warning'
+                                : 'text-foreground-500'
+                          }`}
+                        >
                           {pri.label}
                         </span>
                       </td>
-                      <td className="px-3 py-2.5 text-foreground-500 text-xs">{task.dueDate.slice(5)}</td>
+                      <td className="px-3 py-2.5 text-foreground-500 text-xs">
+                        {task.dueDate.slice(5)}
+                      </td>
                       <td className="px-3 py-2.5">
                         <div className="flex flex-wrap gap-1">
-                          {task.tags.map(tag => (
-                            <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-foreground-500">
+                          {task.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-foreground-500"
+                            >
                               {tag}
                             </span>
                           ))}
@@ -332,17 +396,21 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
           ></div>
 
           {/* Modal content */}
-          <div className="relative w-full max-w-md mx-4 rounded-2xl animate-fade-in"
-            style={{ background: 'linear-gradient(135deg, rgba(22,18,48,0.98) 0%, rgba(30,20,56,0.98) 100%)', backdropFilter: 'blur(20px)', border: '1px solid rgba(108,92,231,0.2)' }}
+          <div
+            className="relative w-full max-w-md mx-4 rounded-2xl animate-fade-in"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(22,18,48,0.98) 0%, rgba(30,20,56,0.98) 100%)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(108,92,231,0.2)',
+            }}
           >
             <div className="p-5 space-y-4">
               {/* Header */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-white font-semibold text-sm">新建任务</h3>
-                  <p className="text-foreground-500 text-xs mt-0.5">
-                    添加到 {selectedStage.name}
-                  </p>
+                  <h3 className="text-white font-semibold text-sm">新建计划项</h3>
+                  <p className="text-foreground-500 text-xs mt-0.5">添加到 {selectedStage.name}</p>
                 </div>
                 <button
                   onClick={() => setShowCreateModal(false)}
@@ -354,12 +422,14 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
 
               {/* Title */}
               <div>
-                <label className="block text-foreground-400 text-xs font-medium mb-1.5">任务标题 <span className="text-error">*</span></label>
+                <label className="block text-foreground-400 text-xs font-medium mb-1.5">
+                  计划项标题 <span className="text-error">*</span>
+                </label>
                 <input
                   type="text"
                   value={form.title}
                   onChange={(e) => handleFormChange('title', e.target.value)}
-                  placeholder="输入任务标题"
+                  placeholder="输入计划项标题"
                   className={`w-full px-3 py-2 text-sm bg-white/6 border rounded-lg text-white placeholder:text-foreground-600 outline-none transition-colors ${formErrors.title ? 'border-error/50 focus:border-error' : 'border-primary-500/15 focus:border-primary-400/60'}`}
                 />
                 {formErrors.title && <p className="text-error text-xs mt-1">{formErrors.title}</p>}
@@ -368,7 +438,9 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
               {/* Assignee & Priority row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-foreground-400 text-xs font-medium mb-1.5">负责人</label>
+                  <label className="block text-foreground-400 text-xs font-medium mb-1.5">
+                    负责人
+                  </label>
                   <div className="relative">
                     <select
                       value={form.assignee}
@@ -385,7 +457,9 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
                   </div>
                 </div>
                 <div>
-                  <label className="block text-foreground-400 text-xs font-medium mb-1.5">优先级</label>
+                  <label className="block text-foreground-400 text-xs font-medium mb-1.5">
+                    优先级
+                  </label>
                   <div className="flex gap-1.5 p-1 rounded-lg bg-white/5">
                     {(['high', 'medium', 'low'] as const).map((pri) => (
                       <button
@@ -393,7 +467,11 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
                         onClick={() => handleFormChange('priority', pri)}
                         className={`flex-1 py-1.5 text-xs rounded-md font-medium transition-all duration-200 cursor-pointer whitespace-nowrap ${
                           form.priority === pri
-                            ? pri === 'high' ? 'bg-error/15 text-error' : pri === 'medium' ? 'bg-warning/15 text-warning' : 'bg-foreground-500/15 text-foreground-400'
+                            ? pri === 'high'
+                              ? 'bg-error/15 text-error'
+                              : pri === 'medium'
+                                ? 'bg-warning/15 text-warning'
+                                : 'bg-foreground-500/15 text-foreground-400'
                             : 'text-foreground-600 hover:text-foreground-400'
                         }`}
                       >
@@ -407,17 +485,23 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
               {/* Due date & Tags row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-foreground-400 text-xs font-medium mb-1.5">截止日期 <span className="text-error">*</span></label>
+                  <label className="block text-foreground-400 text-xs font-medium mb-1.5">
+                    截止日期 <span className="text-error">*</span>
+                  </label>
                   <input
                     type="date"
                     value={form.dueDate}
                     onChange={(e) => handleFormChange('dueDate', e.target.value)}
                     className={`w-full px-3 py-2 text-sm bg-white/6 border rounded-lg text-white outline-none transition-colors [color-scheme:dark] ${formErrors.dueDate ? 'border-error/50 focus:border-error' : 'border-primary-500/15 focus:border-primary-400/60'}`}
                   />
-                  {formErrors.dueDate && <p className="text-error text-xs mt-1">{formErrors.dueDate}</p>}
+                  {formErrors.dueDate && (
+                    <p className="text-error text-xs mt-1">{formErrors.dueDate}</p>
+                  )}
                 </div>
                 <div>
-                  <label className="block text-foreground-400 text-xs font-medium mb-1.5">标签</label>
+                  <label className="block text-foreground-400 text-xs font-medium mb-1.5">
+                    标签
+                  </label>
                   <input
                     type="text"
                     value={form.tags}
@@ -434,7 +518,7 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
                 <textarea
                   value={form.description}
                   onChange={(e) => handleFormChange('description', e.target.value)}
-                  placeholder="添加任务描述（可选）"
+                  placeholder="添加计划项描述（可选）"
                   rows={3}
                   className="w-full px-3 py-2 text-sm bg-white/6 border border-primary-500/15 focus:border-primary-400/60 rounded-lg text-white placeholder:text-foreground-600 outline-none transition-colors resize-none"
                 ></textarea>
@@ -452,7 +536,7 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
                   onClick={handleSubmit}
                   className="flex-1 btn-primary px-4 py-2 text-sm cursor-pointer whitespace-nowrap"
                 >
-                  创建任务
+                  创建计划项
                 </button>
               </div>
             </div>
@@ -465,11 +549,20 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => { setShowDetailModal(false); setEditingTask(null); }}
+            onClick={() => {
+              setShowDetailModal(false);
+              setEditingTask(null);
+            }}
           ></div>
 
-          <div className="relative w-full max-w-md mx-4 rounded-2xl animate-fade-in"
-            style={{ background: 'linear-gradient(135deg, rgba(22,18,48,0.98) 0%, rgba(30,20,56,0.98) 100%)', backdropFilter: 'blur(20px)', border: '1px solid rgba(108,92,231,0.2)' }}
+          <div
+            className="relative w-full max-w-md mx-4 rounded-2xl animate-fade-in"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(22,18,48,0.98) 0%, rgba(30,20,56,0.98) 100%)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(108,92,231,0.2)',
+            }}
           >
             <div className="p-5 space-y-4">
               {/* Header */}
@@ -489,11 +582,16 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
                       <span className="text-foreground-400 text-xs">{editingTask.assignee}</span>
                     </div>
                     <span className="text-foreground-700">·</span>
-                    <span className="text-foreground-500 text-xs">{editingTask.dueDate.slice(5)}</span>
+                    <span className="text-foreground-500 text-xs">
+                      {editingTask.dueDate.slice(5)}
+                    </span>
                   </div>
                 </div>
                 <button
-                  onClick={() => { setShowDetailModal(false); setEditingTask(null); }}
+                  onClick={() => {
+                    setShowDetailModal(false);
+                    setEditingTask(null);
+                  }}
                   className="w-7 h-7 flex items-center justify-center rounded-lg text-foreground-500 hover:text-white hover:bg-white/5 transition-colors cursor-pointer shrink-0"
                 >
                   <i className="ri-close-line"></i>
@@ -504,17 +602,25 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
               <div>
                 <label className="block text-foreground-400 text-xs font-medium mb-2">状态</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {(Object.entries(statusConfig) as [CampaignTask['status'], typeof statusConfig[string]][]).map(([status, config]) => (
+                  {(
+                    Object.entries(statusConfig) as [
+                      CampaignTask['status'],
+                      (typeof statusConfig)[string],
+                    ][]
+                  ).map(([status, config]) => (
                     <button
                       key={status}
                       onClick={() => handleTaskStatusChange(editingTask, status)}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all duration-200 cursor-pointer
-                        ${editingTask.status === status
-                          ? `${config.bg} border font-medium`
-                          : 'bg-white/5 text-foreground-600 hover:text-foreground-400 border border-transparent'
+                        ${
+                          editingTask.status === status
+                            ? `${config.bg} border font-medium`
+                            : 'bg-white/5 text-foreground-600 hover:text-foreground-400 border border-transparent'
                         }`}
                     >
-                      <span className={`w-3.5 h-3.5 flex items-center justify-center ${editingTask.status === status ? '' : 'text-foreground-500'}`}>
+                      <span
+                        className={`w-3.5 h-3.5 flex items-center justify-center ${editingTask.status === status ? '' : 'text-foreground-500'}`}
+                      >
                         <i className={`${config.icon} text-[11px]`}></i>
                       </span>
                       {config.label}
@@ -528,8 +634,10 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
                 <label className="block text-foreground-400 text-xs font-medium mb-1.5">描述</label>
                 <textarea
                   value={editingTask.description || ''}
-                  onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value || undefined })}
-                  placeholder="添加任务描述"
+                  onChange={(e) =>
+                    setEditingTask({ ...editingTask, description: e.target.value || undefined })
+                  }
+                  placeholder="添加计划项描述"
                   rows={3}
                   className="w-full px-3 py-2 text-sm bg-white/6 border border-primary-500/15 focus:border-primary-400/60 rounded-lg text-white placeholder:text-foreground-600 outline-none transition-colors resize-none"
                 ></textarea>
@@ -538,10 +646,15 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
               {/* Tags */}
               {editingTask.tags.length > 0 && (
                 <div>
-                  <label className="block text-foreground-400 text-xs font-medium mb-1.5">标签</label>
+                  <label className="block text-foreground-400 text-xs font-medium mb-1.5">
+                    标签
+                  </label>
                   <div className="flex flex-wrap gap-1.5">
-                    {editingTask.tags.map(tag => (
-                      <span key={tag} className="text-[11px] px-2 py-1 rounded-md bg-white/5 text-foreground-400">
+                    {editingTask.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-[11px] px-2 py-1 rounded-md bg-white/5 text-foreground-400"
+                      >
                         {tag}
                       </span>
                     ))}
@@ -562,7 +675,10 @@ export default function CampaignBoard({ stages, selectedStageId, onSelectStage }
                 </button>
                 <div className="flex-1"></div>
                 <button
-                  onClick={() => { setShowDetailModal(false); setEditingTask(null); }}
+                  onClick={() => {
+                    setShowDetailModal(false);
+                    setEditingTask(null);
+                  }}
                   className="px-4 py-2 text-sm rounded-lg border border-primary-500/15 text-foreground-400 hover:text-white hover:bg-white/5 transition-all duration-200 cursor-pointer whitespace-nowrap"
                 >
                   取消
