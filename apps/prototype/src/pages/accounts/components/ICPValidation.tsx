@@ -40,7 +40,10 @@ interface ICPValidationProps {
 
 export default function ICPValidation({ icpId, icpIndex }: ICPValidationProps) {
   const [reviews, setReviews] = useState<Record<string, 'accept' | 'reject'>>({});
-  const [activated, setActivated] = useState(false);
+  // 按 icpId 区分激活态：避免激活 ICP A 后切换到 B 时错误显示已激活（绕过 LED-004 回测门禁）
+  const [activatedMap, setActivatedMap] = useState<Record<string, boolean>>({});
+  const activated = !!activatedMap[icpId];
+  const setActivated = (v: boolean) => setActivatedMap((p) => ({ ...p, [icpId]: v }));
 
   const samples = buildSamples(icpIndex);
   const reviewed = samples.filter((s) => reviews[`${icpId}_${s.id}`]).length;
