@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/knowledge/knowledge-conflict",
+  "title": "KnowledgeConflict",
+  "description": "知识冲突：不同来源/版本的 Claim 之间的不一致记录（KNW-004：支持冲突检测、版本比较和事实有效期；验收：不同来源不一致时不静默覆盖）。检测到冲突时发布 KnowledgeConflictDetected 事件（母本 11.11 未列出，按 KNW-004 评审补充）；冲突未解决前相关 Campaign 显示风险提醒（母本 4.8.4）。负责域：knowledge；schema_version=1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^kcf_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "前缀式实体 ID，前缀 kcf（knowledge 域补充前缀，见域 notes）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "topic": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "冲突主题，如同一产品的 MOQ、同一认证的有效期"
+    },
+    "claim_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^clm_[0-9A-HJKMNP-TV-Z]{26}$" },
+      "minItems": 2,
+      "uniqueItems": true,
+      "description": "互相冲突的 Claim 集合（至少 2 条，KNW-004）"
+    },
+    "conflict_type": {
+      "type": "string",
+      "enum": [
+        "VALUE_MISMATCH",
+        "VALIDITY_OVERLAP",
+        "SOURCE_CONTRADICTION",
+        "DUPLICATE",
+        "VERSION_DIVERGENCE"
+      ],
+      "description": "冲突类型：取值不一致/有效期重叠矛盾/来源相互矛盾/重复事实/新旧版本分歧（KNW-004 冲突检测与版本比较）"
+    },
+    "detection_method": {
+      "type": "string",
+      "enum": ["AUTO", "MANUAL"],
+      "description": "检测方式：系统自动检测或人工标记（母本 4.8.4：AI 自动提取候选事实并标记冲突）"
+    },
+    "detected_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "检测时间"
+    },
+    "diff_summary": {
+      "type": "string",
+      "maxLength": 5000,
+      "description": "版本/取值差异摘要，供评审比较（KNW-004 版本比较）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["OPEN", "RESOLVED", "DISMISSED"],
+      "description": "冲突处理状态：待处理/已解决/误报忽略（未解决不得静默覆盖，KNW-004）"
+    },
+    "resolution": {
+      "type": "object",
+      "description": "解决记录（status=RESOLVED 时必填，应用层校验）",
+      "properties": {
+        "resolution_type": {
+          "type": "string",
+          "enum": ["KEEP_ONE", "MERGE", "SCOPE_SPLIT", "EXPIRE_OLD", "REVOKE_ALL"],
+          "description": "解决方式：保留一条/合并为新 Claim/按适用范围拆分共存/旧版本置为过期/全部撤销"
+        },
+        "kept_claim_ids": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^clm_[0-9A-HJKMNP-TV-Z]{26}$" },
+          "description": "解决后保留有效的 Claim"
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "解决说明"
+        }
+      },
+      "required": ["resolution_type"],
+      "additionalProperties": false
+    },
+    "resolved_by": {
+      "type": "string",
+      "pattern": "^mem_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "解决人 Membership ID"
+    },
+    "resolved_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "claim_ids",
+    "conflict_type",
+    "detection_method",
+    "detected_at",
+    "status",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

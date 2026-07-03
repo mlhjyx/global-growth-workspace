@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/campaign/stop-condition",
+  "title": "StopCondition",
+  "description": "停止条件：退信、投诉、失败、成本和负面情绪阈值；触发自动暂停和通知（CAM-010；母本 5.10.1 退信异常/平台限制触发自动暂停、WSP-007 Campaign Pause）。触发时产出 StopConditionTriggered 事件并按 action 执行。ID 前缀 stp（对 primitives 前缀映射的补充）。负责域：campaign。schema_version=1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "stp_ 前缀实体 ID"
+    },
+    "workspace_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id"
+    },
+    "campaign_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "cam_ 前缀，所属 Campaign（CAM-010）"
+    },
+    "condition_type": {
+      "type": "string",
+      "enum": [
+        "BOUNCE_RATE",
+        "COMPLAINT_RATE",
+        "FAILURE_RATE",
+        "COST_OVERRUN",
+        "NEGATIVE_SENTIMENT"
+      ],
+      "description": "条件类型：退信/投诉/失败/成本/负面情绪（CAM-010）"
+    },
+    "threshold": {
+      "type": "object",
+      "description": "阈值定义。比率类（BOUNCE_RATE/COMPLAINT_RATE/FAILURE_RATE/NEGATIVE_SENTIMENT）用 threshold_value（0-1）；COST_OVERRUN 用 threshold_money（服务层按 condition_type 校验二选一必填）",
+      "properties": {
+        "threshold_value": {
+          "type": "number",
+          "minimum": 0,
+          "description": "比率阈值（0-1）；NEGATIVE_SENTIMENT 为负面情绪占比"
+        },
+        "threshold_money": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/money",
+          "description": "成本阈值（COST_OVERRUN 专用；与 Campaign.budget.hard_cap 可不同，如提前预警线，CAM-013）"
+        },
+        "comparison": {
+          "type": "string",
+          "enum": ["GT", "GTE"],
+          "description": "观测值与阈值的比较方式"
+        },
+        "window_minutes": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "滑动观测窗口（分钟）；省略表示 Campaign 累计值"
+        },
+        "min_sample_size": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "最小样本量，未达到不评估（避免小样本误触发）"
+        }
+      },
+      "required": ["comparison"],
+      "additionalProperties": false
+    },
+    "action": {
+      "type": "string",
+      "enum": ["PAUSE_CAMPAIGN", "PAUSE_CHANNEL", "NOTIFY_ONLY"],
+      "description": "触发动作（CAM-010：阈值触发自动暂停和通知）。PAUSE_CAMPAIGN：Campaign→PAUSED（母本 11.9）；PAUSE_CHANNEL：仅暂停 channel_scope 内渠道，不阻塞整个 Campaign（母本 5.10.1）"
+    },
+    "channel_scope": {
+      "type": "array",
+      "description": "限定生效渠道（可选；省略表示全渠道）",
+      "items": { "$ref": "ggw://contracts/campaign/channel-plan#/$defs/channel_type" }
+    },
+    "notify_roles": {
+      "type": "array",
+      "description": "触发时通知的角色/成员，如 campaign_owner、workspace_admin（CAM-010 通知）",
+      "items": { "type": "string" }
+    },
+    "enabled": {
+      "type": "boolean",
+      "description": "是否启用；停用需审计（母本 12 治理）"
+    },
+    "triggered_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "最近一次触发时间"
+    },
+    "trigger_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "累计触发次数"
+    },
+    "last_observed_value": {
+      "type": "number",
+      "description": "最近一次触发时的观测值（比率或金额数值，供审计与通知展示）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "campaign_id",
+    "condition_type",
+    "threshold",
+    "action",
+    "enabled",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

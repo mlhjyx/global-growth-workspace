@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/workspace/membership",
+  "title": "Membership",
+  "description": "成员资格：用户在某 Workspace 内的角色集合与生命周期（母本 7.1.2、WSP-002 角色、WSP-004 代理商委派、WSP-009 SCIM）。状态取值与 state-machines/membership.state.ts 一致。角色权限语义见母本 3.6 角色表；Viewer 不能发布、发送或导出（WSP-002 验收）。schema_version: 1",
+  "type": "object",
+  "$defs": {
+    "role": {
+      "type": "string",
+      "enum": ["OWNER", "ADMIN", "STRATEGIST", "MARKETER", "SALES", "REVIEWER", "EXPERT", "VIEWER"],
+      "description": "角色枚举（WSP-002；对应母本 3.6：OWNER=老板/出海负责人，ADMIN=IT/安全管理员，STRATEGIST=海外增长负责人，MARKETER=市场/内容经理，SALES=销售/BD，REVIEWER=审批/品牌/法务审核，EXPERT=行业/国家专家，VIEWER=只读）"
+    },
+    "user_id": {
+      "type": "string",
+      "pattern": "^usr_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "平台用户 ID，前缀 usr（对 primitives 前缀映射的补充）"
+    }
+  },
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^mem_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "成员资格 ID，前缀 mem（common/primitives entity_id 前缀映射）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "user_id": {
+      "$ref": "#/$defs/user_id",
+      "description": "成员用户（同一用户在不同 Workspace 有独立 Membership，WSP-004 隔离）"
+    },
+    "roles": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/role" },
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "角色集合，至少一个（WSP-002；权限矩阵可测试）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["INVITED", "ACTIVE", "SUSPENDED", "REMOVED"],
+      "description": "状态，与 state-machines/membership.state.ts 一致（WSP-009 成员生命周期；权限变更立即影响新请求，母本 7.1.4）"
+    },
+    "granted_via": {
+      "type": "string",
+      "enum": ["DIRECT", "SCIM", "AGENCY_DELEGATION"],
+      "description": "授予途径：DIRECT=直接邀请；SCIM=IdP 同步（WSP-009）；AGENCY_DELEGATION=代理商对客户 Workspace 的委派权限（WSP-004、母本 3.6 PER-AGENCY）"
+    },
+    "invited_by": {
+      "$ref": "#/$defs/user_id",
+      "description": "邀请人用户 ID"
+    },
+    "invited_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "邀请时间"
+    },
+    "activated_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "接受邀请/激活时间"
+    },
+    "expires_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "临时访问到期时间；到期后自动进入 SUSPENDED"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "user_id",
+    "roles",
+    "status",
+    "granted_via",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

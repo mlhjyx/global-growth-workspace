@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/lead/suppression-record",
+  "title": "SuppressionRecord",
+  "description": "抑制记录（母本 4.5.2 SuppressionRecord：退订、禁止联系、竞争对手、现有客户等；8.9：退订、投诉、Do-not-contact 和数据主体请求全局抑制；4.5.5/母本 4117：全局 Suppression 优先阻断任何 Campaign 选择；11.17：Suppression 保留最小不可逆标识，不用于营销；LED-007：模型不能覆盖 Suppression）。负责域：lead；schema_version=1。id 前缀 sup_。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "前缀 sup_（对 primitives 前缀映射的 lead 域补充）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "subject_type": {
+      "type": "string",
+      "enum": ["CONTACT", "ACCOUNT", "CONTACT_POINT", "DOMAIN"],
+      "description": "抑制对象粒度：单联系人 / 整个企业 / 单个联系方式 / 整个域名"
+    },
+    "contact_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "subject_type=CONTACT/CONTACT_POINT 时填写（cta_ 前缀）"
+    },
+    "account_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "subject_type=ACCOUNT 时填写（acc_ 前缀）"
+    },
+    "contact_point_hash": {
+      "type": "string",
+      "description": "被抑制联系方式的不可逆哈希（母本 11.17：保留最小不可逆标识；联系人被删除后仍可阻止再次联系）"
+    },
+    "domain": {
+      "type": "string",
+      "format": "hostname",
+      "description": "subject_type=DOMAIN 时填写"
+    },
+    "reason": {
+      "type": "string",
+      "enum": [
+        "UNSUBSCRIBED",
+        "COMPLAINT",
+        "HARD_BOUNCE",
+        "DO_NOT_CONTACT_REQUEST",
+        "DATA_SUBJECT_REQUEST",
+        "COMPETITOR",
+        "EXISTING_CUSTOMER",
+        "COMPLIANCE",
+        "MANUAL"
+      ],
+      "description": "抑制原因（母本 4.5.2、8.9）"
+    },
+    "channels": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["EMAIL", "PHONE", "SOCIAL", "ALL"] },
+      "minItems": 1,
+      "description": "适用渠道；退订/投诉/数据主体请求应为 ALL（母本 8.9 全局抑制）"
+    },
+    "global": {
+      "type": "boolean",
+      "description": "是否全局抑制：为 true 时优先阻断任何 Campaign 选择与发送（母本 4117 验收；发送前 100% 检查，母本 4.5.6/PUB-010）"
+    },
+    "origin": {
+      "type": "string",
+      "enum": ["USER", "SYSTEM", "WEBHOOK", "IMPORT", "DATA_SUBJECT"],
+      "description": "记录来源：人工标记 / 系统规则 / 渠道 Webhook（退订、投诉） / 客户导入 / 数据主体请求"
+    },
+    "evidence_ref": { "type": "string", "description": "证据引用，如退订事件 ID、投诉工单" },
+    "applied_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "expires_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "为空表示永久。仅业务类原因（COMPETITOR、EXISTING_CUSTOMER）允许设置到期；退订/投诉/数据主体请求不得设置"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "LIFTED"],
+      "description": "LIFTED 仅允许用于业务类原因的人工解除并留审计；UNSUBSCRIBED/COMPLAINT/DATA_SUBJECT_REQUEST 不可解除"
+    },
+    "lifted_by": { "type": "string", "description": "解除人用户 ID（status=LIFTED 时必填）" },
+    "lifted_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "lift_reason": { "type": "string" },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "subject_type",
+    "reason",
+    "channels",
+    "global",
+    "origin",
+    "applied_at",
+    "status",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

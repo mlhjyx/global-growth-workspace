@@ -1,0 +1,342 @@
+# knowledge 域领域事件（母本 11.11「企业与知识」类别；需求 KNW-001..011；负责域：knowledge）
+# - 事件名 PascalCase + schema_version（母本 0.5、11.11），Envelope 引用 common/envelope.schema.json（母本 11.10）
+# - 至少一次投递，消费者幂等（母本 ADR-009）；payload 只放 ID 与变更要点
+# - WorkspaceCreated 属 workspace 域，不在本文件重复定义（conventions.md：同一事件不得在两个域重复定义）
+# - ClaimRevoked、KnowledgeConflictDetected 为母本 11.11 未列出的补充事件：
+#   ClaimRevoked 依据 KNW-003 生命周期 REVOKED 终态与母本 4.8.5「可撤销每条 Claim」；
+#   KnowledgeConflictDetected 依据 KNW-004「不同来源不一致时不静默覆盖」，经契约评审补充。
+asyncapi: 3.0.0
+
+info:
+  title: Knowledge Domain Events
+  version: 1.0.0
+  description: |
+    企业知识域（母本 7.2）全部领域事件：来源索引、Claim 生命周期、企业画像确认与知识冲突。
+    所有事件使用统一 Envelope（ggw://contracts/common/envelope，母本 11.10），schema_version=1。
+
+defaultContentType: application/json
+
+channels:
+  knowledge-events:
+    address: ggw.knowledge.events
+    description: knowledge 域事件通道（Outbox -> 事件总线，母本 11.14）
+    messages:
+      KnowledgeSourceIndexed:
+        $ref: '#/components/messages/KnowledgeSourceIndexed'
+      ClaimApproved:
+        $ref: '#/components/messages/ClaimApproved'
+      ClaimExpired:
+        $ref: '#/components/messages/ClaimExpired'
+      ClaimRevoked:
+        $ref: '#/components/messages/ClaimRevoked'
+      CompanyProfileConfirmed:
+        $ref: '#/components/messages/CompanyProfileConfirmed'
+      KnowledgeConflictDetected:
+        $ref: '#/components/messages/KnowledgeConflictDetected'
+
+operations:
+  publishKnowledgeEvents:
+    action: send
+    channel:
+      $ref: '#/channels/knowledge-events'
+    summary: knowledge-service 发布知识域事件
+    messages:
+      - $ref: '#/channels/knowledge-events/messages/KnowledgeSourceIndexed'
+      - $ref: '#/channels/knowledge-events/messages/ClaimApproved'
+      - $ref: '#/channels/knowledge-events/messages/ClaimExpired'
+      - $ref: '#/channels/knowledge-events/messages/ClaimRevoked'
+      - $ref: '#/channels/knowledge-events/messages/CompanyProfileConfirmed'
+      - $ref: '#/channels/knowledge-events/messages/KnowledgeConflictDetected'
+
+components:
+  messages:
+    KnowledgeSourceIndexed:
+      name: KnowledgeSourceIndexed
+      title: 知识来源已完成索引
+      summary: KnowledgeSource 解析/索引完成，候选 Claim 已生成（KNW-001；母本 11.11）。schema_version=1。
+      payload:
+        allOf:
+          - $ref: 'ggw://contracts/common/envelope'
+          - type: object
+            properties:
+              event_type:
+                const: KnowledgeSourceIndexed
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: KnowledgeSource
+              payload:
+                $ref: '#/components/schemas/KnowledgeSourceIndexedPayload'
+
+    ClaimApproved:
+      name: ClaimApproved
+      title: Claim 已批准
+      summary: Claim 进入 APPROVED，可在适用范围内用于对外生成（KNW-003；母本 11.9、11.11）。schema_version=1。
+      payload:
+        allOf:
+          - $ref: 'ggw://contracts/common/envelope'
+          - type: object
+            properties:
+              event_type:
+                const: ClaimApproved
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Claim
+              payload:
+                $ref: '#/components/schemas/ClaimApprovedPayload'
+
+    ClaimExpired:
+      name: ClaimExpired
+      title: Claim 已过期
+      summary: Claim 有效期结束进入 EXPIRED；过期关键 Claim 阻止高风险对外内容（KNW-009；母本 11.9、11.11）。schema_version=1。
+      payload:
+        allOf:
+          - $ref: 'ggw://contracts/common/envelope'
+          - type: object
+            properties:
+              event_type:
+                const: ClaimExpired
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Claim
+              payload:
+                $ref: '#/components/schemas/ClaimExpiredPayload'
+
+    ClaimRevoked:
+      name: ClaimRevoked
+      title: Claim 已撤销
+      summary: Claim 被人工撤销或因来源删除级联撤销，下游引用须失效（KNW-003、KNW-007；母本 4.8.5。母本 11.11 未列出，按状态机终态补充）。schema_version=1。
+      payload:
+        allOf:
+          - $ref: 'ggw://contracts/common/envelope'
+          - type: object
+            properties:
+              event_type:
+                const: ClaimRevoked
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Claim
+              payload:
+                $ref: '#/components/schemas/ClaimRevokedPayload'
+
+    CompanyProfileConfirmed:
+      name: CompanyProfileConfirmed
+      title: 企业画像已确认
+      summary: 用户确认企业画像，下游（ICP 推荐、Campaign）可信使用（母本 6.5.1 步骤 3、11.11；KNW-002）。schema_version=1。
+      payload:
+        allOf:
+          - $ref: 'ggw://contracts/common/envelope'
+          - type: object
+            properties:
+              event_type:
+                const: CompanyProfileConfirmed
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: CompanyProfile
+              payload:
+                $ref: '#/components/schemas/CompanyProfileConfirmedPayload'
+
+    KnowledgeConflictDetected:
+      name: KnowledgeConflictDetected
+      title: 检测到知识冲突
+      summary: 不同来源/版本 Claim 不一致，需人工裁决，不静默覆盖；相关 Campaign 显示风险提醒（KNW-004；母本 4.8.4。母本 11.11 未列出，按 KNW-004 与契约评审补充）。schema_version=1。
+      payload:
+        allOf:
+          - $ref: 'ggw://contracts/common/envelope'
+          - type: object
+            properties:
+              event_type:
+                const: KnowledgeConflictDetected
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: KnowledgeConflict
+              payload:
+                $ref: '#/components/schemas/KnowledgeConflictDetectedPayload'
+
+  schemas:
+    KnowledgeSourceIndexedPayload:
+      type: object
+      description: 来源索引完成要点（KNW-001 验收：解析服务输出结构化内容和来源位置）
+      properties:
+        source_id:
+          type: string
+          pattern: '^src_[0-9A-HJKMNP-TV-Z]{26}$'
+          description: 完成索引的 KnowledgeSource
+        source_type:
+          type: string
+          enum: [WEBSITE, PDF, DOCX, PPTX, XLSX, IMAGE, AUDIO, VIDEO, MANUAL_INPUT]
+          description: 来源类型（KNW-001，与 knowledge-source.schema.json 枚举一致）
+        segment_count:
+          type: integer
+          minimum: 0
+          description: 解析产生的结构化片段数
+        claim_candidate_count:
+          type: integer
+          minimum: 0
+          description: 生成的候选 Claim 数（KNW-002）
+        content_hash:
+          type: string
+          maxLength: 128
+          description: 本次索引的内容指纹（消费者幂等去重用，母本 11.16）
+      required: [source_id, source_type]
+      additionalProperties: false
+
+    ClaimApprovedPayload:
+      type: object
+      description: Claim 批准要点；完整对象从事实源查询（conventions.md：payload 放 ID + 变更要点）
+      properties:
+        claim_id:
+          type: string
+          pattern: '^clm_[0-9A-HJKMNP-TV-Z]{26}$'
+        claim_type:
+          type: string
+          enum:
+            [
+              COMPANY_FACT,
+              PRODUCT_FACT,
+              PARAMETER,
+              MOQ,
+              LEAD_TIME,
+              CERTIFICATION,
+              CASE_STUDY,
+              CAPABILITY,
+              FORBIDDEN_EXPRESSION,
+              COMPLIANCE,
+            ]
+          description: 事实类型（KNW-002，与 claim.schema.json 枚举一致）
+        approved_by:
+          type: string
+          pattern: '^mem_[0-9A-HJKMNP-TV-Z]{26}$'
+          description: 批准人 Membership ID
+        effective_from:
+          type: string
+          format: date-time
+          description: 生效时间（UTC，母本 11.14）
+        expires_at:
+          type: string
+          format: date-time
+          description: 失效时间（KNW-009 事实有效期）
+      required: [claim_id, claim_type, approved_by]
+      additionalProperties: false
+
+    ClaimExpiredPayload:
+      type: object
+      description: Claim 过期要点（KNW-009：过期提醒；下游阻止高风险对外内容）
+      properties:
+        claim_id:
+          type: string
+          pattern: '^clm_[0-9A-HJKMNP-TV-Z]{26}$'
+        claim_type:
+          type: string
+          enum:
+            [
+              COMPANY_FACT,
+              PRODUCT_FACT,
+              PARAMETER,
+              MOQ,
+              LEAD_TIME,
+              CERTIFICATION,
+              CASE_STUDY,
+              CAPABILITY,
+              FORBIDDEN_EXPRESSION,
+              COMPLIANCE,
+            ]
+        expired_reason:
+          type: string
+          enum: [VALIDITY_ENDED, SOURCE_STALE]
+          description: 过期原因：有效期到期 / 来源长期未刷新（KNW-009）
+        expires_at:
+          type: string
+          format: date-time
+      required: [claim_id, claim_type, expired_reason]
+      additionalProperties: false
+
+    ClaimRevokedPayload:
+      type: object
+      description: Claim 撤销要点；消费者须失效相关索引、缓存和引用（KNW-007）
+      properties:
+        claim_id:
+          type: string
+          pattern: '^clm_[0-9A-HJKMNP-TV-Z]{26}$'
+        claim_type:
+          type: string
+          enum:
+            [
+              COMPANY_FACT,
+              PRODUCT_FACT,
+              PARAMETER,
+              MOQ,
+              LEAD_TIME,
+              CERTIFICATION,
+              CASE_STUDY,
+              CAPABILITY,
+              FORBIDDEN_EXPRESSION,
+              COMPLIANCE,
+            ]
+        previous_status:
+          type: string
+          enum: [NEEDS_REVIEW, APPROVED]
+          description: 撤销前状态（与 claim.state.ts 转移表一致）
+        revoked_by:
+          type: string
+          pattern: '^mem_[0-9A-HJKMNP-TV-Z]{26}$'
+          description: 撤销人 Membership ID；来源删除级联时为执行删除的操作者
+        revoked_reason:
+          type: string
+          maxLength: 2000
+          description: 撤销原因（如 SOURCE_DELETED 级联，KNW-007）
+      required: [claim_id, claim_type, previous_status, revoked_by]
+      additionalProperties: false
+
+    CompanyProfileConfirmedPayload:
+      type: object
+      description: 企业画像确认要点（母本 6.5.1 激活定义组成部分）
+      properties:
+        company_profile_id:
+          type: string
+          pattern: '^cmp_[0-9A-HJKMNP-TV-Z]{26}$'
+        confirmed_by:
+          type: string
+          pattern: '^mem_[0-9A-HJKMNP-TV-Z]{26}$'
+          description: 确认人 Membership ID
+        profile_version:
+          type: integer
+          minimum: 1
+          description: 确认时的画像乐观锁版本（母本 11.16）
+      required: [company_profile_id, confirmed_by]
+      additionalProperties: false
+
+    KnowledgeConflictDetectedPayload:
+      type: object
+      description: 知识冲突检测要点（KNW-004：不静默覆盖，需人工裁决）
+      properties:
+        conflict_id:
+          type: string
+          pattern: '^kcf_[0-9A-HJKMNP-TV-Z]{26}$'
+        claim_ids:
+          type: array
+          items:
+            type: string
+            pattern: '^clm_[0-9A-HJKMNP-TV-Z]{26}$'
+          minItems: 2
+          uniqueItems: true
+          description: 互相冲突的 Claim 集合
+        conflict_type:
+          type: string
+          enum:
+            [VALUE_MISMATCH, VALIDITY_OVERLAP, SOURCE_CONTRADICTION, DUPLICATE, VERSION_DIVERGENCE]
+          description: 冲突类型（与 knowledge-conflict.schema.json 枚举一致）
+        detection_method:
+          type: string
+          enum: [AUTO, MANUAL]
+        topic:
+          type: string
+          maxLength: 500
+          description: 冲突主题
+      required: [conflict_id, claim_ids, conflict_type, detection_method]
+      additionalProperties: false

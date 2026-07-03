@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/lead/qualification-rule",
+  "title": "QualificationRule",
+  "description": "线索资格规则（母本 7.5.2；LED-003：Must-have/Nice-to-have/Exclusion/负向信号，排除条件优先于正向评分；LED-007：规则/统计/LLM/人工反馈组合评分，模型不能覆盖硬性排除和 Suppression）。负责域：lead；schema_version=1。id 前缀 qrl_。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "前缀 qrl_（对 primitives 前缀映射的 lead 域补充）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "icp_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "归属 ICP（icp_ 前缀）"
+    },
+    "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "description": { "type": "string" },
+    "rule_type": {
+      "type": "string",
+      "enum": ["HARD_EXCLUSION", "MUST_HAVE", "NICE_TO_HAVE", "NEGATIVE_SIGNAL"],
+      "description": "规则类别（LED-003）。HARD_EXCLUSION 与 Suppression 永远优先于任何正向评分，且统计/LLM 模型不得覆盖（LED-003/007 验收）"
+    },
+    "evaluator": {
+      "type": "string",
+      "enum": ["RULE", "STATISTICAL", "LLM", "HUMAN_FEEDBACK"],
+      "description": "评估方式（LED-007）。HARD_EXCLUSION 只允许 RULE 评估，保证确定性"
+    },
+    "condition": {
+      "type": "object",
+      "description": "触发条件；field 为 Lead/Account/Contact/Signal 字段路径",
+      "properties": {
+        "field": { "type": "string" },
+        "operator": {
+          "type": "string",
+          "enum": ["EQ", "NEQ", "IN", "NOT_IN", "GT", "GTE", "LT", "LTE", "RANGE", "CONTAINS", "NOT_CONTAINS", "EXISTS", "NOT_EXISTS", "MATCHES"]
+        },
+        "value": { "description": "比较值；类型随 field 而定" }
+      },
+      "required": ["field", "operator"],
+      "additionalProperties": false
+    },
+    "score_dimension": {
+      "type": "string",
+      "enum": ["FIT", "ROLE", "INTENT", "DATA_QUALITY", "REACHABILITY", "ENGAGEMENT"],
+      "description": "作用的评分维度（LED-006 六维）；HARD_EXCLUSION 不作用于维度而直接出局"
+    },
+    "score_impact": {
+      "type": "number",
+      "minimum": -100,
+      "maximum": 100,
+      "description": "命中时对该维度分数的调整（负值降分，NEGATIVE_SIGNAL 应为负）"
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "评估顺序，数值小者先评估；同序时 HARD_EXCLUSION 先于其他规则（LED-003 验收）"
+    },
+    "enabled": { "type": "boolean", "description": "是否启用" },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "icp_id",
+    "name",
+    "rule_type",
+    "evaluator",
+    "condition",
+    "enabled",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

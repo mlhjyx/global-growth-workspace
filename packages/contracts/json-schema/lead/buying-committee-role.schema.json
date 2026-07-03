@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/lead/buying-committee-role",
+  "title": "BuyingCommitteeRole",
+  "description": "购买委员会角色（母本 7.5.2；LED-002：包含决策者、影响者、使用者、技术、财务和采购角色，不同 Growth Motion 可使用不同角色模板）。负责域：lead；schema_version=1。id 前缀 bcr_。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "前缀 bcr_（对 primitives 前缀映射的 lead 域补充）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "icp_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "归属 ICP（icp_ 前缀）；为空表示 Workspace 级可复用角色模板（LED-002 验收：不同 Growth Motion 可使用不同角色模板）"
+    },
+    "role_type": {
+      "type": "string",
+      "enum": ["DECISION_MAKER", "INFLUENCER", "USER", "TECHNICAL", "FINANCE", "PROCUREMENT"],
+      "description": "角色类型（LED-002：决策者/影响者/使用者/技术/财务/采购）"
+    },
+    "name": { "type": "string", "maxLength": 200, "description": "展示名称，如「技术评估负责人」" },
+    "description": { "type": "string" },
+    "growth_motion": {
+      "type": "string",
+      "pattern": "^GM-[A-Z]{2,4}$",
+      "description": "适用 Growth Motion（母本 3.3 目录：GM-ABO/GM-DIST/GM-INB/GM-TRD/GM-EVT/GM-EXP/GM-REA/GM-PAR/GM-ABM/GM-LCH）；为空表示全部 Motion 适用"
+    },
+    "persona_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "承担该角色的典型 Persona（per_ 前缀）"
+    },
+    "typical_titles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "典型职位名称，用于联系人角色匹配（母本 5.6.1）"
+    },
+    "weight": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "参与 Role 评分的权重（LED-006 role 维度）"
+    },
+    "required_for_qualification": {
+      "type": "boolean",
+      "description": "委员会中是否必须覆盖该角色才可判定合格"
+    },
+    "kpis": { "type": "array", "items": { "type": "string" }, "description": "该角色关注的 KPI（母本 1616）" },
+    "objections": { "type": "array", "items": { "type": "string" }, "description": "该角色常见异议（母本 1616）" },
+    "information_needs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "该角色的决策信息需求（母本 1616）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": ["id", "workspace_id", "role_type", "created_at", "updated_at", "version"],
+  "additionalProperties": false
+}

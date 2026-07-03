@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/knowledge/brand-profile",
+  "title": "BrandProfile",
+  "description": "品牌画像：品牌语气、价值主张、表达规范与本地化覆盖（母本 7.2.2 核心对象、4.8.1 营销知识：价值主张、品牌语气、内容规范、禁用表达；KNW-008 不同 Market/Channel 可加载不同表达规则）。逐词条的禁用词/免责声明明细在 GlossaryEntry；本对象保存品牌级基调与覆盖规则。负责域：knowledge；schema_version=1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^brd_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "前缀式实体 ID，前缀 brd（knowledge 域补充前缀，见域 notes）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "company_profile_id": {
+      "type": "string",
+      "pattern": "^cmp_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "所属企业画像"
+    },
+    "brand_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "品牌名称"
+    },
+    "tagline": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "品牌口号"
+    },
+    "value_propositions": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 500 },
+      "description": "价值主张列表（母本 4.8.1 营销知识）"
+    },
+    "tone_of_voice": {
+      "type": "object",
+      "description": "品牌语气定义（KNW-008；CRT-005 内容质量检查加载此规则）",
+      "properties": {
+        "style_keywords": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 100 },
+          "description": "语气关键词，如 professional、warm、technical"
+        },
+        "dos": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 500 },
+          "description": "应当遵循的表达规范"
+        },
+        "donts": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 500 },
+          "description": "应当避免的表达方式（禁用表达概要；逐词条明细见 GlossaryEntry FORBIDDEN_WORD）"
+        }
+      },
+      "additionalProperties": false
+    },
+    "default_disclaimers": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 2000 },
+      "description": "品牌级默认免责声明（KNW-008；逐市场/渠道明细见 GlossaryEntry DISCLAIMER）"
+    },
+    "default_locale": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/locale",
+      "description": "默认表达语言"
+    },
+    "localization_overrides": {
+      "type": "array",
+      "description": "按市场/渠道的表达规则覆盖（KNW-008 验收：不同 Market/Channel 可加载不同表达规则）",
+      "items": {
+        "type": "object",
+        "properties": {
+          "market": {
+            "$ref": "ggw://contracts/common/primitives#/$defs/country_code",
+            "description": "适用市场；缺省表示所有市场"
+          },
+          "channel": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "适用渠道标识，如 linkedin、email、website；缺省表示所有渠道"
+          },
+          "locale": { "$ref": "ggw://contracts/common/primitives#/$defs/locale" },
+          "tone_adjustments": {
+            "type": "array",
+            "items": { "type": "string", "maxLength": 500 },
+            "description": "该市场/渠道下的语气调整"
+          },
+          "notes": { "type": "string", "maxLength": 1000 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["DRAFT", "ACTIVE", "ARCHIVED"],
+      "description": "品牌画像状态"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "brand_name",
+    "status",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

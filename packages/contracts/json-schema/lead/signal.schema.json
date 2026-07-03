@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/lead/signal",
+  "title": "Signal",
+  "description": "商业信号（母本 7.5.2、4.5.2；LED-014：监测贸易、招聘、融资、网站、内容和关系变化信号，信号过期自动降低 Intent；EVENT 类型补充自母本 3.3 GM-EVT 展会与活动 Motion）。负责域：lead；schema_version=1。id 前缀 sig_。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "前缀 sig_（对 primitives 前缀映射的 lead 域补充）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "account_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "信号所属企业（acc_ 前缀）"
+    },
+    "contact_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "个人级信号时指向联系人（cta_ 前缀），如职位变动"
+    },
+    "signal_type": {
+      "type": "string",
+      "enum": ["TRADE", "HIRING", "FUNDING", "WEBSITE", "CONTENT", "RELATIONSHIP_CHANGE", "EVENT"],
+      "description": "信号类型（LED-014：贸易/招聘/融资/网站/内容/关系变化；EVENT=展会与活动，母本 3.3 GM-EVT）。取值与 icp-definition signal_expectation 一致"
+    },
+    "subtype": {
+      "type": "string",
+      "description": "类型内细分，如 TRADE 下 importer_change、HIRING 下 sales_expansion"
+    },
+    "title": { "type": "string", "maxLength": 500, "description": "信号标题" },
+    "summary": { "type": "string", "description": "信号摘要（区分事实/推断，母本 LED-012 精神）" },
+    "strength": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "信号强度 0-1（参与 Intent 评分，LED-006）"
+    },
+    "confidence": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/confidence",
+      "description": "信号真实性置信度（与强度区分：强信号也可能低置信）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "EXPIRED", "REVOKED"],
+      "description": "生命周期：EXPIRED 由 expires_at 到期触发并自动降低 Intent（LED-014 验收）；REVOKED 为来源撤回/证据失效"
+    },
+    "detected_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "检测时间"
+    },
+    "effective_from": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "信号所述事实的生效时间（如融资公告日）"
+    },
+    "expires_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "有效期截止；到期信号不再计入 Intent（LED-014 验收：信号过期自动降低 Intent）"
+    },
+    "source": {
+      "type": "object",
+      "description": "来源与证据（母本 8.10 FieldEvidence；7.5.4 数据来源可见）",
+      "properties": {
+        "provider_id": { "type": "string", "description": "Provider 标识；公开采集为 source registry ID" },
+        "source_url": { "type": "string", "format": "uri" },
+        "evidence_id": { "type": "string", "description": "Evidence Store 快照引用" }
+      },
+      "required": ["provider_id"],
+      "additionalProperties": false
+    },
+    "attributes": {
+      "type": "object",
+      "description": "类型特有载荷（开放对象，键随 signal_type 而定）：TRADE={hs_code,direction,counterparty,value_range}；HIRING={role_category,openings_count}；FUNDING={round,amount_range,investors}；WEBSITE={page,change_type}；CONTENT={topic,channel}；RELATIONSHIP_CHANGE={relationship_type,change}；EVENT={event_name,event_date,booth}"
+    },
+    "related_lead_ids": {
+      "type": "array",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+      "description": "受本信号影响的 Lead（led_ 前缀）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "account_id",
+    "signal_type",
+    "strength",
+    "status",
+    "detected_at",
+    "expires_at",
+    "source",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

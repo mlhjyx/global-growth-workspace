@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/knowledge/claim-evidence",
+  "title": "ClaimEvidence",
+  "description": "知识证据：Claim 在某个 KnowledgeSource 中的来源位置与片段（KNW-001 验收：解析服务输出结构化内容和来源位置；KNW-002 验收：每项候选带来源、置信度和类型；KNW-006 验收：用户两次点击内可查看来源片段）。注意与 common/field-evidence 区分：field-evidence 是 data-hub 域字段级数据权利证据（母本 8.10，管 Provider/License/允许动作）；本对象是 knowledge 域企业事实的出处证据。负责域：knowledge；schema_version=1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^evd_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "前缀式实体 ID，前缀 evd（common/primitives entity_id 前缀映射）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "claim_id": {
+      "type": "string",
+      "pattern": "^clm_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "所支撑的 Claim"
+    },
+    "source_id": {
+      "type": "string",
+      "pattern": "^src_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "来源 KnowledgeSource（source 删除时本证据级联删除/失效，KNW-007）"
+    },
+    "location": {
+      "type": "object",
+      "description": "来源内定位（KNW-001 来源位置；按 source_type 使用对应字段：文档用 page/section/char 偏移，音视频用 timecode，表格用 sheet/cell_range，网页用 url_fragment）",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "页码（PDF/DOCX/PPTX）"
+        },
+        "section": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "章节/标题路径"
+        },
+        "char_start": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "片段起始字符偏移"
+        },
+        "char_end": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "片段结束字符偏移"
+        },
+        "timecode_start_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "音频/视频起始时间（毫秒）"
+        },
+        "timecode_end_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "音频/视频结束时间（毫秒）"
+        },
+        "sheet": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "工作表名（XLSX）"
+        },
+        "cell_range": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "单元格范围，如 A1:C10（XLSX）"
+        },
+        "url_fragment": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "网页 URL 片段/锚点（WEBSITE）"
+        }
+      },
+      "additionalProperties": false
+    },
+    "snippet": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10000,
+      "description": "来源片段原文（KNW-006：两次点击内可查看来源片段；展示前经保密级别过滤，KNW-005）"
+    },
+    "snippet_hash": {
+      "type": "string",
+      "maxLength": 128,
+      "description": "片段内容哈希，用于去重与来源变更检测（KNW-009）"
+    },
+    "confidence": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/confidence",
+      "description": "该证据支撑 Claim 的置信度（KNW-002）"
+    },
+    "extraction_method": {
+      "type": "string",
+      "enum": ["PARSER", "LLM_EXTRACTION", "OCR", "ASR", "MANUAL"],
+      "description": "提取方式：结构化解析（Docling）/大模型抽取/图片 OCR/音视频转写/人工录入（KNW-001 九类来源对应）"
+    },
+    "extracted_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "提取时间"
+    },
+    "locale": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/locale",
+      "description": "片段语言"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "claim_id",
+    "source_id",
+    "snippet",
+    "confidence",
+    "extraction_method",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

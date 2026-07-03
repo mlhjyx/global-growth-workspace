@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/lead/persona",
+  "title": "Persona",
+  "description": "购买者画像（母本 7.5.2 Persona、1616 购买委员会体验：定义 KPI/异议/信息需求；LED-001 personas、LED-002 与购买委员会角色配合）。负责域：lead；schema_version=1。id 前缀 per_。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "前缀 per_（对 primitives 前缀映射的 lead 域补充）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "icp_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "归属 ICP（icp_ 前缀）"
+    },
+    "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "description": { "type": "string" },
+    "job_titles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "典型职位名称（用于角色匹配，母本 5.6.1 处理链「角色匹配」）"
+    },
+    "seniority_levels": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["C_LEVEL", "VP", "DIRECTOR", "MANAGER", "INDIVIDUAL_CONTRIBUTOR", "OWNER"]
+      },
+      "description": "职级范围"
+    },
+    "departments": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "所在部门/职能，如 procurement、engineering"
+    },
+    "buying_role_types": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["DECISION_MAKER", "INFLUENCER", "USER", "TECHNICAL", "FINANCE", "PROCUREMENT"]
+      },
+      "description": "该 Persona 通常承担的购买委员会角色（LED-002；取值与 buying-committee-role.schema.json 一致）"
+    },
+    "goals": { "type": "array", "items": { "type": "string" }, "description": "业务目标" },
+    "pain_points": { "type": "array", "items": { "type": "string" }, "description": "痛点（LED-001）" },
+    "kpis": { "type": "array", "items": { "type": "string" }, "description": "关注 KPI（母本 1616）" },
+    "objections": { "type": "array", "items": { "type": "string" }, "description": "常见异议（母本 1616）" },
+    "information_needs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "决策所需信息（母本 1616）"
+    },
+    "preferred_channels": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["EMAIL", "LINKEDIN", "PHONE", "WHATSAPP", "WECHAT", "SOCIAL", "EVENT", "OTHER"]
+      },
+      "description": "偏好触达渠道"
+    },
+    "locales": {
+      "type": "array",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/locale" },
+      "description": "沟通语言（市场差异，LED-001）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": ["id", "workspace_id", "icp_id", "name", "created_at", "updated_at", "version"],
+  "additionalProperties": false
+}

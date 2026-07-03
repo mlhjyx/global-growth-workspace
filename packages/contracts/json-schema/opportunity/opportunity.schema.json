@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/opportunity/opportunity",
+  "title": "Opportunity",
+  "description": "销售/伙伴机会（母本 7.9.2 核心对象、附录 C Opportunity 最小字段、ENG-007 转化保留来源、ENG-008 可配置阶段、ENG-009 接受/失败原因回写、ENG-010 Owner/下一步/金额区间/产品/目标市场、ENG-016 三级结果模型、ENG-017 撤回/降级、母本 11.9 状态机）。stage 与 qualification_status 取值与 state-machines/opportunity.state.ts 完全一致。负责域：opportunity。schema_version: 1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "opp_ 前缀（primitives 前缀映射：opp=Opportunity）"
+    },
+    "workspace_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id"
+    },
+    "account_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "目标企业 Account（acc_ 前缀；附录 C：account/contact；附录 G：Account 与 Contact 区分）"
+    },
+    "contact_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "主要联系人 Contact（cta_ 前缀；附录 C：account/contact）"
+    },
+    "lead_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "来源 Lead（led_ 前缀；ENG-007：高意向互动创建或关联 Lead/Opportunity）"
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "机会标题（人读；非附录 C 最小字段，评审补丁补充便于列表展示）"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["SALES", "PARTNER"],
+      "description": "机会类型（母本 7.9.1：把有效意向转成销售或伙伴机会；附录 C：type）"
+    },
+    "pack_label": {
+      "type": "string",
+      "description": "行业 Pack 对三级结果模型的映射标签，如 有效询盘/经销商机会/RFQ/Demo/样品/报价（ENG-016：行业 Pack 可定义阶段映射；ENG-008 验收）"
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "NEW",
+        "QUALIFIED",
+        "MEETING",
+        "SAMPLE_DEMO",
+        "PROPOSAL",
+        "WON",
+        "LOST",
+        "WITHDRAWN",
+        "DOWNGRADED"
+      ],
+      "description": "阶段（母本 11.9：NEW→QUALIFIED→MEETING/SAMPLE_DEMO→PROPOSAL→WON/LOST；WITHDRAWN/DOWNGRADED 为 ENG-017/ANA-014 评审补丁；与 state-machines/opportunity.state.ts 一致）"
+    },
+    "stage_reason": {
+      "type": "string",
+      "description": "进入当前阶段的原因回写：LOST 失败原因（ENG-009/ENG-017）、WITHDRAWN 撤回原因、DOWNGRADED 降级原因（ENG-017/ANA-014）"
+    },
+    "qualification_status": {
+      "type": "string",
+      "enum": ["QUALIFIED_LEAD", "SALES_ACCEPTED", "VERIFIED"],
+      "description": "三级结果模型（ENG-016：Qualified Lead → Sales Accepted Opportunity → Verified Commercial Outcome；ANA-013 分别统计；与 state-machines/opportunity.state.ts QUALIFICATION_TRANSITIONS 一致）"
+    },
+    "owner_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "负责人 Membership（mem_ 前缀；ENG-010 验收：机会不能没有 Owner）"
+    },
+    "next_step": {
+      "type": "object",
+      "description": "下一步动作（ENG-010：下一步、截止时间、Owner；验收：机会不能没有下一步长期停滞）",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "下一步动作描述"
+        },
+        "due_at": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+          "description": "截止时间（ENG-010）"
+        },
+        "owner_id": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+          "description": "下一步执行人（缺省为机会 owner_id）"
+        }
+      },
+      "required": ["description", "due_at"],
+      "additionalProperties": false
+    },
+    "value_range": {
+      "type": "object",
+      "description": "金额区间（ENG-010、附录 C value_range；金额结构见母本 11.14）",
+      "properties": {
+        "min": { "$ref": "ggw://contracts/common/primitives#/$defs/money" },
+        "max": { "$ref": "ggw://contracts/common/primitives#/$defs/money" }
+      },
+      "required": ["min", "max"],
+      "additionalProperties": false
+    },
+    "offering_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "关联产品/服务 Offering（off_ 前缀；ENG-010：产品）"
+    },
+    "target_market": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/country_code",
+      "description": "目标市场（ENG-010：目标市场）"
+    },
+    "campaign_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "归因 Campaign（cam_ 前缀；附录 C：campaign；7.10.4 验收：任何 Opportunity 可回溯到 Campaign）"
+    },
+    "touchpoint_ids": {
+      "type": "array",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+      "description": "关联 Touchpoint 列表（tpt_ 前缀；附录 C：touchpoints；7.10.4 验收：任何 Opportunity 可回溯到至少一个 Touchpoint，报表侧要求 minItems>=1，创建初期允许为空）",
+      "default": []
+    },
+    "source": {
+      "type": "object",
+      "description": "转化来源与会话上下文（ENG-007 验收：转化动作保留来源和会话上下文）",
+      "properties": {
+        "conversation_id": {
+          "type": "string",
+          "description": "来源 Conversation ID（engage 域对象，跨域用字符串引用）"
+        },
+        "message_id": {
+          "type": "string",
+          "description": "触发转化的 Message ID"
+        },
+        "channel": {
+          "type": "string",
+          "description": "来源渠道，如 email/comment/dm/form/chat/manual（母本 7.9.6）"
+        },
+        "context_note": {
+          "type": "string",
+          "description": "人工录入或补充的来源说明"
+        }
+      },
+      "additionalProperties": false
+    },
+    "accepted_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "销售接受时间，即进入 SALES_ACCEPTED 的时刻（ENG-009：区分 AI Qualified 与 Sales Accepted；附录 C：accepted_at）"
+    },
+    "accepted_by": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "接受人 Membership（mem_ 前缀；ENG-016 验收：三级状态、进入条件、Owner 和证据均可审计）"
+    },
+    "merged_into_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "重复合并后指向保留的 Opportunity（opp_ 前缀；ANA-014：重复合并；被合并方 stage=WITHDRAWN）"
+    },
+    "crm_ref": {
+      "type": "object",
+      "description": "外部 CRM 引用（ENG-011：CRM 推送、双向同步；CRM 是可选外部系统，平台保留增长上下文）",
+      "properties": {
+        "system": { "type": "string", "description": "CRM 系统标识，如 hubspot/salesforce" },
+        "external_id": { "type": "string", "description": "CRM 侧对象 ID" },
+        "last_synced_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" }
+      },
+      "required": ["system", "external_id"],
+      "additionalProperties": false
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/version",
+      "description": "乐观锁（母本 11.16：Opportunity 更新使用 optimistic locking/version）"
+    }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "account_id",
+    "type",
+    "stage",
+    "qualification_status",
+    "owner_id",
+    "next_step",
+    "touchpoint_ids",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/campaign/outreach-sequence",
+  "title": "OutreachSequence",
+  "description": "外联序列：多步触达（邮件/社交），含步骤间延迟、进入条件与退出条件；独立版本化、可独立审批和重试（CAM-004；母本 5.8.2 市场语言邮件和跟进序列、7.6.2）。同一 Contact 在同一触达策略窗口内由分布式锁防止并发重复发送（母本 11.16）。ID 前缀 seq。负责域：campaign。schema_version=1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "seq_ 前缀实体 ID"
+    },
+    "workspace_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id"
+    },
+    "campaign_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "cam_ 前缀，所属 Campaign（CAM-004）"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "序列名称"
+    },
+    "status": {
+      "$ref": "ggw://contracts/campaign/channel-plan#/$defs/plan_status",
+      "description": "独立审批状态（CAM-004；枚举定义见 channel-plan.schema.json $defs.plan_status）"
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "description": "触达步骤，按 step_number 升序执行",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step_number": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "步骤序号，序列内唯一"
+          },
+          "channel_type": {
+            "$ref": "ggw://contracts/campaign/channel-plan#/$defs/channel_type",
+            "description": "本步骤执行渠道"
+          },
+          "template_ref": {
+            "type": "string",
+            "minLength": 1,
+            "description": "内容模板/ContentAsset 引用；ExecutionAuthorization 以 (template_ref, content_hash) 固化模板，内容变更后授权失配（CAM-008）"
+          },
+          "delay_hours": {
+            "type": "number",
+            "minimum": 0,
+            "description": "相对上一步完成的延迟（小时）；第一步为相对序列进入时刻"
+          },
+          "entry_condition": {
+            "type": "string",
+            "enum": ["ALWAYS", "NO_REPLY", "NO_OPEN", "CLICKED", "REPLIED_POSITIVE", "REPLIED_NEGATIVE"],
+            "default": "ALWAYS",
+            "description": "进入本步骤的前置条件（基于上一步的互动结果，母本 5.11 意向识别）"
+          }
+        },
+        "required": ["step_number", "channel_type", "template_ref", "delay_hours"],
+        "additionalProperties": false
+      }
+    },
+    "exit_conditions": {
+      "type": "array",
+      "minItems": 1,
+      "description": "成员退出序列的条件（母本 5.7 暂停和退出条件；5.10.1 退信异常自动暂停）",
+      "items": {
+        "type": "string",
+        "enum": [
+          "REPLIED",
+          "UNSUBSCRIBED",
+          "BOUNCED",
+          "COMPLAINT",
+          "MEETING_BOOKED",
+          "SUPPRESSED",
+          "MANUAL_EXIT"
+        ]
+      }
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/version",
+      "description": "乐观锁版本 = 独立版本化（CAM-004；母本 11.16）"
+    }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "campaign_id",
+    "name",
+    "status",
+    "steps",
+    "exit_conditions",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

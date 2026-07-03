@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/knowledge/claim",
+  "title": "Claim",
+  "description": "企业事实声明：可审核、可引用、可过期、可撤销的最小知识单元（母本 7.2.1、4.8.2：每个 Claim 包含来源、所有者、适用产品、适用市场、保密级别、生效/失效时间和可使用场景）。生命周期 INGESTED→EXTRACTED→NEEDS_REVIEW→APPROVED→EXPIRED/REVOKED（KNW-003、母本 11.9）；对外生成只允许使用适用范围内的 APPROVED Claim。状态取值与 state-machines/claim.state.ts 一致。负责域：knowledge；schema_version=1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^clm_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "前缀式实体 ID，前缀 clm（common/primitives entity_id 前缀映射）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "claim_type": {
+      "type": "string",
+      "enum": [
+        "COMPANY_FACT",
+        "PRODUCT_FACT",
+        "PARAMETER",
+        "MOQ",
+        "LEAD_TIME",
+        "CERTIFICATION",
+        "CASE_STUDY",
+        "CAPABILITY",
+        "FORBIDDEN_EXPRESSION",
+        "COMPLIANCE"
+      ],
+      "description": "事实类型（KNW-002：企业、产品、参数、MOQ、交期、认证、案例、能力、禁用表达；COMPLIANCE 为母本 4.10.4 Approved Compliance Claim 补充，仅限授权专家确认的结论）"
+    },
+    "statement": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 5000,
+      "description": "规范化事实陈述文本（人可读；对外生成引用的关键说法）"
+    },
+    "structured_value": {
+      "type": "object",
+      "description": "结构化取值，Schema 随 claim_type 变化（如 PARAMETER：{name,value,unit}；MOQ：{quantity,unit}；LEAD_TIME：{min_days,max_days}）。此叶子对象有意开放（不设 additionalProperties:false），由应用层按 claim_type 校验（KNW-002）"
+    },
+    "locale": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/locale",
+      "description": "陈述语言"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["INGESTED", "EXTRACTED", "NEEDS_REVIEW", "APPROVED", "EXPIRED", "REVOKED"],
+      "description": "生命周期状态（KNW-003、母本 11.9；转移表见 state-machines/claim.state.ts）"
+    },
+    "confidence": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/confidence",
+      "description": "提取置信度（KNW-002 验收：每项候选带来源、置信度和类型）"
+    },
+    "source_id": {
+      "type": "string",
+      "pattern": "^src_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "主要来源 KnowledgeSource（母本 4.8.2 来源；source 删除时本 Claim 级联失效，KNW-007）"
+    },
+    "evidence_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^evd_[0-9A-HJKMNP-TV-Z]{26}$" },
+      "description": "支撑证据 ClaimEvidence 列表（KNW-006）"
+    },
+    "owner_id": {
+      "type": "string",
+      "pattern": "^mem_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "事实所有者 Membership ID（母本 4.8.2 所有者）"
+    },
+    "confidentiality_level": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/privacy_classification",
+      "description": "保密级别（KNW-005；检索和模型上下文先做权限过滤；母本 12.11 数据分级）"
+    },
+    "applicable_offering_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^off_[0-9A-HJKMNP-TV-Z]{26}$" },
+      "description": "适用产品（KNW-005；空数组表示适用全部产品）"
+    },
+    "applicable_markets": {
+      "type": "array",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/country_code" },
+      "description": "适用市场（KNW-005；空数组表示适用全部市场）"
+    },
+    "applicable_channels": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 100 },
+      "description": "适用渠道标识，如 linkedin、email、website（KNW-005；空数组表示适用全部渠道）"
+    },
+    "allowed_purposes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "CONTENT_GENERATION",
+          "OUTREACH",
+          "SALES_REPLY",
+          "RESEARCH",
+          "INTERNAL_REFERENCE"
+        ]
+      },
+      "description": "可使用场景/用途（KNW-005 使用目的、母本 4.8.2 可使用场景；空数组表示不限用途）"
+    },
+    "effective_from": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "生效时间（母本 4.8.2 生效/失效时间）"
+    },
+    "expires_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "失效时间（KNW-009 事实有效期；到期进入 EXPIRED，过期关键 Claim 阻止高风险对外内容）"
+    },
+    "last_verified_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "最近人工/重抓验证时间（KNW-009 新鲜度）"
+    },
+    "reviewed_by": {
+      "type": "string",
+      "pattern": "^mem_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "评审人 Membership ID（事实审核台，母本 4.8.4）"
+    },
+    "approved_by": {
+      "type": "string",
+      "pattern": "^mem_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "批准人 Membership ID；进入 APPROVED 时必填（ClaimApproved 事件）"
+    },
+    "approved_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "revoked_by": {
+      "type": "string",
+      "pattern": "^mem_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "撤销人 Membership ID（母本 4.8.5：可查看和撤销每条 Claim）"
+    },
+    "revoked_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "revoked_reason": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "撤销原因（如来源删除级联 KNW-007、事实错误、审核拒绝）"
+    },
+    "superseded_by_claim_id": {
+      "type": "string",
+      "pattern": "^clm_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "被哪个新版本 Claim 取代（KNW-004 版本比较；不同来源不一致时不静默覆盖）"
+    },
+    "conflict_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^kcf_[0-9A-HJKMNP-TV-Z]{26}$" },
+      "description": "关联的未决/历史 KnowledgeConflict（KNW-004）"
+    },
+    "sharing_scope": {
+      "type": "string",
+      "enum": ["WORKSPACE_PRIVATE", "ANONYMIZED_GENERAL", "PACK_CANDIDATE"],
+      "description": "知识回流分级：客户私有/匿名通用/Pack 候选（KNW-010、EXP-007；默认 WORKSPACE_PRIVATE，未经授权的客户资料不进入通用知识）",
+      "default": "WORKSPACE_PRIVATE"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "claim_type",
+    "statement",
+    "status",
+    "confidentiality_level",
+    "sharing_scope",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

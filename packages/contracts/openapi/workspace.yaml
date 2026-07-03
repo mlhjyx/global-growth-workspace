@@ -1,0 +1,1986 @@
+# workspace 域 REST API（OpenAPI 3.1）
+# 负责域：workspace | schema_version: 1
+# 来源：母本 7.1（WSP-001..010）、11.12 API 分组（/workspaces：组织、成员、品牌、策略、预算和审计）、
+#       11.15 错误模型、11.16 幂等与乐观锁。
+# 约定：所有写操作要求 Idempotency-Key 头；更新用 If-Match（version）乐观锁，冲突返回 VERSION_CONFLICT；
+#       列表统一 cursor 分页 { items, next_cursor }；错误统一 { error_code, message, details?, retryable, policy_reason_codes? }。
+openapi: 3.1.0
+info:
+  title: Workspace Domain API
+  version: 1.0.0
+  description: |
+    组织、Workspace、品牌、成员、权限、策略、预算、审批规则、审计与控制开关（母本 7.1、11.12 /workspaces 分组）。
+    所有端点按 workspace_id 强制租户隔离（WSP-001 验收、ADR-001）。
+
+servers:
+  - url: /api/v1
+    description: BFF/API Gateway（母本 11.18）
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: organizations
+    description: 组织（WSP-001、WSP-004）
+  - name: workspaces
+    description: Workspace 生命周期（WSP-001、WSP-008）
+  - name: brands
+    description: 品牌（WSP-001）
+  - name: memberships
+    description: 成员与角色（WSP-002、WSP-004、WSP-009）
+  - name: permission-grants
+    description: RBAC + ABAC 授权（WSP-003）
+  - name: policies
+    description: Workspace 策略（WSP-003）
+  - name: budgets
+    description: 预算与配额（WSP-005）
+  - name: approval-rules
+    description: 审批规则（WSP-006）
+  - name: audit-logs
+    description: 审计日志（WSP-010）
+  - name: control-switches
+    description: Kill Switch / Campaign Pause / Provider Disable（WSP-007）
+
+paths:
+  /organizations:
+    get:
+      operationId: listOrganizations
+      tags: [organizations]
+      summary: 列出当前用户可见的组织
+      description: "WSP-001/WSP-004。代理商可见其全部客户组织。policy: organization.read"
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: 组织列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '../json-schema/workspace/organization.schema.json'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+                additionalProperties: false
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    post:
+      operationId: createOrganization
+      tags: [organizations]
+      summary: 创建组织
+      description: "WSP-001。创建企业或代理商顶层账户，发布 OrganizationCreated。policy: organization.create"
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationCreate'
+      responses:
+        '201':
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/organization.schema.json'
+        '400':
+          $ref: '#/components/responses/InvalidSchema'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /organizations/{organization_id}:
+    parameters:
+      - $ref: '#/components/parameters/OrganizationId'
+    get:
+      operationId: getOrganization
+      tags: [organizations]
+      summary: 获取组织
+      description: "WSP-001。policy: organization.read"
+      responses:
+        '200':
+          description: 组织详情
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/organization.schema.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    patch:
+      operationId: updateOrganization
+      tags: [organizations]
+      summary: 更新组织
+      description: "WSP-001。乐观锁 If-Match=version（母本 11.16）。policy: organization.configure"
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationUpdate'
+      responses:
+        '200':
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/organization.schema.json'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /workspaces:
+    get:
+      operationId: listWorkspaces
+      tags: [workspaces]
+      summary: 列出当前用户可访问的 Workspace
+      description: "WSP-001/WSP-004。切换 Workspace 后缓存、搜索和任务上下文不泄漏（WSP-004 验收）。policy: workspace.read"
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: organization_id
+          in: query
+          description: 按组织过滤
+          schema:
+            type: string
+            pattern: '^org_[0-9A-HJKMNP-TV-Z]{26}$'
+      responses:
+        '200':
+          description: Workspace 列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '../json-schema/workspace/workspace.schema.json'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+                additionalProperties: false
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    post:
+      operationId: createWorkspace
+      tags: [workspaces]
+      summary: 创建 Workspace
+      description: "WSP-001。创建后所有对象自动带 workspace_id；发布 WorkspaceCreated。policy: workspace.create"
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceCreate'
+      responses:
+        '201':
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/workspace.schema.json'
+        '400':
+          $ref: '#/components/responses/InvalidSchema'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /workspaces/{workspace_id}:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      operationId: getWorkspace
+      tags: [workspaces]
+      summary: 获取 Workspace
+      description: "WSP-001。policy: workspace.read"
+      responses:
+        '200':
+          description: Workspace 详情
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/workspace.schema.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    patch:
+      operationId: updateWorkspace
+      tags: [workspaces]
+      summary: 更新 Workspace 设置
+      description: "WSP-001/WSP-008（保留期设置）。乐观锁 If-Match=version。设置变更记审计 WORKSPACE_SETTINGS_CHANGE（WSP-010）。policy: workspace.configure"
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceUpdate'
+      responses:
+        '200':
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/workspace.schema.json'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    delete:
+      operationId: requestWorkspaceClose
+      tags: [workspaces]
+      summary: 请求关闭 Workspace（进入 CLOSING）
+      description: |
+        WSP-008 账户关闭流程：状态转 CLOSING（state-machines/workspace.state.ts），触发删除编排
+        Durable Workflow（母本 11.17），发布 WorkspaceCloseRequested；记审计 ACCOUNT_CLOSE_REQUESTED。
+        高风险动作，命中审批规则时需有效 Approval Token（WSP-006）。policy: workspace.close
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '202':
+          description: 关闭请求已受理，返回删除编排 Workflow ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workspace_id:
+                    type: string
+                    pattern: '^ws_[0-9A-HJKMNP-TV-Z]{26}$'
+                  deletion_workflow_id:
+                    type: string
+                required: [workspace_id, deletion_workflow_id]
+                additionalProperties: false
+        '403':
+          $ref: '#/components/responses/ApprovalRequired'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /workspaces/{workspace_id}/brands:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      operationId: listBrands
+      tags: [brands]
+      summary: 列出品牌
+      description: "WSP-001。policy: brand.read"
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: 品牌列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '../json-schema/workspace/brand.schema.json'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+                additionalProperties: false
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    post:
+      operationId: createBrand
+      tags: [brands]
+      summary: 创建品牌
+      description: "WSP-001。发布 BrandCreated。policy: brand.create"
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrandCreate'
+      responses:
+        '201':
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/brand.schema.json'
+        '400':
+          $ref: '#/components/responses/InvalidSchema'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /workspaces/{workspace_id}/brands/{brand_id}:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - name: brand_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^brd_[0-9A-HJKMNP-TV-Z]{26}$'
+    get:
+      operationId: getBrand
+      tags: [brands]
+      summary: 获取品牌
+      description: "WSP-001。policy: brand.read"
+      responses:
+        '200':
+          description: 品牌详情
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/brand.schema.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    patch:
+      operationId: updateBrand
+      tags: [brands]
+      summary: 更新品牌
+      description: "WSP-001。乐观锁 If-Match=version。policy: brand.update"
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrandUpdate'
+      responses:
+        '200':
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/brand.schema.json'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /workspaces/{workspace_id}/memberships:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      operationId: listMemberships
+      tags: [memberships]
+      summary: 列出成员
+      description: "WSP-002。policy: membership.read"
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          description: 按状态过滤（state-machines/membership.state.ts）
+          schema:
+            type: string
+            enum: [INVITED, ACTIVE, SUSPENDED, REMOVED]
+        - name: role
+          in: query
+          description: 按角色过滤（WSP-002）
+          schema:
+            $ref: '../json-schema/workspace/membership.schema.json#/$defs/role'
+      responses:
+        '200':
+          description: 成员列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '../json-schema/workspace/membership.schema.json'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+                additionalProperties: false
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    post:
+      operationId: inviteMembership
+      tags: [memberships]
+      summary: 邀请成员（创建 INVITED 状态的 Membership）
+      description: "WSP-002/WSP-004。发布 MembershipChanged(change_type=INVITED)；记审计 MEMBER_INVITED（WSP-010）。policy: membership.manage"
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MembershipCreate'
+      responses:
+        '201':
+          description: 已邀请
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/membership.schema.json'
+        '400':
+          $ref: '#/components/responses/InvalidSchema'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /workspaces/{workspace_id}/memberships/{membership_id}:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - name: membership_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^mem_[0-9A-HJKMNP-TV-Z]{26}$'
+    get:
+      operationId: getMembership
+      tags: [memberships]
+      summary: 获取成员
+      description: "WSP-002。policy: membership.read"
+      responses:
+        '200':
+          description: 成员详情
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/membership.schema.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    patch:
+      operationId: updateMembership
+      tags: [memberships]
+      summary: 更新成员角色/状态
+      description: |
+        WSP-002。状态转移须符合 state-machines/membership.state.ts；角色变更发布
+        MembershipChanged(change_type=ROLE_CHANGED)，记审计 ROLE_CHANGE；权限变更立即影响新请求，
+        运行中的高风险任务重新校验（母本 7.1.4）。乐观锁 If-Match=version。policy: membership.manage
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MembershipUpdate'
+      responses:
+        '200':
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/membership.schema.json'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    delete:
+      operationId: removeMembership
+      tags: [memberships]
+      summary: 移除成员（状态转 REMOVED）
+      description: "WSP-002/WSP-009。发布 MembershipChanged(change_type=REMOVED)；记审计 MEMBER_REMOVED。policy: membership.manage"
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '204':
+          description: 已移除
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /workspaces/{workspace_id}/permission-grants:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      operationId: listPermissionGrants
+      tags: [permission-grants]
+      summary: 列出权限授予
+      description: "WSP-003。policy: permission_grant.read"
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: subject_type
+          in: query
+          schema:
+            type: string
+            enum: [ROLE, MEMBERSHIP]
+        - name: resource_type
+          in: query
+          schema:
+            $ref: '../json-schema/workspace/permission-grant.schema.json#/$defs/resource_type'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, EXPIRED, REVOKED]
+      responses:
+        '200':
+          description: 授权列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '../json-schema/workspace/permission-grant.schema.json'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+                additionalProperties: false
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    post:
+      operationId: createPermissionGrant
+      tags: [permission-grants]
+      summary: 创建权限授予
+      description: "WSP-003。发布 PermissionGrantChanged(CREATED)；记审计 PERMISSION_CHANGE（WSP-010）。policy: permission_grant.manage"
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionGrantCreate'
+      responses:
+        '201':
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/permission-grant.schema.json'
+        '400':
+          $ref: '#/components/responses/InvalidSchema'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /workspaces/{workspace_id}/permission-grants/{grant_id}:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - name: grant_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^pgr_[0-9A-HJKMNP-TV-Z]{26}$'
+    get:
+      operationId: getPermissionGrant
+      tags: [permission-grants]
+      summary: 获取权限授予
+      description: "WSP-003。policy: permission_grant.read"
+      responses:
+        '200':
+          description: 授权详情
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/permission-grant.schema.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    patch:
+      operationId: updatePermissionGrant
+      tags: [permission-grants]
+      summary: 更新权限授予
+      description: "WSP-003。发布 PermissionGrantChanged(UPDATED)。乐观锁 If-Match=version。policy: permission_grant.manage"
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionGrantUpdate'
+      responses:
+        '200':
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/permission-grant.schema.json'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    delete:
+      operationId: revokePermissionGrant
+      tags: [permission-grants]
+      summary: 撤销权限授予（status 转 REVOKED）
+      description: "WSP-003。发布 PermissionGrantChanged(REVOKED)；立即影响新请求（母本 7.1.4）。policy: permission_grant.manage"
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '204':
+          description: 已撤销
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /workspaces/{workspace_id}/policies:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      operationId: listPolicies
+      tags: [policies]
+      summary: 列出 Workspace 策略
+      description: "WSP-003。policy: policy.read"
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: policy_type
+          in: query
+          schema:
+            type: string
+            enum: [DATA_RIGHTS, PRIVACY_COMPLIANCE, MODEL_ROUTING, CONTENT_GOVERNANCE, CHANNEL_GOVERNANCE, OUTREACH_LIMIT, EXPORT_CONTROL, RETENTION, APPROVAL_GOVERNANCE, BUDGET_ENFORCEMENT]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, ARCHIVED]
+      responses:
+        '200':
+          description: 策略列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '../json-schema/workspace/workspace-policy.schema.json'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+                additionalProperties: false
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    post:
+      operationId: createPolicy
+      tags: [policies]
+      summary: 创建策略
+      description: "WSP-003。发布 PolicyUpdated(CREATED)；记审计 POLICY_CHANGE（WSP-010）。高风险变更可命中审批规则（WSP-006 POLICY_CHANGE）。policy: policy.manage"
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyCreate'
+      responses:
+        '201':
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/workspace-policy.schema.json'
+        '400':
+          $ref: '#/components/responses/InvalidSchema'
+        '403':
+          $ref: '#/components/responses/ApprovalRequired'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /workspaces/{workspace_id}/policies/{policy_id}:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - name: policy_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^pol_[0-9A-HJKMNP-TV-Z]{26}$'
+    get:
+      operationId: getPolicy
+      tags: [policies]
+      summary: 获取策略
+      description: "WSP-003。policy: policy.read"
+      responses:
+        '200':
+          description: 策略详情
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/workspace-policy.schema.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    patch:
+      operationId: updatePolicy
+      tags: [policies]
+      summary: 更新策略
+      description: "WSP-003。发布 PolicyUpdated(UPDATED)；策略引擎缓存失效。乐观锁 If-Match=version。policy: policy.manage"
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyUpdate'
+      responses:
+        '200':
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/workspace-policy.schema.json'
+        '403':
+          $ref: '#/components/responses/ApprovalRequired'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /workspaces/{workspace_id}/budgets:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      operationId: listBudgets
+      tags: [budgets]
+      summary: 列出预算
+      description: "WSP-005。policy: budget.read"
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: budget_category
+          in: query
+          schema:
+            type: string
+            enum: [MODEL, DATA, MEDIA, EMAIL, EXPERT]
+        - name: health_status
+          in: query
+          description: 按健康度过滤（state-machines/budget.state.ts）
+          schema:
+            type: string
+            enum: [OK, WARNING, EXCEEDED]
+      responses:
+        '200':
+          description: 预算列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '../json-schema/workspace/budget.schema.json'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+                additionalProperties: false
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    post:
+      operationId: createBudget
+      tags: [budgets]
+      summary: 创建预算
+      description: "WSP-005。五类预算（MODEL/DATA/MEDIA/EMAIL/EXPERT）；记审计 BUDGET_CHANGE（WSP-010）。policy: budget.manage"
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BudgetCreate'
+      responses:
+        '201':
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/budget.schema.json'
+        '400':
+          $ref: '#/components/responses/InvalidSchema'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /workspaces/{workspace_id}/budgets/{budget_id}:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - name: budget_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^bud_[0-9A-HJKMNP-TV-Z]{26}$'
+    get:
+      operationId: getBudget
+      tags: [budgets]
+      summary: 获取预算（含用量投影）
+      description: "WSP-005。policy: budget.read"
+      responses:
+        '200':
+          description: 预算详情
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/budget.schema.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    patch:
+      operationId: updateBudget
+      tags: [budgets]
+      summary: 更新预算（限额/阈值/归档）
+      description: |
+        WSP-005。上调硬限制可触发 BudgetRecovered；变更命中审批规则 BUDGET_CHANGE 时需
+        Approval Token（WSP-006）。乐观锁 If-Match=version。policy: budget.manage
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BudgetUpdate'
+      responses:
+        '200':
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/budget.schema.json'
+        '403':
+          $ref: '#/components/responses/ApprovalRequired'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /workspaces/{workspace_id}/approval-rules:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      operationId: listApprovalRules
+      tags: [approval-rules]
+      summary: 列出审批规则
+      description: "WSP-006。policy: approval_rule.read"
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, SUSPENDED, EXPIRED, ARCHIVED]
+      responses:
+        '200':
+          description: 审批规则列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '../json-schema/workspace/approval-rule.schema.json'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+                additionalProperties: false
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    post:
+      operationId: createApprovalRule
+      tags: [approval-rules]
+      summary: 创建审批规则
+      description: "WSP-006。审批人/替代审批人/金额与风险阈值/有效期；发布 ApprovalRuleUpdated(CREATED)。policy: approval_rule.manage"
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalRuleCreate'
+      responses:
+        '201':
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/approval-rule.schema.json'
+        '400':
+          $ref: '#/components/responses/InvalidSchema'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /workspaces/{workspace_id}/approval-rules/{approval_rule_id}:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - name: approval_rule_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^apr_[0-9A-HJKMNP-TV-Z]{26}$'
+    get:
+      operationId: getApprovalRule
+      tags: [approval-rules]
+      summary: 获取审批规则
+      description: "WSP-006。policy: approval_rule.read"
+      responses:
+        '200':
+          description: 审批规则详情
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/approval-rule.schema.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    patch:
+      operationId: updateApprovalRule
+      tags: [approval-rules]
+      summary: 更新审批规则
+      description: "WSP-006。发布 ApprovalRuleUpdated(UPDATED/SUSPENDED/ARCHIVED)。乐观锁 If-Match=version。policy: approval_rule.manage"
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalRuleUpdate'
+      responses:
+        '200':
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/approval-rule.schema.json'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /workspaces/{workspace_id}/audit-logs:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      operationId: queryAuditLogs
+      tags: [audit-logs]
+      summary: 查询审计日志
+      description: |
+        WSP-010 验收：管理员可按人（actor_id）、对象（resource_type/resource_id）、动作（action_type）
+        和时间（occurred_from/occurred_to）查询。条目只增不改；保留策略见母本 11.17。policy: audit_log.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: actor_id
+          in: query
+          description: 按操作者查询（WSP-010「按人」）
+          schema:
+            type: string
+        - name: action_type
+          in: query
+          description: 按动作查询（WSP-010「按动作」；枚举见 audit-log-entry.schema.json）
+          schema:
+            type: string
+        - name: resource_type
+          in: query
+          description: 按对象类型查询（WSP-010「按对象」）
+          schema:
+            $ref: '../json-schema/workspace/permission-grant.schema.json#/$defs/resource_type'
+        - name: resource_id
+          in: query
+          description: 按对象 ID 查询
+          schema:
+            type: string
+        - name: result
+          in: query
+          schema:
+            type: string
+            enum: [SUCCESS, DENIED, FAILED]
+        - name: occurred_from
+          in: query
+          description: 起始时间（含，UTC，WSP-010「按时间」）
+          schema:
+            type: string
+            format: date-time
+        - name: occurred_to
+          in: query
+          description: 截止时间（不含，UTC）
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: 审计条目列表（按 occurred_at 倒序）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '../json-schema/workspace/audit-log-entry.schema.json'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+                additionalProperties: false
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /workspaces/{workspace_id}/control-switches:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      operationId: listControlSwitches
+      tags: [control-switches]
+      summary: 列出控制开关
+      description: "WSP-007。policy: control_switch.read"
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: switch_type
+          in: query
+          schema:
+            type: string
+            enum: [KILL_SWITCH, CAMPAIGN_PAUSE, PROVIDER_DISABLE]
+        - name: state
+          in: query
+          description: 按状态过滤（state-machines/control-switch.state.ts）
+          schema:
+            type: string
+            enum: [ACTIVE, RELEASED]
+      responses:
+        '200':
+          description: 控制开关列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '../json-schema/workspace/control-switch.schema.json'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+                additionalProperties: false
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+    post:
+      operationId: activateControlSwitch
+      tags: [control-switches]
+      summary: 触发控制开关（Kill Switch / Campaign Pause / Provider Disable）
+      description: |
+        WSP-007 验收：停止后未开始任务不再执行，已执行项保留审计。按 switch_type 发布
+        KillSwitchActivated / ProviderDisabled / CampaignPaused（后者为 campaign 域事件）；
+        记审计 KILL_SWITCH_ACTIVATED / PROVIDER_DISABLED / CAMPAIGN_PAUSED（WSP-010）。
+        policy: control_switch.activate
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ControlSwitchActivate'
+      responses:
+        '201':
+          description: 已触发
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/control-switch.schema.json'
+        '400':
+          $ref: '#/components/responses/InvalidSchema'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+  /workspaces/{workspace_id}/control-switches/{control_switch_id}/release:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - name: control_switch_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^csw_[0-9A-HJKMNP-TV-Z]{26}$'
+    post:
+      operationId: releaseControlSwitch
+      tags: [control-switches]
+      summary: 解除控制开关（ACTIVE -> RELEASED）
+      description: |
+        WSP-007。状态转移见 state-machines/control-switch.state.ts；按 switch_type 发布
+        KillSwitchReleased / ProviderEnabled / CampaignResumed（后者为 campaign 域事件）；
+        记审计 KILL_SWITCH_RELEASED / PROVIDER_ENABLED / CAMPAIGN_RESUMED。policy: control_switch.release
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+                  maxLength: 1000
+                  description: 解除说明（审计可读）
+              additionalProperties: false
+      responses:
+        '200':
+          description: 已解除
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/workspace/control-switch.schema.json'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 平台会话令牌；SSO 见 WSP-009
+
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: 写操作幂等键（母本 11.16：所有写操作使用稳定 idempotency_key）
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: 乐观锁：当前对象 version（母本 11.16）；不匹配返回 409 VERSION_CONFLICT（母本 11.15）
+      schema:
+        type: string
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: 游标分页起点（conventions.md 统一 cursor 分页）
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: 每页条数
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+    WorkspaceId:
+      name: workspace_id
+      in: path
+      required: true
+      description: 租户边界（ADR-001；跨租户访问被拒绝，WSP-001 验收）
+      schema:
+        type: string
+        pattern: '^ws_[0-9A-HJKMNP-TV-Z]{26}$'
+    OrganizationId:
+      name: organization_id
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^org_[0-9A-HJKMNP-TV-Z]{26}$'
+
+  responses:
+    ErrorDefault:
+      description: 统一错误（母本 11.15 错误模型与用户恢复）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InvalidSchema:
+      description: 请求体校验失败（error_code=INVALID_SCHEMA，不执行，返回字段错误）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: 对象不存在或不属于该 Workspace（跨租户按不存在处理，WSP-001 验收）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    VersionConflict:
+      description: 乐观锁冲突（error_code=VERSION_CONFLICT，返回当前版本和 Diff，母本 11.15）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ApprovalRequired:
+      description: 需审批（error_code=AUTHORIZATION_REQUIRED，系统生成审批任务，母本 11.15；WSP-006）或被策略拒绝（error_code=ACTION_DENIED）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      description: 统一错误模型（conventions.md、母本 11.15）；error_code 用母本机器码
+      properties:
+        error_code:
+          type: string
+          description: 机器码（母本 11.15），如 INVALID_SCHEMA、TOKEN_EXPIRED、ACTION_DENIED、AUTHORIZATION_REQUIRED、PROVIDER_RATE_LIMIT、BUDGET_EXCEEDED、PROVIDER_UNAVAILABLE、UNSUPPORTED_OPERATION、LICENSE_RESTRICTED、COMPLIANCE_REVIEW_REQUIRED、CIRCUIT_BREAKER_OPEN、VERSION_CONFLICT
+          examples: [ACTION_DENIED, AUTHORIZATION_REQUIRED, BUDGET_EXCEEDED, VERSION_CONFLICT, LICENSE_RESTRICTED]
+        message:
+          type: string
+          description: 人类可读错误信息（中文/按 locale）
+        details:
+          type: object
+          description: 字段级错误、当前版本 Diff 等补充信息（结构随 error_code 而异）
+          additionalProperties: true
+        retryable:
+          type: boolean
+          description: 客户端是否可原样重试（母本 11.15 系统行为列）
+        policy_reason_codes:
+          type: array
+          items:
+            type: string
+          description: 命中的策略原因码（workspace-policy rule.reason_code；母本 11.15 Policy 行）
+      required: [error_code, message, retryable]
+      additionalProperties: false
+
+    OrganizationCreate:
+      type: object
+      description: WSP-001 创建组织
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        display_name:
+          type: string
+          maxLength: 200
+        legal_name:
+          type: string
+          maxLength: 300
+        org_type:
+          type: string
+          enum: [COMPANY, AGENCY]
+        default_locale:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/locale'
+        default_timezone:
+          type: string
+          pattern: '^[A-Za-z0-9_+\-]+(/[A-Za-z0-9_+\-]+)*$'
+        data_region:
+          type: string
+          enum: [CN, SG, US, EU]
+        business_type:
+          type: string
+          enum: [MANUFACTURER, TRADER, SAAS, PROFESSIONAL_SERVICE, BRAND_ECOMMERCE, AGENCY_SERVICE, OTHER]
+        billing_email:
+          type: string
+          format: email
+      required: [name, org_type, default_locale, default_timezone, data_region, business_type]
+      additionalProperties: false
+
+    OrganizationUpdate:
+      type: object
+      description: WSP-001 更新组织（不可变更 org_type/data_region，区域迁移走专项流程）
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        display_name:
+          type: string
+          maxLength: 200
+        legal_name:
+          type: string
+          maxLength: 300
+        default_locale:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/locale'
+        default_timezone:
+          type: string
+          pattern: '^[A-Za-z0-9_+\-]+(/[A-Za-z0-9_+\-]+)*$'
+        business_type:
+          type: string
+          enum: [MANUFACTURER, TRADER, SAAS, PROFESSIONAL_SERVICE, BRAND_ECOMMERCE, AGENCY_SERVICE, OTHER]
+        billing_email:
+          type: string
+          format: email
+      minProperties: 1
+      additionalProperties: false
+
+    WorkspaceCreate:
+      type: object
+      description: WSP-001 创建 Workspace
+      properties:
+        organization_id:
+          type: string
+          pattern: '^org_[0-9A-HJKMNP-TV-Z]{26}$'
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        display_name:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        default_locale:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/locale'
+        default_timezone:
+          type: string
+          pattern: '^[A-Za-z0-9_+\-]+(/[A-Za-z0-9_+\-]+)*$'
+        data_region:
+          type: string
+          enum: [CN, SG, US, EU]
+        business_type:
+          type: string
+          enum: [MANUFACTURER, TRADER, SAAS, PROFESSIONAL_SERVICE, BRAND_ECOMMERCE, AGENCY_SERVICE, OTHER]
+        default_currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+      required: [organization_id, name, default_locale, default_timezone, data_region, business_type]
+      additionalProperties: false
+
+    WorkspaceUpdate:
+      type: object
+      description: WSP-001/WSP-008 更新 Workspace 设置（data_region 不可变更）
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        display_name:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        default_locale:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/locale'
+        default_timezone:
+          type: string
+          pattern: '^[A-Za-z0-9_+\-]+(/[A-Za-z0-9_+\-]+)*$'
+        business_type:
+          type: string
+          enum: [MANUFACTURER, TRADER, SAAS, PROFESSIONAL_SERVICE, BRAND_ECOMMERCE, AGENCY_SERVICE, OTHER]
+        default_currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        data_retention_days:
+          type: integer
+          minimum: 1
+          description: WSP-008 保留期
+      minProperties: 1
+      additionalProperties: false
+
+    BrandCreate:
+      type: object
+      description: WSP-001 创建品牌
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        display_name:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        default_locale:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/locale'
+        locales:
+          type: array
+          items:
+            $ref: '../json-schema/common/primitives.schema.json#/$defs/locale'
+          uniqueItems: true
+        target_markets:
+          type: array
+          items:
+            $ref: '../json-schema/common/primitives.schema.json#/$defs/country_code'
+          uniqueItems: true
+        industry:
+          type: string
+          maxLength: 200
+        domains:
+          type: array
+          items:
+            type: string
+            format: hostname
+          uniqueItems: true
+        logo_asset_id:
+          type: string
+      required: [name, default_locale]
+      additionalProperties: false
+
+    BrandUpdate:
+      type: object
+      description: WSP-001 更新品牌
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        display_name:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        default_locale:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/locale'
+        locales:
+          type: array
+          items:
+            $ref: '../json-schema/common/primitives.schema.json#/$defs/locale'
+          uniqueItems: true
+        target_markets:
+          type: array
+          items:
+            $ref: '../json-schema/common/primitives.schema.json#/$defs/country_code'
+          uniqueItems: true
+        industry:
+          type: string
+          maxLength: 200
+        domains:
+          type: array
+          items:
+            type: string
+            format: hostname
+          uniqueItems: true
+        logo_asset_id:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, ARCHIVED]
+      minProperties: 1
+      additionalProperties: false
+
+    MembershipCreate:
+      type: object
+      description: WSP-002 邀请成员（初始状态 INVITED）
+      properties:
+        user_id:
+          type: string
+          pattern: '^usr_[0-9A-HJKMNP-TV-Z]{26}$'
+          description: 已注册用户 ID；与 invite_email 二选一
+        invite_email:
+          type: string
+          format: email
+          description: 未注册用户邮箱邀请；与 user_id 二选一
+        roles:
+          type: array
+          items:
+            $ref: '../json-schema/workspace/membership.schema.json#/$defs/role'
+          minItems: 1
+          uniqueItems: true
+        granted_via:
+          type: string
+          enum: [DIRECT, SCIM, AGENCY_DELEGATION]
+          default: DIRECT
+        expires_at:
+          type: string
+          format: date-time
+          description: 临时访问到期时间（可选）
+      required: [roles]
+      anyOf:
+        - required: [user_id]
+        - required: [invite_email]
+      additionalProperties: false
+
+    MembershipUpdate:
+      type: object
+      description: WSP-002 更新成员角色/状态（转移须符合 state-machines/membership.state.ts）
+      properties:
+        roles:
+          type: array
+          items:
+            $ref: '../json-schema/workspace/membership.schema.json#/$defs/role'
+          minItems: 1
+          uniqueItems: true
+        status:
+          type: string
+          enum: [ACTIVE, SUSPENDED]
+          description: 仅允许激活/停用；移除用 DELETE
+        expires_at:
+          type: [string, 'null']
+          format: date-time
+      minProperties: 1
+      additionalProperties: false
+
+    PermissionGrantCreate:
+      type: object
+      description: WSP-003 创建授权（字段语义见 permission-grant.schema.json）
+      properties:
+        subject_type:
+          type: string
+          enum: [ROLE, MEMBERSHIP]
+        subject_role:
+          $ref: '../json-schema/workspace/membership.schema.json#/$defs/role'
+        subject_membership_id:
+          type: string
+          pattern: '^mem_[0-9A-HJKMNP-TV-Z]{26}$'
+        effect:
+          type: string
+          enum: [ALLOW, DENY]
+        resource_type:
+          $ref: '../json-schema/workspace/permission-grant.schema.json#/$defs/resource_type'
+        resource_id:
+          type: string
+        actions:
+          type: array
+          items:
+            $ref: '../json-schema/workspace/permission-grant.schema.json#/$defs/action'
+          minItems: 1
+          uniqueItems: true
+        field_scope:
+          type: object
+          properties:
+            allowed_fields:
+              type: array
+              items:
+                type: string
+              uniqueItems: true
+            denied_fields:
+              type: array
+              items:
+                type: string
+              uniqueItems: true
+          additionalProperties: false
+        channel_account_ids:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+        conditions:
+          type: array
+          items:
+            $ref: '../json-schema/workspace/permission-grant.schema.json#/$defs/condition'
+        priority:
+          type: integer
+          minimum: 0
+        valid_from:
+          type: string
+          format: date-time
+        valid_until:
+          type: string
+          format: date-time
+        reason:
+          type: string
+          maxLength: 500
+      required: [subject_type, effect, resource_type, actions]
+      additionalProperties: false
+
+    PermissionGrantUpdate:
+      type: object
+      description: WSP-003 更新授权（主体与资源类型不可变；需变更时撤销重建）
+      properties:
+        effect:
+          type: string
+          enum: [ALLOW, DENY]
+        actions:
+          type: array
+          items:
+            $ref: '../json-schema/workspace/permission-grant.schema.json#/$defs/action'
+          minItems: 1
+          uniqueItems: true
+        field_scope:
+          type: object
+          properties:
+            allowed_fields:
+              type: array
+              items:
+                type: string
+              uniqueItems: true
+            denied_fields:
+              type: array
+              items:
+                type: string
+              uniqueItems: true
+          additionalProperties: false
+        channel_account_ids:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+        conditions:
+          type: array
+          items:
+            $ref: '../json-schema/workspace/permission-grant.schema.json#/$defs/condition'
+        priority:
+          type: integer
+          minimum: 0
+        valid_from:
+          type: string
+          format: date-time
+        valid_until:
+          type: string
+          format: date-time
+        reason:
+          type: string
+          maxLength: 500
+      minProperties: 1
+      additionalProperties: false
+
+    PolicyCreate:
+      type: object
+      description: WSP-003 创建策略（rule 结构见 workspace-policy.schema.json）
+      properties:
+        policy_type:
+          type: string
+          enum: [DATA_RIGHTS, PRIVACY_COMPLIANCE, MODEL_ROUTING, CONTENT_GOVERNANCE, CHANNEL_GOVERNANCE, OUTREACH_LIMIT, EXPORT_CONTROL, RETENTION, APPROVAL_GOVERNANCE, BUDGET_ENFORCEMENT]
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        rules:
+          type: array
+          items:
+            $ref: '../json-schema/workspace/workspace-policy.schema.json#/$defs/rule'
+          minItems: 1
+        enforcement_mode:
+          type: string
+          enum: [ENFORCE, MONITOR, DISABLED]
+          default: MONITOR
+        priority:
+          type: integer
+          minimum: 0
+        effective_from:
+          type: string
+          format: date-time
+        effective_until:
+          type: string
+          format: date-time
+      required: [policy_type, name, rules]
+      additionalProperties: false
+
+    PolicyUpdate:
+      type: object
+      description: WSP-003 更新策略（policy_type 不可变）
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        rules:
+          type: array
+          items:
+            $ref: '../json-schema/workspace/workspace-policy.schema.json#/$defs/rule'
+          minItems: 1
+        enforcement_mode:
+          type: string
+          enum: [ENFORCE, MONITOR, DISABLED]
+        priority:
+          type: integer
+          minimum: 0
+        effective_from:
+          type: string
+          format: date-time
+        effective_until:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [ACTIVE, ARCHIVED]
+      minProperties: 1
+      additionalProperties: false
+
+    BudgetCreate:
+      type: object
+      description: WSP-005 创建预算（quota 结构见 budget.schema.json）
+      properties:
+        budget_category:
+          type: string
+          enum: [MODEL, DATA, MEDIA, EMAIL, EXPERT]
+        name:
+          type: string
+          maxLength: 200
+        period_type:
+          type: string
+          enum: [DAILY, MONTHLY, QUARTERLY, ONE_TIME]
+        period_start:
+          type: string
+          format: date-time
+        period_end:
+          type: string
+          format: date-time
+        soft_limit:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/money'
+        hard_limit:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/money'
+        warning_thresholds:
+          type: array
+          items:
+            type: number
+            exclusiveMinimum: 0
+            maximum: 1
+          uniqueItems: true
+        quota:
+          type: object
+          properties:
+            unit:
+              type: string
+              enum: [TOKENS, CREDITS, RECORDS, EMAILS, RENDER_MINUTES, EXPERT_HOURS, API_CALLS]
+            soft_quota:
+              type: number
+              exclusiveMinimum: 0
+            hard_quota:
+              type: number
+              exclusiveMinimum: 0
+          required: [unit, hard_quota]
+          additionalProperties: false
+        block_on_hard_limit:
+          type: boolean
+          default: true
+      required: [budget_category, period_type, period_start, period_end, hard_limit]
+      additionalProperties: false
+
+    BudgetUpdate:
+      type: object
+      description: WSP-005 更新预算（budget_category/period 不可变；换期新建）
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        soft_limit:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/money'
+        hard_limit:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/money'
+        warning_thresholds:
+          type: array
+          items:
+            type: number
+            exclusiveMinimum: 0
+            maximum: 1
+          uniqueItems: true
+        quota:
+          type: object
+          properties:
+            unit:
+              type: string
+              enum: [TOKENS, CREDITS, RECORDS, EMAILS, RENDER_MINUTES, EXPERT_HOURS, API_CALLS]
+            soft_quota:
+              type: number
+              exclusiveMinimum: 0
+            hard_quota:
+              type: number
+              exclusiveMinimum: 0
+          required: [unit, hard_quota]
+          additionalProperties: false
+        block_on_hard_limit:
+          type: boolean
+        status:
+          type: string
+          enum: [ACTIVE, ARCHIVED]
+      minProperties: 1
+      additionalProperties: false
+
+    ApprovalRuleCreate:
+      type: object
+      description: WSP-006 创建审批规则（approver_roles 与 approver_membership_ids 至少其一）
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        governed_actions:
+          type: array
+          items:
+            type: string
+            enum: [CAMPAIGN_LAUNCH, CONTENT_PUBLISH, OUTBOUND_SEND, DATA_EXPORT, DATA_PURCHASE, CROSS_BORDER_MODEL_CALL, BUDGET_CHANGE, POLICY_CHANGE, MEMBER_ROLE_CHANGE, EXPERT_ENGAGEMENT, HIGH_RISK_REPLY]
+          minItems: 1
+          uniqueItems: true
+        approver_roles:
+          type: array
+          items:
+            $ref: '../json-schema/workspace/membership.schema.json#/$defs/role'
+          uniqueItems: true
+        approver_membership_ids:
+          type: array
+          items:
+            type: string
+            pattern: '^mem_[0-9A-HJKMNP-TV-Z]{26}$'
+          uniqueItems: true
+        alternate_approver_roles:
+          type: array
+          items:
+            $ref: '../json-schema/workspace/membership.schema.json#/$defs/role'
+          uniqueItems: true
+        alternate_approver_membership_ids:
+          type: array
+          items:
+            type: string
+            pattern: '^mem_[0-9A-HJKMNP-TV-Z]{26}$'
+          uniqueItems: true
+        min_approvals:
+          type: integer
+          minimum: 1
+          default: 1
+        amount_threshold:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/money'
+        risk_threshold:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        approval_token_ttl_minutes:
+          type: integer
+          minimum: 1
+        escalation_after_hours:
+          type: integer
+          minimum: 1
+        valid_from:
+          type: string
+          format: date-time
+        valid_until:
+          type: string
+          format: date-time
+      required: [name, governed_actions, approval_token_ttl_minutes]
+      anyOf:
+        - required: [approver_roles]
+        - required: [approver_membership_ids]
+      additionalProperties: false
+
+    ApprovalRuleUpdate:
+      type: object
+      description: WSP-006 更新审批规则
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        governed_actions:
+          type: array
+          items:
+            type: string
+            enum: [CAMPAIGN_LAUNCH, CONTENT_PUBLISH, OUTBOUND_SEND, DATA_EXPORT, DATA_PURCHASE, CROSS_BORDER_MODEL_CALL, BUDGET_CHANGE, POLICY_CHANGE, MEMBER_ROLE_CHANGE, EXPERT_ENGAGEMENT, HIGH_RISK_REPLY]
+          minItems: 1
+          uniqueItems: true
+        approver_roles:
+          type: array
+          items:
+            $ref: '../json-schema/workspace/membership.schema.json#/$defs/role'
+          uniqueItems: true
+        approver_membership_ids:
+          type: array
+          items:
+            type: string
+            pattern: '^mem_[0-9A-HJKMNP-TV-Z]{26}$'
+          uniqueItems: true
+        alternate_approver_roles:
+          type: array
+          items:
+            $ref: '../json-schema/workspace/membership.schema.json#/$defs/role'
+          uniqueItems: true
+        alternate_approver_membership_ids:
+          type: array
+          items:
+            type: string
+            pattern: '^mem_[0-9A-HJKMNP-TV-Z]{26}$'
+          uniqueItems: true
+        min_approvals:
+          type: integer
+          minimum: 1
+        amount_threshold:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/money'
+        risk_threshold:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        approval_token_ttl_minutes:
+          type: integer
+          minimum: 1
+        escalation_after_hours:
+          type: integer
+          minimum: 1
+        valid_from:
+          type: string
+          format: date-time
+        valid_until:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [ACTIVE, SUSPENDED, ARCHIVED]
+      minProperties: 1
+      additionalProperties: false
+
+    ControlSwitchActivate:
+      type: object
+      description: WSP-007 触发控制开关；target 约束见 control-switch.schema.json allOf
+      properties:
+        switch_type:
+          type: string
+          enum: [KILL_SWITCH, CAMPAIGN_PAUSE, PROVIDER_DISABLE]
+        target_id:
+          type: string
+          minLength: 1
+          description: KILL_SWITCH=省略或等于 workspace_id；CAMPAIGN_PAUSE=cam_ ID；PROVIDER_DISABLE=Provider 注册 ID
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        auto_release_at:
+          type: string
+          format: date-time
+      required: [switch_type, reason]
+      additionalProperties: false

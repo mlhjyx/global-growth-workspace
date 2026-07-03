@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/lead/icp-definition",
+  "title": "ICPDefinition",
+  "description": "理想客户画像定义（母本 7.5.2、附录 C ICPDefinition；LED-001 公司属性/业务场景/痛点/触发信号/排除条件/市场差异；LED-003 Must-have/Nice-to-have/Exclusion/负向信号；LED-004 回测，未回测必须处于 HYPOTHESIS）。状态取值与 state-machines/icp.state.ts 完全一致。负责域：lead；schema_version=1。",
+  "type": "object",
+  "$defs": {
+    "criterion": {
+      "type": "object",
+      "description": "结构化公司条件（LED-001/003）。field 为 Account/CanonicalCompany 字段路径，如 country、industries、employee_range、domains。",
+      "properties": {
+        "criterion_id": { "type": "string", "description": "条件在本 ICP 内的稳定标识" },
+        "field": { "type": "string", "description": "被评估的公司字段路径" },
+        "operator": {
+          "type": "string",
+          "enum": ["EQ", "NEQ", "IN", "NOT_IN", "GT", "GTE", "LT", "LTE", "RANGE", "CONTAINS", "NOT_CONTAINS", "EXISTS", "NOT_EXISTS", "MATCHES"],
+          "description": "比较算子"
+        },
+        "value": { "description": "比较值；类型随 field 而定（string/number/array/object）" },
+        "requirement_level": {
+          "type": "string",
+          "enum": ["MUST_HAVE", "NICE_TO_HAVE"],
+          "description": "LED-003：Must-have / Nice-to-have"
+        },
+        "weight": { "type": "number", "minimum": 0, "maximum": 1, "description": "参与 Fit 评分的权重（附录 C weights）" },
+        "rationale": { "type": "string", "description": "该条件的业务理由，用于可解释性（母本 4.4）" }
+      },
+      "required": ["field", "operator", "requirement_level"],
+      "additionalProperties": false
+    },
+    "exclusion_criterion": {
+      "type": "object",
+      "description": "排除条件（LED-003 验收：排除条件优先于正向评分；LED-007 验收：模型不能覆盖硬性排除）",
+      "properties": {
+        "criterion_id": { "type": "string" },
+        "field": { "type": "string" },
+        "operator": {
+          "type": "string",
+          "enum": ["EQ", "NEQ", "IN", "NOT_IN", "GT", "GTE", "LT", "LTE", "RANGE", "CONTAINS", "NOT_CONTAINS", "EXISTS", "NOT_EXISTS", "MATCHES"]
+        },
+        "value": { "description": "比较值；类型随 field 而定" },
+        "reason": { "type": "string", "description": "排除理由" }
+      },
+      "required": ["field", "operator"],
+      "additionalProperties": false
+    },
+    "signal_expectation": {
+      "type": "object",
+      "description": "ICP 关注的触发/负向信号（LED-001 触发信号、LED-003 负向信号、LED-014 信号类型）。signal_type 取值与 signal.schema.json 完全一致。",
+      "properties": {
+        "signal_type": {
+          "type": "string",
+          "enum": ["TRADE", "HIRING", "FUNDING", "WEBSITE", "CONTENT", "RELATIONSHIP_CHANGE", "EVENT"]
+        },
+        "subtype": { "type": "string", "description": "类型内细分，如 HIRING 下的岗位类别" },
+        "min_strength": { "type": "number", "minimum": 0, "maximum": 1, "description": "计入评分所需的最低信号强度" },
+        "lookback_days": { "type": "integer", "minimum": 1, "description": "信号回看窗口（天）；配合 Signal.expires_at 过期降低 Intent（LED-014 验收）" },
+        "weight": { "type": "number", "minimum": 0, "maximum": 1, "description": "参与 Intent 评分的权重" }
+      },
+      "required": ["signal_type"],
+      "additionalProperties": false
+    },
+    "backtest_record": {
+      "type": "object",
+      "description": "回测记录（LED-004：使用样例账户、公开数据或历史结果回测；未回测 ICP 标记为 Hypothesis）",
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["SAMPLE_ACCOUNTS", "PUBLIC_DATA", "HISTORICAL_RESULTS"],
+          "description": "回测方法（LED-004）"
+        },
+        "dataset_ref": { "type": "string", "description": "回测数据集引用（样例账户列表 / 数据快照 ID）" },
+        "sample_size": { "type": "integer", "minimum": 1 },
+        "precision": { "type": "number", "minimum": 0, "maximum": 1 },
+        "recall": { "type": "number", "minimum": 0, "maximum": 1 },
+        "passed": { "type": "boolean", "description": "是否达到激活门槛" },
+        "run_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+        "run_by": { "type": "string", "description": "执行人/系统标识" },
+        "summary": { "type": "string" }
+      },
+      "required": ["method", "run_at", "passed"],
+      "additionalProperties": false
+    },
+    "market_override": {
+      "type": "object",
+      "description": "按市场覆盖条件与排除（LED-001 市场差异；Market Pack 优先级见母本 4.2）",
+      "properties": {
+        "country_code": { "$ref": "ggw://contracts/common/primitives#/$defs/country_code" },
+        "criteria_overrides": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/criterion" },
+          "description": "该市场下替换/追加的正向条件"
+        },
+        "exclusion_overrides": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/exclusion_criterion" },
+          "description": "该市场下替换/追加的排除条件"
+        },
+        "notes": { "type": "string" }
+      },
+      "required": ["country_code"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "前缀 icp_（primitives 前缀映射）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 200, "description": "ICP 名称" },
+    "description": { "type": "string", "description": "业务描述" },
+    "status": {
+      "type": "string",
+      "enum": ["DRAFT", "HYPOTHESIS", "VALIDATING", "ACTIVE", "SUPERSEDED", "ARCHIVED"],
+      "description": "状态（母本 11.9 ICP 状态机；取值与 state-machines/icp.state.ts 一致；LED-004：未回测 ICP 标记为 HYPOTHESIS）"
+    },
+    "offering_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "关联产品/服务（off_ 前缀，knowledge 域 Offering）"
+    },
+    "business_scenarios": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "适用业务场景（LED-001）"
+    },
+    "pain_points": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "目标客户痛点（LED-001）"
+    },
+    "criteria": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/criterion" },
+      "description": "正向公司条件（Must-have / Nice-to-have，LED-001/003，附录 C criteria）"
+    },
+    "exclusions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/exclusion_criterion" },
+      "description": "排除条件（附录 C exclusions；优先于正向评分，LED-003 验收）"
+    },
+    "trigger_signals": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/signal_expectation" },
+      "description": "正向触发信号（LED-001、LED-014）"
+    },
+    "negative_signals": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/signal_expectation" },
+      "description": "负向信号，命中降低评分（LED-003）"
+    },
+    "persona_ids": {
+      "type": "array",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+      "description": "关联 Persona（per_ 前缀，附录 C personas）"
+    },
+    "buying_committee_role_ids": {
+      "type": "array",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+      "description": "关联购买委员会角色（bcr_ 前缀，LED-002，附录 C buying_roles）"
+    },
+    "weights": {
+      "type": "object",
+      "description": "六维评分权重（附录 C weights；维度与 LeadScore/LED-006 一致）",
+      "properties": {
+        "fit": { "type": "number", "minimum": 0, "maximum": 1 },
+        "role": { "type": "number", "minimum": 0, "maximum": 1 },
+        "intent": { "type": "number", "minimum": 0, "maximum": 1 },
+        "data_quality": { "type": "number", "minimum": 0, "maximum": 1 },
+        "reachability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "engagement": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "market_scope": {
+      "type": "array",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/country_code" },
+      "description": "适用市场（附录 C market_scope）"
+    },
+    "market_overrides": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/market_override" },
+      "description": "分市场差异（LED-001 市场差异）"
+    },
+    "backtests": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/backtest_record" },
+      "description": "回测历史（LED-004；附录 C validation_status 由 status + backtests 表达）"
+    },
+    "superseded_by_icp_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "被哪个新版本 ICP 取代（状态 SUPERSEDED 时必填；母本 7.5.4：ICP 重大变更不静默影响运行中 Campaign，通过新版本 + ICPActivated 事件显式切换）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "name",
+    "status",
+    "criteria",
+    "exclusions",
+    "market_scope",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

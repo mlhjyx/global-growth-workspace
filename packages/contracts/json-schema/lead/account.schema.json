@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/lead/account",
+  "title": "Account",
+  "description": "目标企业/组织（母本 7.5.2、附录 C CanonicalCompany 最小字段、附录 G 术语表；LED-010：合并、拆分、历史关系可审计可撤销；母本 8.8 身份解析、7.4.13 供应商 ID 不得泄漏到业务主对象）。字段级来源证据保存在 common/field-evidence（entity_id 指向本对象），不在此内嵌。负责域：lead；schema_version=1。id 前缀 acc_。",
+  "type": "object",
+  "$defs": {
+    "merge_operation": {
+      "type": "object",
+      "description": "合并/拆分历史条目（LED-010 验收：合并和拆分可审计和撤销；母本 11.16：数据合并和拆分使用可回放命令与审计，不直接不可逆覆盖外部 ID；母本 7.4.10：保留 Merge/Split 历史）",
+      "properties": {
+        "operation_id": { "type": "string", "description": "可回放命令 ID" },
+        "operation": {
+          "type": "string",
+          "enum": ["MERGE", "SPLIT", "UNDO_MERGE", "UNDO_SPLIT"],
+          "description": "操作类型；UNDO_* 为撤销操作（LED-010）"
+        },
+        "source_entity_ids": {
+          "type": "array",
+          "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+          "description": "操作前的实体集合"
+        },
+        "result_entity_ids": {
+          "type": "array",
+          "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+          "description": "操作后的实体集合"
+        },
+        "operated_by": { "type": "string", "description": "操作者：用户 ID 或 system（母本 7.4.10：高置信自动合并，中置信人工 Review）" },
+        "operated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+        "confidence": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/confidence",
+          "description": "匹配置信度（母本 8.8 IdentityLink；高风险合并不得仅依赖 LLM）"
+        },
+        "reason": { "type": "string" },
+        "undo_of_operation_id": { "type": "string", "description": "撤销的目标操作 ID（operation 为 UNDO_* 时必填）" },
+        "audit_log_id": { "type": "string", "description": "审计记录引用" }
+      },
+      "required": ["operation_id", "operation", "source_entity_ids", "result_entity_ids", "operated_by", "operated_at"],
+      "additionalProperties": false
+    },
+    "company_relationship": {
+      "type": "object",
+      "description": "企业关系（母本 8.8 CompanyRelationship：母子公司、供应商、客户、经销商、合作伙伴；LED-010 历史关系）",
+      "properties": {
+        "relationship_type": {
+          "type": "string",
+          "enum": ["PARENT", "SUBSIDIARY", "SUPPLIER", "CUSTOMER", "DISTRIBUTOR", "PARTNER"]
+        },
+        "target_account_id": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+        "valid_from": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+        "valid_to": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+          "description": "为空表示关系当前有效；历史关系保留不删除（LED-010）"
+        },
+        "source_evidence_id": { "type": "string", "description": "FieldEvidence/Evidence 引用" }
+      },
+      "required": ["relationship_type", "target_account_id"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "前缀 acc_（primitives 前缀映射）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "canonical_company_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "指向 Data Hub CanonicalCompany（母本 8.8、附录 C）。业务主对象只引用 Canonical 实体，Provider ID 不得泄漏（母本 7.4.13）；重新解析不得破坏本引用（母本 7.4.10）"
+    },
+    "name": { "type": "string", "minLength": 1, "maxLength": 500, "description": "法律名称（附录 C legal_name）" },
+    "trading_names": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "商用名/品牌名（附录 C trading_names）"
+    },
+    "domains": {
+      "type": "array",
+      "items": { "type": "string", "format": "hostname" },
+      "description": "规范化域名（附录 C domains；母本 8.8 匹配信号）"
+    },
+    "country": { "$ref": "ggw://contracts/common/primitives#/$defs/country_code" },
+    "industries": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "行业标签（附录 C industries）"
+    },
+    "employee_range": { "type": "string", "description": "员工规模区间，如 51-200（附录 C employee_range）" },
+    "revenue_range": { "type": "string", "description": "营收区间，如 10M-50M USD（附录 C revenue_range）" },
+    "registry_ids": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "registry_type": { "type": "string", "description": "注册类型，如 LEI、CN_USCC、US_EIN" },
+          "value": { "type": "string" },
+          "country": { "$ref": "ggw://contracts/common/primitives#/$defs/country_code" }
+        },
+        "required": ["registry_type", "value"],
+        "additionalProperties": false
+      },
+      "description": "法定注册标识（附录 C registry_ids；母本 7.4.10 强标识）"
+    },
+    "parent_account_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "母公司 Account（母本 8.8 母子公司）"
+    },
+    "relationships": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/company_relationship" },
+      "description": "企业关系（LED-010 历史关系）"
+    },
+    "matched_icp_ids": {
+      "type": "array",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+      "description": "命中的 ICP（icp_ 前缀）"
+    },
+    "owner_user_id": { "type": "string", "description": "负责人用户 ID" },
+    "quality_score": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/confidence",
+      "description": "数据质量分（附录 C quality_score；过期数据自动降分并进入刷新队列，母本 4.5.5）"
+    },
+    "last_verified_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "最近核验时间（附录 C last_verified_at；7.5.4 每条 Lead 可查看更新时间）"
+    },
+    "merge_history": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/merge_operation" },
+      "description": "合并/拆分历史（LED-010）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "canonical_company_id",
+    "name",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

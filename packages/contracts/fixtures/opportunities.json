@@ -1,0 +1,289 @@
+[
+  {
+    "$schema_ref": "ggw://contracts/opportunity/touchpoint",
+    "id": "tpt_01JZTCHP000000000000000001",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "touchpoint_type": "REPLY",
+    "campaign_id": "cam_01JZCAMP000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000011",
+    "contact_id": "cta_01JZC0NT000000000000000011",
+    "lead_id": "led_01JZ1EAD000000000000000011",
+    "occurred_at": "2026-06-26T09:41:00Z",
+    "source": {
+      "channel": "email",
+      "provider_id": "prv_email_gateway",
+      "external_event_id": "evt-mail-8f21-reply-0011"
+    },
+    "created_at": "2026-06-26T09:42:00Z",
+    "updated_at": "2026-06-26T09:42:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/opportunity/touchpoint",
+    "id": "tpt_01JZTCHP000000000000000002",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "touchpoint_type": "MEETING",
+    "campaign_id": "cam_01JZCAMP000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000011",
+    "contact_id": "cta_01JZC0NT000000000000000011",
+    "lead_id": "led_01JZ1EAD000000000000000011",
+    "opportunity_id": "opp_01JZ0PPT000000000000000001",
+    "occurred_at": "2026-06-30T14:00:00Z",
+    "source": {
+      "channel": "meeting",
+      "provider_id": "prv_calendar",
+      "external_event_id": "evt-cal-ng-dealer-0630",
+      "url": "https://meet.example.com/ng-dealer-intro"
+    },
+    "created_at": "2026-06-30T15:05:00Z",
+    "updated_at": "2026-06-30T15:05:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/opportunity/touchpoint",
+    "id": "tpt_01JZTCHP000000000000000003",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "touchpoint_type": "CLICK",
+    "campaign_id": "cam_01JZCAMP000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000012",
+    "contact_id": "cta_01JZC0NT000000000000000012",
+    "lead_id": "led_01JZ1EAD000000000000000012",
+    "occurred_at": "2026-06-25T07:12:00Z",
+    "source": {
+      "channel": "email",
+      "provider_id": "prv_email_gateway",
+      "external_event_id": "evt-mail-8f21-click-0012",
+      "url": "https://www.hengji-buildmat.example.com/dealers"
+    },
+    "created_at": "2026-06-25T07:13:00Z",
+    "updated_at": "2026-06-25T07:13:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/opportunity/touchpoint",
+    "id": "tpt_01JZTCHP000000000000000004",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "touchpoint_type": "REPLY",
+    "campaign_id": "cam_01JZCAMP000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000012",
+    "contact_id": "cta_01JZC0NT000000000000000012",
+    "lead_id": "led_01JZ1EAD000000000000000012",
+    "occurred_at": "2026-06-27T10:30:00Z",
+    "source": {
+      "channel": "email",
+      "provider_id": "prv_email_gateway",
+      "external_event_id": "evt-mail-8f21-reply-0012"
+    },
+    "created_at": "2026-06-27T10:31:00Z",
+    "updated_at": "2026-06-27T10:31:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/opportunity/touchpoint",
+    "id": "tpt_01JZTCHP000000000000000005",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "touchpoint_type": "MEETING",
+    "campaign_id": "cam_01JZCAMP000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000012",
+    "contact_id": "cta_01JZC0NT000000000000000012",
+    "lead_id": "led_01JZ1EAD000000000000000012",
+    "opportunity_id": "opp_01JZ0PPT000000000000000002",
+    "occurred_at": "2026-06-29T10:00:00Z",
+    "source": {
+      "channel": "meeting",
+      "provider_id": "prv_calendar",
+      "external_event_id": "evt-cal-ke-dealer-0629",
+      "url": "https://meet.example.com/ke-dealer-intro"
+    },
+    "created_at": "2026-06-29T11:00:00Z",
+    "updated_at": "2026-06-29T11:00:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/opportunity/touchpoint",
+    "id": "tpt_01JZTCHP000000000000000006",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "touchpoint_type": "REPLY",
+    "campaign_id": "cam_01JZCAMP000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000020",
+    "contact_id": "cta_01JZC0NT000000000000000020",
+    "lead_id": "led_01JZ1EAD000000000000000020",
+    "occurred_at": "2026-06-28T08:45:00Z",
+    "source": {
+      "channel": "email",
+      "provider_id": "prv_email_gateway",
+      "external_event_id": "evt-mail-8f21-reply-0020"
+    },
+    "created_at": "2026-06-28T08:46:00Z",
+    "updated_at": "2026-06-28T08:46:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/opportunity/touchpoint",
+    "id": "tpt_01JZTCHP000000000000000007",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "touchpoint_type": "STAGE_CHANGE",
+    "campaign_id": "cam_01JZCAMP000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000011",
+    "opportunity_id": "opp_01JZ0PPT000000000000000001",
+    "occurred_at": "2026-07-01T09:00:00Z",
+    "source": {
+      "channel": "system",
+      "external_event_id": "evt-sys-stage-opp0001-meeting"
+    },
+    "created_at": "2026-07-01T09:00:00Z",
+    "updated_at": "2026-07-01T09:00:00Z",
+    "version": 1
+  },
+
+  {
+    "$schema_ref": "ggw://contracts/opportunity/opportunity",
+    "id": "opp_01JZ0PPT000000000000000001",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000011",
+    "contact_id": "cta_01JZC0NT000000000000000011",
+    "lead_id": "led_01JZ1EAD000000000000000011",
+    "title": "Lagos BuildMart · 耐水石膏板区域经销权（拉各斯）",
+    "type": "PARTNER",
+    "pack_label": "经销商机会",
+    "stage": "MEETING",
+    "qualification_status": "SALES_ACCEPTED",
+    "owner_id": "mem_01JZMEMB000000000000000003",
+    "next_step": {
+      "description": "发出经销协议草案与首柜报价，确认拉各斯仓配与 SONCAP 清关分工",
+      "due_at": "2026-07-08T09:00:00Z",
+      "owner_id": "mem_01JZMEMB000000000000000003"
+    },
+    "value_range": {
+      "min": { "amount": 25000, "currency": "USD" },
+      "max": { "amount": 60000, "currency": "USD" }
+    },
+    "offering_id": "off_01JZ0FFR000000000000000003",
+    "target_market": "NG",
+    "campaign_id": "cam_01JZCAMP000000000000000001",
+    "touchpoint_ids": [
+      "tpt_01JZTCHP000000000000000001",
+      "tpt_01JZTCHP000000000000000002",
+      "tpt_01JZTCHP000000000000000007"
+    ],
+    "source": {
+      "conversation_id": "cnv_ng_dealer_0011",
+      "message_id": "msg_ng_dealer_0011_014",
+      "channel": "email",
+      "context_note": "对第二封跟进邮件回复，主动询问区域独家政策与首柜条件（ENG-007 保留来源与会话上下文）"
+    },
+    "accepted_at": "2026-06-30T16:00:00Z",
+    "accepted_by": "mem_01JZMEMB000000000000000003",
+    "created_at": "2026-06-26T10:00:00Z",
+    "updated_at": "2026-07-01T09:00:00Z",
+    "version": 4
+  },
+  {
+    "$schema_ref": "ggw://contracts/opportunity/opportunity",
+    "id": "opp_01JZ0PPT000000000000000002",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000012",
+    "contact_id": "cta_01JZC0NT000000000000000012",
+    "lead_id": "led_01JZ1EAD000000000000000012",
+    "title": "Nairobi Hardware · 首柜试销与年度经销框架（内罗毕）",
+    "type": "PARTNER",
+    "pack_label": "经销商机会",
+    "stage": "SAMPLE_DEMO",
+    "qualification_status": "VERIFIED",
+    "owner_id": "mem_01JZMEMB000000000000000003",
+    "next_step": {
+      "description": "跟进样品板到货检验结果，两周内出首柜正式报价",
+      "due_at": "2026-07-10T09:00:00Z",
+      "owner_id": "mem_01JZMEMB000000000000000003"
+    },
+    "value_range": {
+      "min": { "amount": 15000, "currency": "USD" },
+      "max": { "amount": 40000, "currency": "USD" }
+    },
+    "offering_id": "off_01JZ0FFR000000000000000003",
+    "target_market": "KE",
+    "campaign_id": "cam_01JZCAMP000000000000000001",
+    "touchpoint_ids": [
+      "tpt_01JZTCHP000000000000000003",
+      "tpt_01JZTCHP000000000000000004",
+      "tpt_01JZTCHP000000000000000005"
+    ],
+    "source": {
+      "conversation_id": "cnv_ke_dealer_0012",
+      "message_id": "msg_ke_dealer_0012_006",
+      "channel": "email",
+      "context_note": "回复首封邮件并接受视频会议邀约；会议已发生并经销售验证（ENG-016 三级结果模型）"
+    },
+    "accepted_at": "2026-06-29T12:00:00Z",
+    "accepted_by": "mem_01JZMEMB000000000000000003",
+    "created_at": "2026-06-27T11:00:00Z",
+    "updated_at": "2026-06-30T08:00:00Z",
+    "version": 5
+  },
+  {
+    "$schema_ref": "ggw://contracts/opportunity/opportunity",
+    "id": "opp_01JZ0PPT000000000000000003",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000020",
+    "contact_id": "cta_01JZC0NT000000000000000020",
+    "lead_id": "led_01JZ1EAD000000000000000020",
+    "title": "Delta Coast · 经销合作（已撤回）",
+    "type": "PARTNER",
+    "pack_label": "经销商机会",
+    "stage": "WITHDRAWN",
+    "stage_reason": "客户回复确认本年度不再新增品牌代理（预算受限），双方同意撤回；保留 2027 年 Q1 回访计划（ENG-017 撤回，撤回原因回写）",
+    "qualification_status": "QUALIFIED_LEAD",
+    "owner_id": "mem_01JZMEMB000000000000000003",
+    "next_step": {
+      "description": "2027 年 1 月回访重启评估（撤回后保留跟进计划，避免机会长期停滞，ENG-010）",
+      "due_at": "2027-01-15T09:00:00Z",
+      "owner_id": "mem_01JZMEMB000000000000000003"
+    },
+    "offering_id": "off_01JZ0FFR000000000000000003",
+    "target_market": "NG",
+    "campaign_id": "cam_01JZCAMP000000000000000001",
+    "touchpoint_ids": ["tpt_01JZTCHP000000000000000006"],
+    "source": {
+      "conversation_id": "cnv_ng_dealer_0020",
+      "message_id": "msg_ng_dealer_0020_003",
+      "channel": "email",
+      "context_note": "回复表示有兴趣但今年预算受限，次周确认不再新增代理"
+    },
+    "created_at": "2026-06-28T09:00:00Z",
+    "updated_at": "2026-07-02T08:00:00Z",
+    "version": 3
+  },
+
+  {
+    "$schema_ref": "ggw://contracts/opportunity/commercial-outcome",
+    "id": "out_01JZ0VTC000000000000000001",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "opportunity_id": "opp_01JZ0PPT000000000000000001",
+    "outcome_type": "MEETING",
+    "occurred_at": "2026-06-30T14:00:00Z",
+    "evidence_refs": ["evd_01JZEVDN000000000000000101"],
+    "verification_status": "PENDING",
+    "followup_window": 7,
+    "workflow_run_id": "wf_outcome_followup_7d_opp0001_run01",
+    "created_at": "2026-06-30T15:10:00Z",
+    "updated_at": "2026-06-30T15:10:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/opportunity/commercial-outcome",
+    "id": "out_01JZ0VTC000000000000000002",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "opportunity_id": "opp_01JZ0PPT000000000000000002",
+    "outcome_type": "MEETING",
+    "occurred_at": "2026-06-29T10:00:00Z",
+    "evidence_refs": ["evd_01JZEVDN000000000000000102"],
+    "verified_by": "mem_01JZMEMB000000000000000003",
+    "verified_at": "2026-06-29T15:20:00Z",
+    "verification_status": "VERIFIED",
+    "followup_window": 7,
+    "workflow_run_id": "wf_outcome_followup_7d_opp0002_run01",
+    "created_at": "2026-06-29T11:05:00Z",
+    "updated_at": "2026-06-29T15:20:00Z",
+    "version": 2
+  }
+]

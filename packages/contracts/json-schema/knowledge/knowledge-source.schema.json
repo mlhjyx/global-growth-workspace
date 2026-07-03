@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/knowledge/knowledge-source",
+  "title": "KnowledgeSource",
+  "description": "知识来源：官网、文件或手工输入的原始知识载体（KNW-001：支持官网、PDF、DOCX、PPTX、XLSX、图片、音频、视频和手工输入；验收：Docling/解析服务输出结构化内容和来源位置）。删除时级联删除/失效索引、缓存和引用（KNW-007）；支持新鲜度与重新抓取（KNW-009）。索引完成发布 KnowledgeSourceIndexed 事件（母本 11.11）。负责域：knowledge；schema_version=1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^src_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "前缀式实体 ID，前缀 src（common/primitives entity_id 前缀映射）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "WEBSITE",
+        "PDF",
+        "DOCX",
+        "PPTX",
+        "XLSX",
+        "IMAGE",
+        "AUDIO",
+        "VIDEO",
+        "MANUAL_INPUT"
+      ],
+      "description": "来源类型枚举（KNW-001 原文列举 9 类：官网、PDF、DOCX、PPTX、XLSX、图片、音频、视频、手工输入）"
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "来源标题/文件名/页面标题"
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri",
+      "description": "WEBSITE 类型的抓取 URL；文件类型为空"
+    },
+    "file_ref": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "对象存储引用（文件类来源）"
+    },
+    "mime_type": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "文件 MIME 类型"
+    },
+    "file_size_bytes": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "文件字节数"
+    },
+    "content_hash": {
+      "type": "string",
+      "maxLength": 128,
+      "description": "内容指纹，用于变更检测与去重（母本 11.16 内容指纹）"
+    },
+    "language": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/locale",
+      "description": "主要语言"
+    },
+    "uploaded_by": {
+      "type": "string",
+      "pattern": "^mem_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "上传/录入人 Membership ID"
+    },
+    "confidentiality_level": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/privacy_classification",
+      "description": "来源整体保密级别，作为提取 Claim 的默认级别（KNW-005、母本 12.11）"
+    },
+    "index_status": {
+      "type": "string",
+      "enum": ["PENDING", "PARSING", "INDEXED", "FAILED"],
+      "description": "解析/索引状态；进入 INDEXED 时发布 KnowledgeSourceIndexed（KNW-001）"
+    },
+    "index_error": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "index_status=FAILED 时的失败原因"
+    },
+    "parser": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "解析器标识，如 docling（附录 D：Docling Integrate）"
+    },
+    "parsed_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "segment_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "解析产生的结构化片段数（KNW-001 验收：结构化内容和来源位置）"
+    },
+    "last_fetched_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "最近一次抓取/上传时间（KNW-009 新鲜度）"
+    },
+    "next_refresh_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "计划的下次重新抓取时间（KNW-009 重新抓取；仅 WEBSITE 等可刷新来源）"
+    },
+    "refresh_interval_days": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "重新抓取周期（天）"
+    },
+    "freshness_status": {
+      "type": "string",
+      "enum": ["FRESH", "STALE", "EXPIRED"],
+      "description": "新鲜度状态（KNW-009：过期提醒；过期关键 Claim 阻止高风险对外内容）"
+    },
+    "deletion_status": {
+      "type": "string",
+      "enum": ["ACTIVE", "DELETING", "DELETED"],
+      "description": "级联删除编排状态（KNW-007：删除任务有完成证明和失败重试；流程见母本 11.17）"
+    },
+    "deletion_job_id": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "级联删除 Workflow 任务 ID（KNW-007 完成证明）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "source_type",
+    "index_status",
+    "deletion_status",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

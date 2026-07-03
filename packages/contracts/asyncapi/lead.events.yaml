@@ -1,0 +1,415 @@
+# lead 域领域事件（母本 11.11「客户」类：ICPActivated、LeadDiscovered、LeadQualified、LeadRejected、
+# SignalDetected、SuppressionApplied；EntityResolved 在 11.11 归类于「市场与数据」，按域分工由 lead 域
+# （身份解析，母本 7.4.10/7.5/8.8）唯一定义，其他域不得重复定义（conventions.md）。
+# 负责域：lead；schema_version=1（全部事件首版）。
+# Envelope 统一引用 json-schema/common/envelope.schema.json（母本 11.10）；至少一次投递、消费者幂等（ADR-009）；
+# payload 只放 ID 与变更要点，不放可查询的完整对象。
+asyncapi: 3.0.0
+info:
+  title: Lead Domain Events
+  version: 1.0.0
+  description: |
+    lead 域（ICP、购买委员会、Lead Intelligence 与身份解析，母本 7.5）领域事件契约。
+    需求追踪：LED-001..014；状态机 state-machines/lead.state.ts、state-machines/icp.state.ts。
+
+defaultContentType: application/json
+
+channels:
+  leadEvents:
+    address: ggw.lead.events
+    description: lead 域事件通道（Outbox 投递，母本 11.14；至少一次、消费者幂等，ADR-009）
+    messages:
+      ICPActivated:
+        $ref: '#/components/messages/ICPActivated'
+      LeadDiscovered:
+        $ref: '#/components/messages/LeadDiscovered'
+      LeadQualified:
+        $ref: '#/components/messages/LeadQualified'
+      LeadRejected:
+        $ref: '#/components/messages/LeadRejected'
+      SignalDetected:
+        $ref: '#/components/messages/SignalDetected'
+      SuppressionApplied:
+        $ref: '#/components/messages/SuppressionApplied'
+      EntityResolved:
+        $ref: '#/components/messages/EntityResolved'
+
+operations:
+  publishLeadEvents:
+    action: send
+    channel:
+      $ref: '#/channels/leadEvents'
+    summary: lead-service 发布 lead 域领域事件
+    messages:
+      - $ref: '#/channels/leadEvents/messages/ICPActivated'
+      - $ref: '#/channels/leadEvents/messages/LeadDiscovered'
+      - $ref: '#/channels/leadEvents/messages/LeadQualified'
+      - $ref: '#/channels/leadEvents/messages/LeadRejected'
+      - $ref: '#/channels/leadEvents/messages/SignalDetected'
+      - $ref: '#/channels/leadEvents/messages/SuppressionApplied'
+      - $ref: '#/channels/leadEvents/messages/EntityResolved'
+
+components:
+  messages:
+    ICPActivated:
+      name: ICPActivated
+      title: ICP 激活
+      summary: ICP 回测通过并激活（LED-004）；新版本激活时通过 superseded_icp_id 显式取代旧版本，不静默影响运行中 Campaign（母本 7.5.4 验收）。
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: ICPActivated
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: ICPDefinition
+              payload:
+                $ref: '#/components/schemas/ICPActivatedPayload'
+
+    LeadDiscovered:
+      name: LeadDiscovered
+      title: 线索发现
+      summary: 新 Lead 进入 DISCOVERED 状态（LED-005 查询计划 / 导入 / 信号触发；来源必须可见，母本 7.5.4）。
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: LeadDiscovered
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Lead
+              payload:
+                $ref: '#/components/schemas/LeadDiscoveredPayload'
+
+    LeadQualified:
+      name: LeadQualified
+      title: 线索合格
+      summary: REVIEW→QUALIFIED（LED-009 ACCEPTED 决策；评分与队列见 payload；六维评分权威值在 LeadScore，LED-006）。
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: LeadQualified
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Lead
+              payload:
+                $ref: '#/components/schemas/LeadQualifiedPayload'
+
+    LeadRejected:
+      name: LeadRejected
+      title: 线索拒绝
+      summary: REVIEW→REJECTED（LED-009 REJECTED 决策，原因回写进入租户私有学习；保留历史但不进入发送队列，母本 7.5.4）。
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: LeadRejected
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Lead
+              payload:
+                $ref: '#/components/schemas/LeadRejectedPayload'
+
+    SignalDetected:
+      name: SignalDetected
+      title: 信号检测
+      summary: 检测到贸易/招聘/融资/网站/内容/关系变化/活动信号（LED-014）；消费者据此重算 Intent 维度（LED-006）。
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: SignalDetected
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Signal
+              payload:
+                $ref: '#/components/schemas/SignalDetectedPayload'
+
+    SuppressionApplied:
+      name: SuppressionApplied
+      title: 抑制生效
+      summary: SuppressionRecord 生效，全局优先阻断（母本 4.5.5、4117）；outreach/campaign 消费者必须在发送前 100% 检查（母本 PUB-010）。
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: SuppressionApplied
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: SuppressionRecord
+              payload:
+                $ref: '#/components/schemas/SuppressionAppliedPayload'
+
+    EntityResolved:
+      name: EntityResolved
+      title: 实体解析完成
+      summary: Account/Contact 合并、拆分或撤销完成（LED-010：可审计可撤销；母本 7.4.10：重新解析不得破坏已有 Campaign/Conversation/Opportunity 引用——消费者据本事件更新自身引用）。
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: EntityResolved
+              schema_version:
+                const: 1
+              aggregate_type:
+                enum: [Account, Contact]
+              payload:
+                $ref: '#/components/schemas/EntityResolvedPayload'
+
+  schemas:
+    ICPActivatedPayload:
+      type: object
+      description: ICP 激活要点（LED-004；schema_version=1）
+      properties:
+        icp_id:
+          type: string
+          pattern: '^icp_[0-9A-HJKMNP-TV-Z]{26}$'
+        icp_name:
+          type: string
+        previous_status:
+          type: string
+          enum: [DRAFT, HYPOTHESIS, VALIDATING, ACTIVE, SUPERSEDED, ARCHIVED]
+          description: 激活前状态（正常为 VALIDATING，见 icp.state.ts）
+        activated_by:
+          type: string
+          description: 激活人用户 ID
+        backtest_passed:
+          type: boolean
+          description: 是否通过回测（LED-004：未回测不得激活）
+        superseded_icp_id:
+          type: string
+          pattern: '^icp_[0-9A-HJKMNP-TV-Z]{26}$'
+          description: 被本次激活取代的旧 ICP；旧 ICP 转 SUPERSEDED（母本 7.5.4 不静默影响 Campaign）
+        affected_campaign_ids:
+          type: array
+          items:
+            type: string
+            pattern: '^cam_[0-9A-HJKMNP-TV-Z]{26}$'
+          description: 正在引用旧 ICP 的运行中 Campaign，需要显式确认切换（母本 7.5.4）
+      required: [icp_id, previous_status, activated_by, backtest_passed]
+      additionalProperties: false
+
+    LeadDiscoveredPayload:
+      type: object
+      description: 线索发现要点（LED-005；schema_version=1）
+      properties:
+        lead_id:
+          type: string
+          pattern: '^led_[0-9A-HJKMNP-TV-Z]{26}$'
+        account_id:
+          type: string
+          pattern: '^acc_[0-9A-HJKMNP-TV-Z]{26}$'
+        contact_id:
+          type: string
+          pattern: '^cta_[0-9A-HJKMNP-TV-Z]{26}$'
+        icp_id:
+          type: string
+          pattern: '^icp_[0-9A-HJKMNP-TV-Z]{26}$'
+        discovery_method:
+          type: string
+          enum: [PROVIDER_QUERY, CSV_IMPORT, CRM_IMPORT, WEB_FORM, SIGNAL, MANUAL, REFERRAL]
+          description: 与 lead.schema.json source.discovery_method 一致
+        provider_id:
+          type: string
+        import_batch_id:
+          type: string
+          description: 批量导入批次（母本 11.16）
+      required: [lead_id, account_id, discovery_method]
+      additionalProperties: false
+
+    LeadQualifiedPayload:
+      type: object
+      description: 线索合格要点（LED-006/009；schema_version=1）
+      properties:
+        lead_id:
+          type: string
+          pattern: '^led_[0-9A-HJKMNP-TV-Z]{26}$'
+        account_id:
+          type: string
+          pattern: '^acc_[0-9A-HJKMNP-TV-Z]{26}$'
+        contact_id:
+          type: string
+          pattern: '^cta_[0-9A-HJKMNP-TV-Z]{26}$'
+        icp_id:
+          type: string
+          pattern: '^icp_[0-9A-HJKMNP-TV-Z]{26}$'
+        decision_id:
+          type: string
+          pattern: '^ldc_[0-9A-HJKMNP-TV-Z]{26}$'
+          description: 触发合格的决策（LED-009）
+        lead_score_id:
+          type: string
+          pattern: '^lsc_[0-9A-HJKMNP-TV-Z]{26}$'
+          description: 决策时评分快照；六维明细查 LeadScore（LED-006）
+        total_priority:
+          type: number
+          minimum: 0
+          maximum: 100
+        queue:
+          type: string
+          enum: [RECOMMENDED, NEEDS_CONFIRMATION, REJECTED, DO_NOT_CONTACT]
+          description: 决策时队列（LED-008）
+        decided_by:
+          type: string
+      required: [lead_id, account_id, decision_id, lead_score_id, total_priority, decided_by]
+      additionalProperties: false
+
+    LeadRejectedPayload:
+      type: object
+      description: 线索拒绝要点（LED-009；schema_version=1）
+      properties:
+        lead_id:
+          type: string
+          pattern: '^led_[0-9A-HJKMNP-TV-Z]{26}$'
+        decision_id:
+          type: string
+          pattern: '^ldc_[0-9A-HJKMNP-TV-Z]{26}$'
+        reason_codes:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum: [NOT_ICP_FIT, WRONG_ROLE, BAD_DATA, ALREADY_CUSTOMER, COMPETITOR, BAD_TIMING, DUPLICATE, COMPLIANCE_RISK, OTHER]
+          description: 与 lead-decision.schema.json reason_codes 一致
+        decided_by:
+          type: string
+        batch_id:
+          type: string
+          description: 批量拒绝批次（母本 11.16）
+      required: [lead_id, decision_id, reason_codes, decided_by]
+      additionalProperties: false
+
+    SignalDetectedPayload:
+      type: object
+      description: 信号检测要点（LED-014；schema_version=1）
+      properties:
+        signal_id:
+          type: string
+          pattern: '^sig_[0-9A-HJKMNP-TV-Z]{26}$'
+        account_id:
+          type: string
+          pattern: '^acc_[0-9A-HJKMNP-TV-Z]{26}$'
+        contact_id:
+          type: string
+          pattern: '^cta_[0-9A-HJKMNP-TV-Z]{26}$'
+        signal_type:
+          type: string
+          enum: [TRADE, HIRING, FUNDING, WEBSITE, CONTENT, RELATIONSHIP_CHANGE, EVENT]
+          description: 与 signal.schema.json 一致
+        subtype:
+          type: string
+        strength:
+          type: number
+          minimum: 0
+          maximum: 1
+        detected_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+          description: 到期后消费者应降低 Intent（LED-014 验收）
+      required: [signal_id, account_id, signal_type, strength, detected_at, expires_at]
+      additionalProperties: false
+
+    SuppressionAppliedPayload:
+      type: object
+      description: 抑制生效要点（母本 4.5.5/8.9；schema_version=1）
+      properties:
+        suppression_record_id:
+          type: string
+          pattern: '^sup_[0-9A-HJKMNP-TV-Z]{26}$'
+        subject_type:
+          type: string
+          enum: [CONTACT, ACCOUNT, CONTACT_POINT, DOMAIN]
+        contact_id:
+          type: string
+          pattern: '^cta_[0-9A-HJKMNP-TV-Z]{26}$'
+        account_id:
+          type: string
+          pattern: '^acc_[0-9A-HJKMNP-TV-Z]{26}$'
+        contact_point_hash:
+          type: string
+          description: 不可逆标识（母本 11.17）
+        domain:
+          type: string
+        reason:
+          type: string
+          enum: [UNSUBSCRIBED, COMPLAINT, HARD_BOUNCE, DO_NOT_CONTACT_REQUEST, DATA_SUBJECT_REQUEST, COMPETITOR, EXISTING_CUSTOMER, COMPLIANCE, MANUAL]
+          description: 与 suppression-record.schema.json 一致
+        channels:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum: [EMAIL, PHONE, SOCIAL, ALL]
+        global:
+          type: boolean
+          description: 为 true 时全局优先阻断（母本 4117）
+      required: [suppression_record_id, subject_type, reason, channels, global]
+      additionalProperties: false
+
+    EntityResolvedPayload:
+      type: object
+      description: 实体解析要点（LED-010、母本 7.4.10/8.8/11.16 可回放命令；schema_version=1）
+      properties:
+        entity_type:
+          type: string
+          enum: [ACCOUNT, CONTACT]
+        operation:
+          type: string
+          enum: [MERGE, SPLIT, UNDO_MERGE, UNDO_SPLIT]
+          description: 与 account/contact merge_operation 一致；UNDO_* 为撤销（LED-010 验收）
+        operation_id:
+          type: string
+          description: 可回放命令 ID（母本 11.16）
+        canonical_entity_id:
+          type: string
+          pattern: '^[a-z]{2,5}_[0-9A-HJKMNP-TV-Z]{26}$'
+          description: 操作后的主实体（acc_/cta_ 前缀）
+        source_entity_ids:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            pattern: '^[a-z]{2,5}_[0-9A-HJKMNP-TV-Z]{26}$'
+          description: 操作前实体集合
+        result_entity_ids:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            pattern: '^[a-z]{2,5}_[0-9A-HJKMNP-TV-Z]{26}$'
+          description: 操作后实体集合；消费者据此更新引用，不得破坏既有 Campaign/Conversation/Opportunity（母本 7.4.10）
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: 匹配置信度（母本 8.8 IdentityLink；高风险合并不得仅依赖 LLM）
+        resolved_by:
+          type: string
+          enum: [AUTO, HUMAN]
+          description: 高置信自动合并 / 中置信人工 Review（母本 7.4.10、DAT-009）
+      required: [entity_type, operation, operation_id, canonical_entity_id, source_entity_ids, result_entity_ids, resolved_by]
+      additionalProperties: false

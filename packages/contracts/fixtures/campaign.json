@@ -1,0 +1,276 @@
+[
+  {
+    "$schema_ref": "ggw://contracts/campaign/campaign",
+    "id": "cam_01JZCAMP000000000000000001",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "name": "非洲经销商招募 · 耐水石膏板（尼日利亚/肯尼亚首发）",
+    "objective": {
+      "goal_statement": "在 90 天内为耐水耐火石膏板产品线在尼日利亚与肯尼亚招募合格区域经销商，产出至少 5 个销售接受的伙伴机会（母本 13.9 J-B 经销商招募旅程）。",
+      "qualification_caliber": "SAO",
+      "success_metrics": [
+        { "metric_name": "sales_accepted_partner_opportunities", "target_value": 5, "unit": "count" },
+        { "metric_name": "qualified_dealer_leads", "target_value": 40, "unit": "count" },
+        { "metric_name": "reply_rate", "target_value": 8, "unit": "percent" }
+      ]
+    },
+    "growth_motion": {
+      "motion_code": "distributor_development",
+      "pack_id": "pack_gm_dist",
+      "pack_version": "1.2.0"
+    },
+    "offering_id": "off_01JZ0FFR000000000000000003",
+    "market": {
+      "market_id": "mkt_africa_building_materials_v1",
+      "country_code": "NG",
+      "region": "拉各斯/阿布贾 + 内罗毕（双城首发）",
+      "locale": "en"
+    },
+    "icp_ids": ["icp_01JZ1CPD000000000000000002"],
+    "audience_ids": ["aud_01JZAVDN000000000000000001"],
+    "owner_id": "mem_01JZMEMB000000000000000002",
+    "budget": {
+      "total": { "amount": 6000, "currency": "USD" },
+      "hard_cap": { "amount": 8000, "currency": "USD" },
+      "daily_cap": { "amount": 150, "currency": "USD" },
+      "consumed": { "amount": 1240.5, "currency": "USD" }
+    },
+    "dates": {
+      "planned_start_at": "2026-06-22T00:00:00Z",
+      "planned_end_at": "2026-09-20T00:00:00Z",
+      "actual_start_at": "2026-06-23T02:00:00Z"
+    },
+    "status": "RUNNING",
+    "strategy_snapshot": {
+      "snapshot_at": "2026-06-18T09:00:00Z",
+      "snapshot_hash": "sha256:strat9f2c4e6a8b0d2f4a6c8e0b1d3f57",
+      "audience_tiers": [
+        { "tier_name": "Tier1 有石膏制品进口记录的经销商", "criteria_summary": "近 12 个月 HS 6809 进口记录且为分销业态", "priority": 1 },
+        { "tier_name": "Tier2 关联建材品类经销商", "criteria_summary": "经营板材/吊顶/管材等关联品类，无直接进口记录", "priority": 2 }
+      ],
+      "channel_cadence": [
+        { "channel": "EMAIL", "cadence_summary": "每联系人每周不超过 2 封，间隔至少 72 小时，当地时间工作日 9:00-17:00 发送" },
+        { "channel": "LINKEDIN", "cadence_summary": "仅对 Tier1 决策人在邮件无回复后补充 DM 触达" }
+      ],
+      "content_themes": [
+        { "theme": "SONCAP 认证与清关支持", "funnel_stage": "consideration" },
+        { "theme": "经销政策与区域独家保护", "funnel_stage": "decision" },
+        { "theme": "耐水石膏板项目应用案例", "funnel_stage": "awareness" }
+      ],
+      "variant_hypotheses": [
+        "主题行 A（SONCAP 认证背书）回复率优于主题行 B（首单价格让利）",
+        "含区域独家政策说明的正文可提升决策人回复率"
+      ],
+      "estimated_cost": { "amount": 5400, "currency": "USD" },
+      "estimated_action_volume": 900,
+      "approval_policy": "全部对外触达经 Campaign Owner 审批签发 ExecutionAuthorization；模板内容变更后授权失配须重新审批（CAM-008）",
+      "exit_conditions": [
+        "退信率 24 小时窗口 ≥5% 自动暂停 Campaign",
+        "成本达到 6000 USD 预警线通知 Owner，达到 8000 USD 硬上限自动停止新任务"
+      ]
+    },
+    "authorization_ids": ["auth_01JZAVTH000000000000000001"],
+    "sequence_ids": ["seq_01JZSEQN000000000000000001"],
+    "stop_condition_ids": ["stp_01JZST0P000000000000000001", "stp_01JZST0P000000000000000002"],
+    "is_quick_campaign": false,
+    "current_revision_number": 0,
+    "created_at": "2026-06-16T08:00:00Z",
+    "updated_at": "2026-06-30T10:00:00Z",
+    "version": 6
+  },
+  {
+    "$schema_ref": "ggw://contracts/campaign/audience",
+    "id": "aud_01JZAVDN000000000000000001",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "name": "尼日利亚/肯尼亚建材经销商 · 首批冻结名单",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "refresh_mode": "FROZEN",
+    "query_snapshot": {
+      "criteria": [
+        { "field": "company.country", "operator": "IN", "value": ["NG", "KE"] },
+        { "field": "lead.icp_id", "operator": "EQ", "value": "icp_01JZ1CPD000000000000000002" },
+        { "field": "lead.queue", "operator": "EQ", "value": "RECOMMENDED" }
+      ],
+      "raw_query": "country IN (NG,KE) AND icp=icp_01JZ1CPD000000000000000002 AND queue=RECOMMENDED",
+      "source": "lead_pool",
+      "executed_at": "2026-06-18T08:00:00Z",
+      "result_count": 6,
+      "snapshot_hash": "sha256:audq7d1e3f5a9c2b4d6f8a0c2e4b6d80"
+    },
+    "members": [
+      { "entity_type": "LEAD", "entity_id": "led_01JZ1EAD000000000000000011", "membership_status": "ACCEPTED", "accepted_at": "2026-06-18T08:30:00Z", "accepted_by": "mem_01JZMEMB000000000000000002" },
+      { "entity_type": "LEAD", "entity_id": "led_01JZ1EAD000000000000000012", "membership_status": "ACCEPTED", "accepted_at": "2026-06-18T08:30:00Z", "accepted_by": "mem_01JZMEMB000000000000000002" },
+      { "entity_type": "LEAD", "entity_id": "led_01JZ1EAD000000000000000013", "membership_status": "ACCEPTED", "accepted_at": "2026-06-18T08:31:00Z", "accepted_by": "mem_01JZMEMB000000000000000002" },
+      { "entity_type": "LEAD", "entity_id": "led_01JZ1EAD000000000000000015", "membership_status": "ACCEPTED", "accepted_at": "2026-06-18T08:31:00Z", "accepted_by": "mem_01JZMEMB000000000000000002" },
+      { "entity_type": "LEAD", "entity_id": "led_01JZ1EAD000000000000000020", "membership_status": "ACCEPTED", "accepted_at": "2026-06-18T08:32:00Z", "accepted_by": "mem_01JZMEMB000000000000000002" },
+      { "entity_type": "LEAD", "entity_id": "led_01JZ1EAD000000000000000018", "membership_status": "REMOVED", "accepted_at": "2026-06-18T08:32:00Z", "accepted_by": "mem_01JZMEMB000000000000000002", "removed_reason": "复核发现命中硬性排除（终端施工方），人工移出名单（LED-003）" }
+    ],
+    "member_count": 5,
+    "frozen_at": "2026-06-18T08:35:00Z",
+    "created_at": "2026-06-17T06:00:00Z",
+    "updated_at": "2026-06-18T08:35:00Z",
+    "version": 3
+  },
+  {
+    "$schema_ref": "ggw://contracts/campaign/outreach-sequence",
+    "id": "seq_01JZSEQN000000000000000001",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "campaign_id": "cam_01JZCAMP000000000000000001",
+    "name": "经销商招募 · 三步邮件+领英序列（英文）",
+    "status": "APPROVED",
+    "steps": [
+      {
+        "step_number": 1,
+        "channel_type": "EMAIL",
+        "template_ref": "cnt_dealer_intro_en_v2",
+        "delay_hours": 0,
+        "entry_condition": "ALWAYS"
+      },
+      {
+        "step_number": 2,
+        "channel_type": "EMAIL",
+        "template_ref": "cnt_dealer_case_follow_en_v1",
+        "delay_hours": 72,
+        "entry_condition": "NO_REPLY"
+      },
+      {
+        "step_number": 3,
+        "channel_type": "LINKEDIN",
+        "template_ref": "cnt_dealer_dm_en_v1",
+        "delay_hours": 96,
+        "entry_condition": "NO_REPLY"
+      }
+    ],
+    "exit_conditions": ["REPLIED", "UNSUBSCRIBED", "BOUNCED", "COMPLAINT", "MEETING_BOOKED", "SUPPRESSED"],
+    "created_at": "2026-06-17T07:00:00Z",
+    "updated_at": "2026-06-19T09:00:00Z",
+    "version": 4
+  },
+  {
+    "$schema_ref": "ggw://contracts/campaign/execution-authorization",
+    "id": "auth_01JZAVTH000000000000000001",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "campaign_id": "cam_01JZCAMP000000000000000001",
+    "status": "ACTIVE",
+    "issued_by": "mem_01JZMEMB000000000000000001",
+    "issued_at": "2026-06-20T10:00:00Z",
+    "strategy_snapshot_hash": "sha256:strat9f2c4e6a8b0d2f4a6c8e0b1d3f57",
+    "scope": {
+      "audience_refs": [
+        {
+          "audience_id": "aud_01JZAVDN000000000000000001",
+          "audience_version": 3,
+          "snapshot_hash": "sha256:audq7d1e3f5a9c2b4d6f8a0c2e4b6d80"
+        }
+      ],
+      "channels": ["EMAIL", "LINKEDIN"],
+      "allowed_action_types": ["OUTBOUND_EMAIL", "FOLLOW_UP", "DM"],
+      "max_total_actions": 900
+    },
+    "templates": [
+      { "template_ref": "cnt_dealer_intro_en_v2", "content_hash": "sha256:tpl1a3c5e7092b4d6f8a0c2e4d6f8a0b2" },
+      { "template_ref": "cnt_dealer_case_follow_en_v1", "content_hash": "sha256:tpl2b4d6f80a1c3e5f7092b4d6e8f0a1c3" },
+      { "template_ref": "cnt_dealer_dm_en_v1", "content_hash": "sha256:tpl3c5e7a90b2d4f60a1c3e5d7f90b2d4e" }
+    ],
+    "frequency_caps": {
+      "max_actions_per_day": 60,
+      "max_actions_per_contact_per_day": 1,
+      "max_actions_per_contact_per_week": 2,
+      "min_interval_minutes": 60
+    },
+    "budget_cap": { "amount": 8000, "currency": "USD" },
+    "thresholds": {
+      "max_bounce_rate": 0.05,
+      "max_complaint_rate": 0.002,
+      "max_failure_rate": 0.1,
+      "stop_condition_ids": ["stp_01JZST0P000000000000000001", "stp_01JZST0P000000000000000002"]
+    },
+    "valid_from": "2026-06-23T00:00:00Z",
+    "valid_until": "2026-09-21T00:00:00Z",
+    "authorization_hash": "sha256:auth5f7a9c1e3b5d70f92a4c6e8b0d2f46",
+    "created_at": "2026-06-20T10:00:00Z",
+    "updated_at": "2026-06-23T02:00:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/campaign/stop-condition",
+    "id": "stp_01JZST0P000000000000000001",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "campaign_id": "cam_01JZCAMP000000000000000001",
+    "condition_type": "BOUNCE_RATE",
+    "threshold": {
+      "threshold_value": 0.05,
+      "comparison": "GTE",
+      "window_minutes": 1440,
+      "min_sample_size": 50
+    },
+    "action": "PAUSE_CAMPAIGN",
+    "channel_scope": ["EMAIL"],
+    "notify_roles": ["campaign_owner", "workspace_admin"],
+    "enabled": true,
+    "trigger_count": 0,
+    "created_at": "2026-06-18T09:10:00Z",
+    "updated_at": "2026-06-18T09:10:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/campaign/stop-condition",
+    "id": "stp_01JZST0P000000000000000002",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "campaign_id": "cam_01JZCAMP000000000000000001",
+    "condition_type": "COST_OVERRUN",
+    "threshold": {
+      "threshold_money": { "amount": 6000, "currency": "USD" },
+      "comparison": "GTE"
+    },
+    "action": "NOTIFY_ONLY",
+    "notify_roles": ["campaign_owner"],
+    "enabled": true,
+    "trigger_count": 0,
+    "created_at": "2026-06-18T09:12:00Z",
+    "updated_at": "2026-06-18T09:12:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/campaign/campaign",
+    "id": "cam_01JZCAMP000000000000000002",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "name": "东南亚光伏进口商主动获客（越南首发 · 草案）",
+    "objective": {
+      "goal_statement": "验证 TOPCon 组件在越南/泰国进口商与 EPC 的主动获客路径，60 天内产出 20 条合格线索与 3 个销售接受机会（母本 13.9 J-A 无历史数据主动获客旅程）。",
+      "qualification_caliber": "SAO",
+      "success_metrics": [
+        { "metric_name": "qualified_leads", "target_value": 20, "unit": "count" },
+        { "metric_name": "sales_accepted_opportunities", "target_value": 3, "unit": "count" }
+      ]
+    },
+    "growth_motion": {
+      "motion_code": "direct_outbound",
+      "pack_id": "pack_gm_abo",
+      "pack_version": "1.0.0"
+    },
+    "offering_id": "off_01JZ0FFR000000000000000001",
+    "market": {
+      "market_id": "mkt_vn_solar_v1",
+      "country_code": "VN",
+      "locale": "vi"
+    },
+    "icp_ids": ["icp_01JZ1CPD000000000000000001"],
+    "audience_ids": [],
+    "owner_id": "mem_01JZMEMB000000000000000002",
+    "budget": {
+      "total": { "amount": 4000, "currency": "USD" },
+      "hard_cap": { "amount": 5000, "currency": "USD" }
+    },
+    "dates": {
+      "planned_start_at": "2026-07-15T00:00:00Z",
+      "planned_end_at": "2026-09-15T00:00:00Z"
+    },
+    "status": "DRAFT",
+    "authorization_ids": [],
+    "is_quick_campaign": false,
+    "current_revision_number": 0,
+    "created_at": "2026-06-28T06:00:00Z",
+    "updated_at": "2026-06-28T06:00:00Z",
+    "version": 1
+  }
+]

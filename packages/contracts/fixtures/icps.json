@@ -1,0 +1,341 @@
+[
+  {
+    "$schema_ref": "ggw://contracts/lead/buying-committee-role",
+    "id": "bcr_01JZBCRR000000000000000001",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "role_type": "DECISION_MAKER",
+    "name": "进口商/EPC 总经理",
+    "description": "拍板供应商准入与年度采购框架的最终决策人。",
+    "growth_motion": "GM-ABO",
+    "typical_titles": ["Managing Director", "General Manager", "CEO", "Owner"],
+    "weight": 0.4,
+    "required_for_qualification": true,
+    "kpis": ["项目毛利", "供货准时率", "供应商账期条件"],
+    "objections": ["新供应商供货稳定性存疑", "已有长期合作组件品牌"],
+    "information_needs": ["IEC 认证与银行可融资性", "整柜价格与账期", "旺季产能保障"],
+    "created_at": "2026-06-13T02:00:00Z",
+    "updated_at": "2026-06-13T02:00:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/buying-committee-role",
+    "id": "bcr_01JZBCRR000000000000000002",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "role_type": "TECHNICAL",
+    "name": "技术评估负责人",
+    "description": "评估组件参数、认证与并网合规性的技术把关人。",
+    "growth_motion": "GM-ABO",
+    "typical_titles": ["Technical Director", "Chief Engineer", "Head of Engineering"],
+    "weight": 0.3,
+    "required_for_qualification": false,
+    "kpis": ["组件衰减与质保条款", "系统度电成本"],
+    "objections": ["缺少本地并网型式试验报告", "PID/热斑测试数据不全"],
+    "information_needs": ["第三方测试报告", "质保与理赔流程", "本地项目参考案例"],
+    "created_at": "2026-06-13T02:02:00Z",
+    "updated_at": "2026-06-13T02:02:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/buying-committee-role",
+    "id": "bcr_01JZBCRR000000000000000003",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "role_type": "PROCUREMENT",
+    "name": "采购负责人",
+    "description": "负责询价、比价与订单执行的采购接口人。",
+    "growth_motion": "GM-ABO",
+    "typical_titles": ["Procurement Director", "Purchasing Manager", "Supply Chain Manager"],
+    "weight": 0.3,
+    "required_for_qualification": false,
+    "kpis": ["到岸成本", "交期达成率"],
+    "objections": ["MOQ 过高", "付款条件不灵活"],
+    "information_needs": ["FOB/CIF 报价", "MOQ 与交期", "信用证条款"],
+    "created_at": "2026-06-13T02:04:00Z",
+    "updated_at": "2026-06-13T02:04:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/buying-committee-role",
+    "id": "bcr_01JZBCRR000000000000000004",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "role_type": "DECISION_MAKER",
+    "name": "经销商企业主",
+    "description": "非洲建材经销商多为业主直营，企业主直接决定是否代理新品牌。",
+    "growth_motion": "GM-DIST",
+    "typical_titles": ["Owner", "Managing Director", "Proprietor", "CEO"],
+    "weight": 0.6,
+    "required_for_qualification": true,
+    "kpis": ["单柜毛利", "库存周转", "区域独家保护"],
+    "objections": ["已代理竞品品牌", "首单资金占用大", "清关认证责任归属"],
+    "information_needs": ["经销政策与区域保护", "SONCAP/KEBS 认证支持", "首单联合营销支持"],
+    "created_at": "2026-06-16T03:00:00Z",
+    "updated_at": "2026-06-16T03:00:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/buying-committee-role",
+    "id": "bcr_01JZBCRR000000000000000005",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "role_type": "PROCUREMENT",
+    "name": "采购经理",
+    "description": "负责比价、验货与船期跟进的经销商采购接口人。",
+    "growth_motion": "GM-DIST",
+    "typical_titles": ["Purchasing Manager", "Procurement Officer", "Import Manager"],
+    "weight": 0.4,
+    "required_for_qualification": false,
+    "kpis": ["到岸成本", "破损率", "清关时效"],
+    "objections": ["拼柜配额受限", "包装不适配长途内陆运输"],
+    "information_needs": ["混柜方案", "包装与装柜标准", "清关文件清单"],
+    "created_at": "2026-06-16T03:02:00Z",
+    "updated_at": "2026-06-16T03:02:00Z",
+    "version": 1
+  },
+
+  {
+    "$schema_ref": "ggw://contracts/lead/icp-definition",
+    "id": "icp_01JZ1CPD000000000000000001",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "name": "东南亚光伏进口商与 EPC（TOPCon 组件）",
+    "description": "J-A 主动获客旅程目标画像：东南亚五国有光伏组件进口记录或在建项目管道的进口商/EPC（PDR-001 光伏 × 东南亚）。",
+    "status": "ACTIVE",
+    "offering_id": "off_01JZ0FFR000000000000000001",
+    "business_scenarios": ["分布式电站 EPC 项目采购", "本地品牌批发进口", "工商业屋顶开发商自采"],
+    "pain_points": ["旺季供货稳定性与交期", "IEC 与本地并网认证合规", "美元汇率波动与账期压力"],
+    "criteria": [
+      {
+        "criterion_id": "c1_market",
+        "field": "country",
+        "operator": "IN",
+        "value": ["VN", "TH", "MY", "PH", "ID"],
+        "requirement_level": "MUST_HAVE",
+        "weight": 0.25,
+        "rationale": "PDR-001 首批目标区域东南亚，首轮聚焦五个候选国"
+      },
+      {
+        "criterion_id": "c2_industry",
+        "field": "industries",
+        "operator": "CONTAINS",
+        "value": "solar",
+        "requirement_level": "MUST_HAVE",
+        "weight": 0.25,
+        "rationale": "限定光伏行业买家（进口商/批发/EPC）"
+      },
+      {
+        "criterion_id": "c3_size",
+        "field": "employee_range",
+        "operator": "IN",
+        "value": ["11-50", "51-200", "201-500"],
+        "requirement_level": "NICE_TO_HAVE",
+        "weight": 0.15,
+        "rationale": "过小无整柜采购能力，过大通常已有锁定供应商"
+      },
+      {
+        "criterion_id": "c4_import",
+        "field": "import_history.hs_codes",
+        "operator": "CONTAINS",
+        "value": "854143",
+        "requirement_level": "NICE_TO_HAVE",
+        "weight": 0.2,
+        "rationale": "近 12 个月有 HS 854143 光伏组件进口记录，说明具备进口与清关能力"
+      },
+      {
+        "criterion_id": "c5_web",
+        "field": "domains",
+        "operator": "EXISTS",
+        "requirement_level": "NICE_TO_HAVE",
+        "weight": 0.15,
+        "rationale": "有官网便于研究与画像补全，提高数据质量"
+      }
+    ],
+    "exclusions": [
+      {
+        "criterion_id": "x1_competitor",
+        "field": "industries",
+        "operator": "CONTAINS",
+        "value": "pv_module_manufacturing",
+        "reason": "组件同业制造商是竞争对手而非买家，硬性排除"
+      },
+      {
+        "criterion_id": "x2_sanction",
+        "field": "compliance_flags",
+        "operator": "CONTAINS",
+        "value": "sanctioned_entity",
+        "reason": "命中制裁/出口管制名单，硬性排除且模型不可覆盖（LED-007）"
+      }
+    ],
+    "trigger_signals": [
+      { "signal_type": "TRADE", "subtype": "pv_module_import_growth", "min_strength": 0.5, "lookback_days": 180, "weight": 0.4 },
+      { "signal_type": "HIRING", "subtype": "solar_project_engineer", "min_strength": 0.4, "lookback_days": 90, "weight": 0.2 },
+      { "signal_type": "EVENT", "subtype": "solar_expo_exhibitor", "min_strength": 0.3, "lookback_days": 365, "weight": 0.2 }
+    ],
+    "negative_signals": [
+      { "signal_type": "RELATIONSHIP_CHANGE", "subtype": "exclusive_supply_agreement_signed", "lookback_days": 365, "weight": 0.3 }
+    ],
+    "buying_committee_role_ids": [
+      "bcr_01JZBCRR000000000000000001",
+      "bcr_01JZBCRR000000000000000002",
+      "bcr_01JZBCRR000000000000000003"
+    ],
+    "weights": { "fit": 0.3, "role": 0.15, "intent": 0.25, "data_quality": 0.1, "reachability": 0.1, "engagement": 0.1 },
+    "market_scope": ["VN", "TH", "MY", "PH", "ID"],
+    "market_overrides": [
+      {
+        "country_code": "VN",
+        "criteria_overrides": [
+          {
+            "criterion_id": "vn1_grid",
+            "field": "certifications",
+            "operator": "CONTAINS",
+            "value": "moit_type_approval",
+            "requirement_level": "NICE_TO_HAVE",
+            "weight": 0.1,
+            "rationale": "越南并网项目普遍要求 MOIT 认可的型式试验报告"
+          }
+        ],
+        "notes": "越南市场增加并网合规条件；分布式项目优先"
+      }
+    ],
+    "backtests": [
+      {
+        "method": "SAMPLE_ACCOUNTS",
+        "dataset_ref": "seed_accounts_sea_solar_v1",
+        "sample_size": 60,
+        "precision": 0.62,
+        "recall": 0.55,
+        "passed": false,
+        "run_at": "2026-06-05T06:00:00Z",
+        "run_by": "usr_01JZVSER000000000000000002",
+        "summary": "首轮条件过宽：员工规模区间未限制导致大型电力集团混入，precision 不达标"
+      },
+      {
+        "method": "PUBLIC_DATA",
+        "dataset_ref": "trade_stats_854143_2025_snapshot",
+        "sample_size": 120,
+        "precision": 0.78,
+        "recall": 0.6,
+        "passed": true,
+        "run_at": "2026-06-12T07:30:00Z",
+        "run_by": "usr_01JZVSER000000000000000002",
+        "summary": "收紧规模区间并加入进口记录条件后达到激活门槛，转 ACTIVE"
+      }
+    ],
+    "created_at": "2026-06-04T08:00:00Z",
+    "updated_at": "2026-06-12T08:00:00Z",
+    "version": 4
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/icp-definition",
+    "id": "icp_01JZ1CPD000000000000000002",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "name": "非洲建材经销商（石膏板/管材）",
+    "description": "J-B 经销商招募旅程目标画像：尼日利亚/肯尼亚等国有建材进口与分销能力、可承接区域代理的经销商（PDR-001 建材 × 非洲）。",
+    "status": "ACTIVE",
+    "offering_id": "off_01JZ0FFR000000000000000003",
+    "business_scenarios": ["建材批发分销", "承包商供货渠道", "五金建材连锁门店供货"],
+    "pain_points": ["货源不稳定且认证文件不全导致清关延误", "外汇获取与信用证成本", "缺少品牌方营销与技术支持"],
+    "criteria": [
+      {
+        "criterion_id": "c1_market",
+        "field": "country",
+        "operator": "IN",
+        "value": ["NG", "KE", "GH", "TZ", "EG"],
+        "requirement_level": "MUST_HAVE",
+        "weight": 0.3,
+        "rationale": "PDR-001 首批目标区域非洲，首轮聚焦五个候选国"
+      },
+      {
+        "criterion_id": "c2_model",
+        "field": "business_model",
+        "operator": "EQ",
+        "value": "distributor",
+        "requirement_level": "MUST_HAVE",
+        "weight": 0.3,
+        "rationale": "J-B 旅程目标是渠道伙伴，必须具备分销业态"
+      },
+      {
+        "criterion_id": "c3_import",
+        "field": "import_history.hs_codes",
+        "operator": "CONTAINS",
+        "value": "6809",
+        "requirement_level": "NICE_TO_HAVE",
+        "weight": 0.2,
+        "rationale": "有石膏制品（HS 6809）或同类建材进口记录，具备清关经验"
+      },
+      {
+        "criterion_id": "c4_warehouse",
+        "field": "capabilities.warehouse",
+        "operator": "EXISTS",
+        "requirement_level": "NICE_TO_HAVE",
+        "weight": 0.2,
+        "rationale": "自有仓储能力是承接整柜与区域分销的前提"
+      }
+    ],
+    "exclusions": [
+      {
+        "criterion_id": "x1_contractor",
+        "field": "business_model",
+        "operator": "EQ",
+        "value": "end_contractor",
+        "reason": "终端施工方不承担渠道库存与分销职能，不符合经销商招募目标"
+      },
+      {
+        "criterion_id": "x2_sanction",
+        "field": "compliance_flags",
+        "operator": "CONTAINS",
+        "value": "sanctioned_entity",
+        "reason": "命中制裁/出口管制名单，硬性排除且模型不可覆盖（LED-007）"
+      }
+    ],
+    "trigger_signals": [
+      { "signal_type": "TRADE", "subtype": "building_materials_import_recurring", "min_strength": 0.5, "lookback_days": 365, "weight": 0.4 },
+      { "signal_type": "EVENT", "subtype": "construction_expo_exhibitor", "min_strength": 0.3, "lookback_days": 365, "weight": 0.2 },
+      { "signal_type": "WEBSITE", "subtype": "product_category_expansion", "min_strength": 0.3, "lookback_days": 120, "weight": 0.2 }
+    ],
+    "negative_signals": [
+      { "signal_type": "RELATIONSHIP_CHANGE", "subtype": "competitor_exclusive_agency_signed", "lookback_days": 365, "weight": 0.3 }
+    ],
+    "buying_committee_role_ids": [
+      "bcr_01JZBCRR000000000000000004",
+      "bcr_01JZBCRR000000000000000005"
+    ],
+    "weights": { "fit": 0.35, "role": 0.2, "intent": 0.15, "data_quality": 0.1, "reachability": 0.15, "engagement": 0.05 },
+    "market_scope": ["NG", "KE", "GH", "TZ", "EG"],
+    "market_overrides": [
+      {
+        "country_code": "NG",
+        "criteria_overrides": [
+          {
+            "criterion_id": "ng1_soncap",
+            "field": "capabilities.import_compliance",
+            "operator": "CONTAINS",
+            "value": "soncap_experience",
+            "requirement_level": "NICE_TO_HAVE",
+            "weight": 0.1,
+            "rationale": "有 SONCAP 清关经验的经销商合作启动更快"
+          }
+        ],
+        "notes": "尼日利亚市场叠加 SONCAP 清关经验偏好；外汇管制下优先支持信用证客户"
+      }
+    ],
+    "backtests": [
+      {
+        "method": "HISTORICAL_RESULTS",
+        "dataset_ref": "hengji_dealer_history_2024_2025",
+        "sample_size": 45,
+        "precision": 0.71,
+        "recall": 0.5,
+        "passed": true,
+        "run_at": "2026-06-15T09:00:00Z",
+        "run_by": "usr_01JZVSER000000000000000002",
+        "summary": "用恒基 2024-2025 已成交经销商回测：45 家历史客户中 32 家命中画像，达到激活门槛"
+      }
+    ],
+    "created_at": "2026-06-14T02:00:00Z",
+    "updated_at": "2026-06-15T10:00:00Z",
+    "version": 2
+  }
+]

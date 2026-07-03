@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/workspace/permission-grant",
+  "title": "PermissionGrant",
+  "description": "权限授予：RBAC + ABAC，按资源、动作、字段和渠道账号维度独立控制（母本 7.1.2、WSP-003；验收：导出联系人、查看完整邮箱、调用境外模型等可独立控制）。决策规则：DENY 优先于 ALLOW；同 effect 下 priority 大者优先。权限变更立即影响新请求，运行中的高风险任务重新校验（母本 7.1.4）。schema_version: 1",
+  "type": "object",
+  "$defs": {
+    "action": {
+      "type": "string",
+      "enum": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE",
+        "EXPORT",
+        "PUBLISH",
+        "SEND",
+        "APPROVE",
+        "EXECUTE",
+        "ASSIGN",
+        "CONFIGURE",
+        "MANAGE_MEMBERS",
+        "VIEW_SENSITIVE_FIELD",
+        "USE_CROSS_BORDER_MODEL"
+      ],
+      "description": "动作枚举（WSP-002/003：VIEWER 不得 PUBLISH/SEND/EXPORT；VIEW_SENSITIVE_FIELD=查看完整邮箱等敏感字段；USE_CROSS_BORDER_MODEL=调用境外模型）"
+    },
+    "resource_type": {
+      "type": "string",
+      "enum": [
+        "WORKSPACE",
+        "BRAND",
+        "MEMBERSHIP",
+        "PERMISSION_GRANT",
+        "POLICY",
+        "BUDGET",
+        "APPROVAL_RULE",
+        "AUDIT_LOG",
+        "CONTROL_SWITCH",
+        "COMPANY_PROFILE",
+        "KNOWLEDGE_SOURCE",
+        "CLAIM",
+        "RESEARCH",
+        "MARKET",
+        "PROVIDER",
+        "ICP",
+        "ACCOUNT",
+        "CONTACT",
+        "LEAD",
+        "CAMPAIGN",
+        "AUDIENCE",
+        "EXPERIMENT",
+        "CONTENT",
+        "MEDIA",
+        "VIDEO",
+        "CHANNEL_ACCOUNT",
+        "PUBLISH_JOB",
+        "OUTREACH_SEQUENCE",
+        "CONVERSATION",
+        "OPPORTUNITY",
+        "ANALYTICS",
+        "PACK",
+        "EXPERT_REQUEST",
+        "AI_TASK",
+        "WORKFLOW"
+      ],
+      "description": "资源类型枚举，对齐母本 7.x 核心对象与 11.12 API 分组（WSP-003 资源维度）"
+    },
+    "condition": {
+      "type": "object",
+      "description": "ABAC 条件：对资源/上下文属性的断言，全部满足才命中本条授权（WSP-003）",
+      "properties": {
+        "attribute": {
+          "type": "string",
+          "description": "属性路径，如 resource.data_region、resource.privacy_classification、context.model_region、context.channel_type"
+        },
+        "operator": {
+          "type": "string",
+          "enum": ["EQ", "NE", "IN", "NOT_IN", "GT", "GTE", "LT", "LTE", "CONTAINS"],
+          "description": "比较算子"
+        },
+        "value": {
+          "description": "比较值：标量或数组（IN/NOT_IN 时为数组）"
+        }
+      },
+      "required": ["attribute", "operator", "value"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^pgr_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "权限授予 ID，前缀 pgr（对 primitives 前缀映射的补充）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "subject_type": {
+      "type": "string",
+      "enum": ["ROLE", "MEMBERSHIP"],
+      "description": "授权主体类型：ROLE=对角色整体授权（RBAC 基线）；MEMBERSHIP=对单个成员授权（覆盖/收紧）"
+    },
+    "subject_role": {
+      "$ref": "ggw://contracts/workspace/membership#/$defs/role",
+      "description": "subject_type=ROLE 时必填（WSP-002 角色枚举）"
+    },
+    "subject_membership_id": {
+      "type": "string",
+      "pattern": "^mem_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "subject_type=MEMBERSHIP 时必填"
+    },
+    "effect": {
+      "type": "string",
+      "enum": ["ALLOW", "DENY"],
+      "description": "效果；DENY 优先于 ALLOW"
+    },
+    "resource_type": { "$ref": "#/$defs/resource_type" },
+    "resource_id": {
+      "type": "string",
+      "description": "限定到单个资源实例（可选；缺省对该类型全部资源生效）"
+    },
+    "actions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/action" },
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "被授权/拒绝的动作集合（WSP-003 动作维度）"
+    },
+    "field_scope": {
+      "type": "object",
+      "description": "字段维度控制（WSP-003：如 contact.email 完整值仅对 SALES 可见；与 FieldEvidence 的 allowed_to_display/export 叠加生效，母本 9.2）",
+      "properties": {
+        "allowed_fields": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true,
+          "description": "允许访问的字段路径白名单，如 contact.email、contact.phone"
+        },
+        "denied_fields": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true,
+          "description": "拒绝访问的字段路径黑名单；与白名单同现时黑名单优先"
+        }
+      },
+      "additionalProperties": false
+    },
+    "channel_account_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true,
+      "description": "渠道账号维度：仅对列出的渠道账号生效，如指定 LinkedIn/邮箱账号（WSP-003；账号对象见母本 7.8）"
+    },
+    "conditions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/condition" },
+      "description": "ABAC 条件列表（AND 语义）；如限制 data_region=EU 的联系人不可导出（WSP-003）"
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "同 effect 冲突时大者优先；跨 effect 时 DENY 恒优先"
+    },
+    "valid_from": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "生效时间（可选）"
+    },
+    "valid_until": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "失效时间（可选；到期后 status 转 EXPIRED）"
+    },
+    "granted_by": {
+      "$ref": "ggw://contracts/workspace/membership#/$defs/user_id",
+      "description": "授予人用户 ID（进入审计，WSP-010）"
+    },
+    "reason": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "授予原因（审计可读）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "EXPIRED", "REVOKED"],
+      "description": "授权状态"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "subject_type",
+    "effect",
+    "resource_type",
+    "actions",
+    "granted_by",
+    "status",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "subject_type": { "const": "ROLE" } } },
+      "then": { "required": ["subject_role"] }
+    },
+    {
+      "if": { "properties": { "subject_type": { "const": "MEMBERSHIP" } } },
+      "then": { "required": ["subject_membership_id"] }
+    }
+  ],
+  "additionalProperties": false
+}

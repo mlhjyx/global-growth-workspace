@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/lead/lead",
+  "title": "Lead",
+  "description": "待评估或待跟进的 Account/Contact 组合及其业务上下文（母本附录 G 术语表、7.5.2；7.5.4 验收：每条 Lead 可查看数据来源、更新时间、评分理由、风险和联系历史；LED-008 四类队列；LED-011 跨 Campaign 触达频率与冲突可见）。状态取值与 state-machines/lead.state.ts 完全一致。负责域：lead；schema_version=1。id 前缀 led_。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "前缀 led_（primitives 前缀映射）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "account_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "目标企业（acc_ 前缀）"
+    },
+    "contact_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "目标联系人（cta_ 前缀）；为空表示公司级 Lead，待角色匹配（母本 5.6.1）"
+    },
+    "icp_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "评估所依据的 ICP（icp_ 前缀，LED-005 查询计划来源）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["DISCOVERED", "ENRICHING", "REVIEW", "QUALIFIED", "REJECTED", "SUPPRESSED", "CONTACTED", "CONVERTED"],
+      "description": "状态（母本 11.9 Lead 状态机；取值与 state-machines/lead.state.ts 一致；7.5.4：被拒绝或失效的线索保留历史但不进入发送队列）"
+    },
+    "queue": {
+      "type": "string",
+      "enum": ["RECOMMENDED", "NEEDS_CONFIRMATION", "REJECTED", "DO_NOT_CONTACT"],
+      "description": "队列（LED-008：推荐、待确认、拒绝、禁止联系四类；批量操作前展示差异）"
+    },
+    "source": {
+      "type": "object",
+      "description": "数据来源（7.5.4 验收：每条 Lead 可查看数据来源；母本 4.5.5：未知来源不能进入可发送队列）",
+      "properties": {
+        "discovery_method": {
+          "type": "string",
+          "enum": ["PROVIDER_QUERY", "CSV_IMPORT", "CRM_IMPORT", "WEB_FORM", "SIGNAL", "MANUAL", "REFERRAL"],
+          "description": "发现方式（LED-005 多 Provider 查询计划；母本 7.4.12 客户自带数据）"
+        },
+        "provider_id": { "type": "string", "description": "来源 Provider（发现层记录；业务对象不泄漏 Provider 原始 ID，母本 7.4.13）" },
+        "import_batch_id": { "type": "string", "description": "导入批次（母本 11.16 Batch ID）" },
+        "campaign_id": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+          "description": "触发发现的 Campaign（cam_ 前缀）"
+        }
+      },
+      "required": ["discovery_method"],
+      "additionalProperties": false
+    },
+    "latest_score_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "最新评分（lsc_ 前缀，lead-score.schema.json）"
+    },
+    "latest_priority": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "最新综合优先级快照，仅供列表展示；权威值与六维证据在 LeadScore（LED-006）"
+    },
+    "latest_decision_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "最新人工决策（ldc_ 前缀，lead-decision.schema.json，LED-009）"
+    },
+    "risk_flags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "风险标记，如 unverified_email、expired_data、compliance_review（7.5.4 验收：风险可见）"
+    },
+    "outreach_summary": {
+      "type": "object",
+      "description": "触达摘要（7.5.4 联系历史；LED-011：同一联系人跨 Campaign 的触达频率和冲突可见，并发重复外联被阻止——阻断由发送侧分布式锁执行，母本 11.16）",
+      "properties": {
+        "last_contacted_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+        "touch_count_30d": { "type": "integer", "minimum": 0, "description": "近 30 天触达次数" },
+        "active_campaign_ids": {
+          "type": "array",
+          "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+          "description": "正在触达本联系人的 Campaign（cam_ 前缀）"
+        },
+        "conflict_detected": { "type": "boolean", "description": "是否存在跨 Campaign 冲突（LED-011）" }
+      },
+      "additionalProperties": false
+    },
+    "duplicate_of_lead_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "重复线索指向的主 Lead（LED-010 重复触达检测）"
+    },
+    "owner_user_id": { "type": "string", "description": "负责人用户 ID" },
+    "last_enriched_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "最近补全时间（7.5.4 更新时间；过期数据自动降分，母本 4.5.5）"
+    },
+    "qualified_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "contacted_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "converted_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "opportunity_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "转化产生的 Opportunity（opp_ 前缀，CONVERTED 时填写）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "account_id",
+    "status",
+    "source",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

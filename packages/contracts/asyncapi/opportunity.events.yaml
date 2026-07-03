@@ -1,0 +1,571 @@
+# Opportunity 域领域事件（AsyncAPI 3.0）
+# 负责域：opportunity。母本 7.9/7.10、11.10 Envelope、11.11 关键业务事件。
+# 需求追踪：ENG-007..010/016/017、ANA-001/013/014、11.9 状态机（含 ENG-017/ANA-014 评审补丁 WITHDRAWN/DOWNGRADED）。
+# 【工作流说明】SAO 7/30/90 天验证回写由 Temporal 定时工作流驱动（补母本 9.8 用例）：
+#   SAOAccepted 发布后，Temporal 工作流按 accepted_at + 7/30/90 天设置定时器，
+#   到点检查 CommercialOutcome：已验证 -> OutcomeVerified 已发布；仍 PENDING 且窗口到期 -> 发布 OutcomeExpired；
+#   人工撤销/纠错 -> OutcomeRevoked。消费者按 ADR-009 至少一次投递、必须幂等。
+# 事件名 PascalCase + schema_version=1（母本 0.5、11.11）。
+asyncapi: 3.0.0
+info:
+  title: Opportunity Domain Events
+  version: 1.0.0
+  description: |
+    Opportunity 域全部领域事件：三级结果链（Qualified Lead -> Sales Accepted Opportunity ->
+    Verified Commercial Outcome，ENG-016）、阶段变化（ENG-008、母本 11.9）、SAO 撤回/降级
+    （ENG-017/ANA-014 评审补丁）、结果验证/过期/撤销（ENG-017、ANA-013/014）与统一触点
+    （ANA-001）。所有事件复用 common/envelope.schema.json（母本 11.10）。
+defaultContentType: application/json
+
+channels:
+  opportunity-events:
+    address: ggw.opportunity.events
+    description: Opportunity 域事件通道（Outbox 投递，至少一次，母本 11.14/ADR-009）
+    messages:
+      OpportunityAccepted:
+        $ref: '#/components/messages/OpportunityAccepted'
+      OpportunityStageChanged:
+        $ref: '#/components/messages/OpportunityStageChanged'
+      SAOAccepted:
+        $ref: '#/components/messages/SAOAccepted'
+      SAOWithdrawn:
+        $ref: '#/components/messages/SAOWithdrawn'
+      SAODowngraded:
+        $ref: '#/components/messages/SAODowngraded'
+      OutcomeVerified:
+        $ref: '#/components/messages/OutcomeVerified'
+      OutcomeExpired:
+        $ref: '#/components/messages/OutcomeExpired'
+      OutcomeRevoked:
+        $ref: '#/components/messages/OutcomeRevoked'
+      TouchpointRecorded:
+        $ref: '#/components/messages/TouchpointRecorded'
+
+operations:
+  publishOpportunityEvents:
+    action: send
+    channel:
+      $ref: '#/channels/opportunity-events'
+    summary: opportunity-service 发布 Opportunity 域事件
+    messages:
+      - $ref: '#/channels/opportunity-events/messages/OpportunityAccepted'
+      - $ref: '#/channels/opportunity-events/messages/OpportunityStageChanged'
+      - $ref: '#/channels/opportunity-events/messages/SAOAccepted'
+      - $ref: '#/channels/opportunity-events/messages/SAOWithdrawn'
+      - $ref: '#/channels/opportunity-events/messages/SAODowngraded'
+      - $ref: '#/channels/opportunity-events/messages/OutcomeVerified'
+      - $ref: '#/channels/opportunity-events/messages/OutcomeExpired'
+      - $ref: '#/channels/opportunity-events/messages/OutcomeRevoked'
+      - $ref: '#/channels/opportunity-events/messages/TouchpointRecorded'
+
+components:
+  messages:
+    OpportunityAccepted:
+      name: OpportunityAccepted
+      title: 机会已接受
+      summary: 高意向互动被用户接受并创建/关联为 Opportunity（母本 11.11 互动与机会类；ENG-007/ENG-009）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: OpportunityAccepted
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Opportunity
+              payload:
+                $ref: '#/components/schemas/OpportunityAcceptedPayload'
+
+    OpportunityStageChanged:
+      name: OpportunityStageChanged
+      title: 机会阶段变化
+      summary: 阶段沿 state-machines/opportunity.state.ts 转移（母本 11.9/11.11；ENG-008；同时产生 STAGE_CHANGE Touchpoint，ANA-001）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: OpportunityStageChanged
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Opportunity
+              payload:
+                $ref: '#/components/schemas/OpportunityStageChangedPayload'
+
+    SAOAccepted:
+      name: SAOAccepted
+      title: SAO 接受（三级结果链第二级）
+      summary: qualification_status QUALIFIED_LEAD -> SALES_ACCEPTED（ENG-016；ENG-009 区分 AI Qualified 与 Sales Accepted）；发布后启动 Temporal 7/30/90 天回写工作流（母本 9.8 补充用例）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: SAOAccepted
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Opportunity
+              payload:
+                $ref: '#/components/schemas/SAOAcceptedPayload'
+
+    SAOWithdrawn:
+      name: SAOWithdrawn
+      title: SAO 撤回（评审补丁）
+      summary: 机会不再符合条件/重复合并/纠错时撤回，stage -> WITHDRAWN，退出结果链计数（ENG-017/ANA-014 评审补丁；报表按 report_impact 重算或标记版本）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: SAOWithdrawn
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Opportunity
+              payload:
+                $ref: '#/components/schemas/SAOWithdrawnPayload'
+
+    SAODowngraded:
+      name: SAODowngraded
+      title: SAO 降级（评审补丁）
+      summary: SAO 降回 Qualified Lead 层级，stage -> DOWNGRADED、qualification_status -> QUALIFIED_LEAD（ENG-017/ANA-014 评审补丁）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: SAODowngraded
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Opportunity
+              payload:
+                $ref: '#/components/schemas/SAODowngradedPayload'
+
+    OutcomeVerified:
+      name: OutcomeVerified
+      title: 商业结果已验证（三级结果链第三级）
+      summary: CommercialOutcome PENDING -> VERIFIED，机会 qualification_status -> VERIFIED（ENG-016/ENG-017；ANA-013 7/30/90 天滞后转化统计）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: OutcomeVerified
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: CommercialOutcome
+              payload:
+                $ref: '#/components/schemas/OutcomeVerifiedPayload'
+
+    OutcomeExpired:
+      name: OutcomeExpired
+      title: 商业结果验证窗口过期
+      summary: 7/30/90 天窗口到期仍未验证，由 Temporal 定时工作流置位 PENDING -> EXPIRED（ENG-017 验收：不允许只靠用户点击接受永久计为有效结果；母本 9.8）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: OutcomeExpired
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: CommercialOutcome
+              payload:
+                $ref: '#/components/schemas/OutcomeExpiredPayload'
+
+    OutcomeRevoked:
+      name: OutcomeRevoked
+      title: 商业结果撤销/纠错
+      summary: PENDING/VERIFIED -> REVOKED（ANA-014：结果纠错，历史报表重算或标记版本；虚假或失效机会不会继续充当成功指标）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: OutcomeRevoked
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: CommercialOutcome
+              payload:
+                $ref: '#/components/schemas/OutcomeRevokedPayload'
+
+    TouchpointRecorded:
+      name: TouchpointRecorded
+      title: 统一触点已记录
+      summary: 曝光/点击/回复/评论/表单/会议/样品/报价/阶段变化进入统一 Touchpoint（母本 11.11 结果与学习类；ANA-001）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: TouchpointRecorded
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Touchpoint
+              payload:
+                $ref: '#/components/schemas/TouchpointRecordedPayload'
+
+  schemas:
+    opportunity_stage:
+      type: string
+      enum:
+        - NEW
+        - QUALIFIED
+        - MEETING
+        - SAMPLE_DEMO
+        - PROPOSAL
+        - WON
+        - LOST
+        - WITHDRAWN
+        - DOWNGRADED
+      description: 与 state-machines/opportunity.state.ts OPPORTUNITY_STAGES 完全一致（母本 11.9 + ENG-017/ANA-014 评审补丁）
+
+    qualification_status:
+      type: string
+      enum:
+        - QUALIFIED_LEAD
+        - SALES_ACCEPTED
+        - VERIFIED
+      description: 三级结果模型（ENG-016；与 state-machines/opportunity.state.ts QUALIFICATION_STATUSES 一致）
+
+    outcome_type:
+      type: string
+      enum:
+        - MEETING
+        - SAMPLE
+        - QUOTE
+        - CONTRACT
+        - WON
+        - LOST
+      description: 结果类型（ENG-017：会议、样品、报价、合同、Won/Lost）
+
+    followup_window:
+      type: integer
+      enum: [7, 30, 90]
+      description: 回写窗口天数（ENG-017/ANA-013）
+
+    report_impact:
+      type: string
+      enum:
+        - RECALCULATE
+        - VERSION_TAG
+      description: 历史报表处理方式：重算或标记版本（ANA-014）
+
+    withdraw_reason_code:
+      type: string
+      enum:
+        - DUPLICATE_MERGED
+        - NO_LONGER_QUALIFIED
+        - INVALID_DATA
+        - CUSTOMER_WITHDREW
+        - CORRECTION
+        - OTHER
+      description: 撤回/降级原因码（ENG-017：不再符合条件；ANA-014：重复合并与结果纠错）
+
+    OpportunityAcceptedPayload:
+      type: object
+      description: ENG-007/ENG-009：机会创建并被接受；保留来源和会话上下文
+      properties:
+        opportunity_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        account_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        contact_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        lead_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        campaign_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        owner_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        accepted_by:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        accepted_at:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/timestamp'
+        stage:
+          $ref: '#/components/schemas/opportunity_stage'
+        qualification_status:
+          $ref: '#/components/schemas/qualification_status'
+        source_conversation_id:
+          type: string
+          description: 来源会话（ENG-007 验收：转化动作保留来源和会话上下文）
+      required:
+        - opportunity_id
+        - account_id
+        - owner_id
+        - accepted_by
+        - accepted_at
+        - stage
+        - qualification_status
+      additionalProperties: false
+
+    OpportunityStageChangedPayload:
+      type: object
+      description: ENG-008/母本 11.9：阶段转移；非法转移由 state-machines/opportunity.state.ts 拒绝
+      properties:
+        opportunity_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        from_stage:
+          $ref: '#/components/schemas/opportunity_stage'
+        to_stage:
+          $ref: '#/components/schemas/opportunity_stage'
+        reason:
+          type: string
+          description: 阶段变化原因（LOST 时为失败原因回写，ENG-009/ENG-017）
+        changed_by:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        touchpoint_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+      required:
+        - opportunity_id
+        - from_stage
+        - to_stage
+        - changed_by
+      additionalProperties: false
+
+    SAOAcceptedPayload:
+      type: object
+      description: ENG-016 三级结果链第二级；发布后由 Temporal 工作流按 followup_review_at 定时回写（母本 9.8 补充用例）
+      properties:
+        opportunity_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        previous_qualification_status:
+          const: QUALIFIED_LEAD
+        qualification_status:
+          const: SALES_ACCEPTED
+        accepted_by:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        accepted_at:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/timestamp'
+        pack_label:
+          type: string
+          description: 行业 Pack 映射标签，如 有效询盘/经销商机会/RFQ/Demo/样品/报价（ENG-016）
+        followup_review_at:
+          type: array
+          items:
+            $ref: '../json-schema/common/primitives.schema.json#/$defs/timestamp'
+          minItems: 3
+          maxItems: 3
+          description: Temporal 定时回写检查点：accepted_at + 7/30/90 天（ENG-017/ANA-013）
+      required:
+        - opportunity_id
+        - previous_qualification_status
+        - qualification_status
+        - accepted_by
+        - accepted_at
+        - followup_review_at
+      additionalProperties: false
+
+    SAOWithdrawnPayload:
+      type: object
+      description: ENG-017/ANA-014 评审补丁：撤回后 stage=WITHDRAWN、qualification_status 回落 QUALIFIED_LEAD，退出北极星计数
+      properties:
+        opportunity_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        previous_stage:
+          $ref: '#/components/schemas/opportunity_stage'
+        reason_code:
+          $ref: '#/components/schemas/withdraw_reason_code'
+        reason_note:
+          type: string
+          description: 补充原因说明（ENG-009：失败原因回写）
+        withdrawn_by:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        merged_into_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        report_impact:
+          $ref: '#/components/schemas/report_impact'
+      required:
+        - opportunity_id
+        - previous_stage
+        - reason_code
+        - withdrawn_by
+        - report_impact
+      additionalProperties: false
+
+    SAODowngradedPayload:
+      type: object
+      description: ENG-017/ANA-014 评审补丁：SAO 降回 Qualified Lead 层级，重新符合条件后可回 QUALIFIED
+      properties:
+        opportunity_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        previous_stage:
+          $ref: '#/components/schemas/opportunity_stage'
+        previous_qualification_status:
+          const: SALES_ACCEPTED
+        qualification_status:
+          const: QUALIFIED_LEAD
+        reason_code:
+          $ref: '#/components/schemas/withdraw_reason_code'
+        reason_note:
+          type: string
+        downgraded_by:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        report_impact:
+          $ref: '#/components/schemas/report_impact'
+      required:
+        - opportunity_id
+        - previous_stage
+        - previous_qualification_status
+        - qualification_status
+        - reason_code
+        - downgraded_by
+        - report_impact
+      additionalProperties: false
+
+    OutcomeVerifiedPayload:
+      type: object
+      description: ENG-016/ENG-017：结果经证据确认；机会 qualification_status -> VERIFIED（ANA-013 统计）
+      properties:
+        outcome_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        opportunity_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        outcome_type:
+          $ref: '#/components/schemas/outcome_type'
+        followup_window:
+          $ref: '#/components/schemas/followup_window'
+        verified_by:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        verified_at:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/timestamp'
+        evidence_refs:
+          type: array
+          items:
+            $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+          minItems: 1
+          description: 验证证据（ENG-016 验收：证据均可审计）
+        value:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/money'
+      required:
+        - outcome_id
+        - opportunity_id
+        - outcome_type
+        - followup_window
+        - verified_by
+        - verified_at
+        - evidence_refs
+      additionalProperties: false
+
+    OutcomeExpiredPayload:
+      type: object
+      description: ENG-017：窗口到期未验证；由 Temporal 定时工作流发布（母本 9.8 补充用例）
+      properties:
+        outcome_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        opportunity_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        outcome_type:
+          $ref: '#/components/schemas/outcome_type'
+        followup_window:
+          $ref: '#/components/schemas/followup_window'
+        expired_at:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/timestamp'
+        workflow_run_id:
+          type: string
+          description: 发布本事件的 Temporal 工作流运行 ID（可追溯，母本 9.8）
+      required:
+        - outcome_id
+        - opportunity_id
+        - followup_window
+        - expired_at
+      additionalProperties: false
+
+    OutcomeRevokedPayload:
+      type: object
+      description: ANA-014：结果撤销/纠错；消费方（Analytics）按 report_impact 重算历史报表或标记版本
+      properties:
+        outcome_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        opportunity_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        previous_verification_status:
+          type: string
+          enum:
+            - PENDING
+            - VERIFIED
+          description: 撤销前状态（与 state-machines/commercial-outcome.state.ts 转移一致）
+        reason_code:
+          $ref: '#/components/schemas/withdraw_reason_code'
+        reason_note:
+          type: string
+        revoked_by:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        corrected_by_outcome_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        report_impact:
+          $ref: '#/components/schemas/report_impact'
+      required:
+        - outcome_id
+        - opportunity_id
+        - previous_verification_status
+        - reason_code
+        - revoked_by
+        - report_impact
+      additionalProperties: false
+
+    TouchpointRecordedPayload:
+      type: object
+      description: ANA-001：统一触点；验收要求事件具有 Campaign、Account/Contact、时间和来源
+      properties:
+        touchpoint_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        touchpoint_type:
+          type: string
+          enum:
+            - IMPRESSION
+            - CLICK
+            - REPLY
+            - COMMENT
+            - FORM_SUBMIT
+            - MEETING
+            - SAMPLE
+            - QUOTE
+            - STAGE_CHANGE
+          description: 与 json-schema/opportunity/touchpoint.schema.json 一致（ANA-001）
+        campaign_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        account_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        contact_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        opportunity_id:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/entity_id'
+        occurred_at:
+          $ref: '../json-schema/common/primitives.schema.json#/$defs/timestamp'
+        source:
+          type: object
+          properties:
+            channel:
+              type: string
+            provider_id:
+              type: string
+            external_event_id:
+              type: string
+              description: Webhook 去重键组成部分（母本 11.16）
+          required:
+            - channel
+          additionalProperties: false
+      required:
+        - touchpoint_id
+        - touchpoint_type
+        - occurred_at
+        - source
+      additionalProperties: false

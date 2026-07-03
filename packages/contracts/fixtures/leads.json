@@ -1,0 +1,5033 @@
+[
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000001",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000001",
+    "name": "Mekong Solar Trading Co., Ltd.",
+    "trading_names": [
+      "Mekong Solar"
+    ],
+    "domains": [
+      "mekong-solar.example.com"
+    ],
+    "country": "VN",
+    "industries": [
+      "solar_distribution",
+      "renewable_energy"
+    ],
+    "employee_range": "51-200",
+    "revenue_range": "5M-20M USD",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000001"
+    ],
+    "quality_score": 0.86,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T03:00:00Z",
+    "updated_at": "2026-06-20T03:31:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000001",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000001",
+    "full_name": "Nguyen Van Thanh",
+    "given_name": "Van Thanh",
+    "family_name": "Nguyen",
+    "current_role": {
+      "title": "Procurement Director",
+      "seniority": "DIRECTOR"
+    },
+    "buying_role": "PROCUREMENT",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0001_email",
+        "type": "EMAIL",
+        "value": "thanh.nguyen@mekong-solar.example.com",
+        "value_masked": "t***@mekong-solar.example.com",
+        "value_hash": "sha256:cpe0001a7f3d10001",
+        "is_primary": true,
+        "verification_status": "VALID",
+        "verified_at": "2026-06-17T06:00:00Z",
+        "verification_provider_id": "prv_email_verify",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      },
+      {
+        "contact_point_id": "cpt_0001_li",
+        "type": "LINKEDIN",
+        "value": "https://www.linkedin.com/in/sample-0001-fictional",
+        "value_masked": "linkedin.com/in/s***",
+        "value_hash": "sha256:cpl0001b8e4c20001",
+        "is_primary": false,
+        "verification_status": "UNVERIFIED",
+        "consent_status": "UNKNOWN",
+        "suppressed": false
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000001",
+        "company_name": "Mekong Solar Trading Co., Ltd.",
+        "title": "Procurement Director",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "VN",
+    "locale": "vi",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T03:00:00Z",
+    "updated_at": "2026-06-20T03:31:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000001",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000001",
+    "contact_id": "cta_01JZC0NT000000000000000001",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "status": "QUALIFIED",
+    "queue": "RECOMMENDED",
+    "source": {
+      "discovery_method": "PROVIDER_QUERY",
+      "provider_id": "prv_asia_trade_directory"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000001",
+    "latest_priority": 86,
+    "risk_flags": [],
+    "owner_user_id": "usr_01JZVSER000000000000000003",
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "qualified_at": "2026-06-20T04:01:00Z",
+    "created_at": "2026-06-16T03:00:00Z",
+    "updated_at": "2026-06-20T03:31:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000001",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000001",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "dimensions": {
+      "fit": {
+        "score": 88,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:01:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 VN 与行业标签命中 ICP 市场范围与行业条件（criteria c1/c2）",
+            "observed_at": "2026-06-20T03:01:00Z",
+            "field_name": "country",
+            "contribution": 53
+          }
+        ]
+      },
+      "role": {
+        "score": 82,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:01:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「Procurement Director」匹配购买委员会角色 PROCUREMENT（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:01:00Z",
+            "field_name": "current_role.title",
+            "contribution": 41
+          }
+        ]
+      },
+      "intent": {
+        "score": 80,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:01:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "近 180 天 HS 854143 组件进口量环比增长 35%（贸易信号）",
+            "observed_at": "2026-06-20T03:01:00Z",
+            "contribution": 40
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 90,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:01:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱已验证、公司画像字段完整率 85%+，来源新鲜（近 30 天）",
+            "observed_at": "2026-06-20T03:01:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 92,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:01:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱验证通过且未被抑制，允许外联（allowed_for_outreach=true）",
+            "observed_at": "2026-06-20T03:01:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 40,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:01:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "无历史互动记录",
+            "observed_at": "2026-06-20T03:01:00Z",
+            "contribution": 0
+          }
+        ]
+      }
+    },
+    "total_priority": 86,
+    "hard_exclusion_applied": false,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.3,
+      "role": 0.15,
+      "intent": 0.25,
+      "data_quality": 0.1,
+      "reachability": 0.1,
+      "engagement": 0.1
+    },
+    "computed_at": "2026-06-20T03:01:00Z",
+    "created_at": "2026-06-20T03:01:00Z",
+    "updated_at": "2026-06-20T03:01:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000001",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10001c9d5e30001",
+    "provider_id": "prv_apex_b2b_contacts",
+    "provider_record_id": "rec-apex-0001-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.92,
+    "license_id": "lic_apex_b2b_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000001",
+    "field_name": "import_history.hs_codes",
+    "value_hash": "sha256:fe20001d0e6f40001",
+    "provider_id": "prv_customs_trade_data",
+    "provider_record_id": "rec-ctd-0001-co",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2027-06-19T06:00:00Z",
+    "confidence": 0.85,
+    "license_id": "lic_tradedata_2026",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000002",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000002",
+    "name": "Saigon Green Energy JSC",
+    "trading_names": [
+      "Saigon Green Energy"
+    ],
+    "domains": [
+      "saigon-greenenergy.example.com"
+    ],
+    "country": "VN",
+    "industries": [
+      "solar_epc"
+    ],
+    "employee_range": "201-500",
+    "revenue_range": "20M-100M USD",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000001"
+    ],
+    "quality_score": 0.82,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T04:00:00Z",
+    "updated_at": "2026-06-20T03:32:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000002",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000002",
+    "full_name": "Tran Thi Mai",
+    "given_name": "Thi Mai",
+    "family_name": "Tran",
+    "current_role": {
+      "title": "Managing Director",
+      "seniority": "C_LEVEL"
+    },
+    "buying_role": "DECISION_MAKER",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0002_email",
+        "type": "EMAIL",
+        "value": "mai.tran@saigon-greenenergy.example.com",
+        "value_masked": "m***@saigon-greenenergy.example.com",
+        "value_hash": "sha256:cpe0002a7f3d10002",
+        "is_primary": true,
+        "verification_status": "VALID",
+        "verified_at": "2026-06-17T06:00:00Z",
+        "verification_provider_id": "prv_email_verify",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000002",
+        "company_name": "Saigon Green Energy JSC",
+        "title": "Managing Director",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "VN",
+    "locale": "vi",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T04:00:00Z",
+    "updated_at": "2026-06-20T03:32:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000002",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000002",
+    "contact_id": "cta_01JZC0NT000000000000000002",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "status": "QUALIFIED",
+    "queue": "RECOMMENDED",
+    "source": {
+      "discovery_method": "PROVIDER_QUERY",
+      "provider_id": "prv_asia_trade_directory"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000002",
+    "latest_priority": 82,
+    "risk_flags": [],
+    "owner_user_id": "usr_01JZVSER000000000000000003",
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "qualified_at": "2026-06-20T04:02:00Z",
+    "created_at": "2026-06-16T04:00:00Z",
+    "updated_at": "2026-06-20T03:32:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000002",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000002",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "dimensions": {
+      "fit": {
+        "score": 85,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:02:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 VN 与行业标签命中 ICP 市场范围与行业条件（criteria c1/c2）",
+            "observed_at": "2026-06-20T03:02:00Z",
+            "field_name": "country",
+            "contribution": 51
+          }
+        ]
+      },
+      "role": {
+        "score": 90,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:02:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「Managing Director」匹配购买委员会角色 DECISION_MAKER（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:02:00Z",
+            "field_name": "current_role.title",
+            "contribution": 45
+          }
+        ]
+      },
+      "intent": {
+        "score": 68,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:02:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "官网公示 2026 年 120MW 工商业屋顶项目管道（内容信号）",
+            "observed_at": "2026-06-20T03:02:00Z",
+            "contribution": 34
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 86,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:02:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱已验证、公司画像字段完整率 85%+，来源新鲜（近 30 天）",
+            "observed_at": "2026-06-20T03:02:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 85,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:02:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱验证通过且未被抑制，允许外联（allowed_for_outreach=true）",
+            "observed_at": "2026-06-20T03:02:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 35,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:02:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "无历史互动记录",
+            "observed_at": "2026-06-20T03:02:00Z",
+            "contribution": 0
+          }
+        ]
+      }
+    },
+    "total_priority": 82,
+    "hard_exclusion_applied": false,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.3,
+      "role": 0.15,
+      "intent": 0.25,
+      "data_quality": 0.1,
+      "reachability": 0.1,
+      "engagement": 0.1
+    },
+    "computed_at": "2026-06-20T03:02:00Z",
+    "created_at": "2026-06-20T03:02:00Z",
+    "updated_at": "2026-06-20T03:02:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000002",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10002c9d5e30002",
+    "provider_id": "prv_apex_b2b_contacts",
+    "provider_record_id": "rec-apex-0002-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.92,
+    "license_id": "lic_apex_b2b_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000002",
+    "field_name": "import_history.hs_codes",
+    "value_hash": "sha256:fe20002d0e6f40002",
+    "provider_id": "prv_customs_trade_data",
+    "provider_record_id": "rec-ctd-0002-co",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2027-06-19T06:00:00Z",
+    "confidence": 0.85,
+    "license_id": "lic_tradedata_2026",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000003",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000003",
+    "name": "Siam Sunrise Power Co., Ltd.",
+    "trading_names": [
+      "Siam Sunrise"
+    ],
+    "domains": [
+      "siam-sunrise.example.com"
+    ],
+    "country": "TH",
+    "industries": [
+      "solar_epc",
+      "engineering"
+    ],
+    "employee_range": "51-200",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000001"
+    ],
+    "quality_score": 0.78,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T05:00:00Z",
+    "updated_at": "2026-06-20T03:33:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000003",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000003",
+    "full_name": "Somchai Rattanakorn",
+    "given_name": "Somchai",
+    "family_name": "Rattanakorn",
+    "current_role": {
+      "title": "Technical Director",
+      "seniority": "DIRECTOR"
+    },
+    "buying_role": "TECHNICAL",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0003_email",
+        "type": "EMAIL",
+        "value": "somchai.r@siam-sunrise.example.com",
+        "value_masked": "s***@siam-sunrise.example.com",
+        "value_hash": "sha256:cpe0003a7f3d10003",
+        "is_primary": true,
+        "verification_status": "VALID",
+        "verified_at": "2026-06-17T06:00:00Z",
+        "verification_provider_id": "prv_email_verify",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000003",
+        "company_name": "Siam Sunrise Power Co., Ltd.",
+        "title": "Technical Director",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "TH",
+    "locale": "th",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T05:00:00Z",
+    "updated_at": "2026-06-20T03:33:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000003",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000003",
+    "contact_id": "cta_01JZC0NT000000000000000003",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "status": "QUALIFIED",
+    "queue": "RECOMMENDED",
+    "source": {
+      "discovery_method": "SIGNAL",
+      "provider_id": "prv_hiring_signals"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000003",
+    "latest_priority": 78,
+    "risk_flags": [],
+    "owner_user_id": "usr_01JZVSER000000000000000003",
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "qualified_at": "2026-06-20T04:03:00Z",
+    "created_at": "2026-06-16T05:00:00Z",
+    "updated_at": "2026-06-20T03:33:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000003",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000003",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "dimensions": {
+      "fit": {
+        "score": 80,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:03:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 TH 与行业标签命中 ICP 市场范围与行业条件（criteria c1/c2）",
+            "observed_at": "2026-06-20T03:03:00Z",
+            "field_name": "country",
+            "contribution": 48
+          }
+        ]
+      },
+      "role": {
+        "score": 70,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:03:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「Technical Director」匹配购买委员会角色 TECHNICAL（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:03:00Z",
+            "field_name": "current_role.title",
+            "contribution": 35
+          }
+        ]
+      },
+      "intent": {
+        "score": 84,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:03:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "近 90 天连续招聘 solar project engineer 岗位（招聘信号，触发 ICP trigger_signals.HIRING）",
+            "observed_at": "2026-06-20T03:03:00Z",
+            "contribution": 42
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 78,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:03:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱已验证、公司画像字段完整率 85%+，来源新鲜（近 30 天）",
+            "observed_at": "2026-06-20T03:03:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 82,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:03:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱验证通过且未被抑制，允许外联（allowed_for_outreach=true）",
+            "observed_at": "2026-06-20T03:03:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 30,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:03:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "无历史互动记录",
+            "observed_at": "2026-06-20T03:03:00Z",
+            "contribution": 0
+          }
+        ]
+      }
+    },
+    "total_priority": 78,
+    "hard_exclusion_applied": false,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.3,
+      "role": 0.15,
+      "intent": 0.25,
+      "data_quality": 0.1,
+      "reachability": 0.1,
+      "engagement": 0.1
+    },
+    "computed_at": "2026-06-20T03:03:00Z",
+    "created_at": "2026-06-20T03:03:00Z",
+    "updated_at": "2026-06-20T03:03:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000003",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10003c9d5e30003",
+    "provider_id": "prv_apex_b2b_contacts",
+    "provider_record_id": "rec-apex-0003-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.92,
+    "license_id": "lic_apex_b2b_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000003",
+    "field_name": "industries",
+    "value_hash": "sha256:fe20003d0e6f40003",
+    "provider_id": "prv_public_web_crawl",
+    "provider_record_id": "rec-web-0003-co",
+    "source_url": "https://www.siam-sunrise.example.com/about",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-09-17T06:00:00Z",
+    "confidence": 0.8,
+    "license_id": "lic_public_web_tos",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": true,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000004",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000004",
+    "name": "Bangkok Solar Import Co., Ltd.",
+    "trading_names": [
+      "BKK Solar Import"
+    ],
+    "domains": [
+      "bkk-solarimport.example.com"
+    ],
+    "country": "TH",
+    "industries": [
+      "solar_distribution"
+    ],
+    "employee_range": "11-50",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000001"
+    ],
+    "quality_score": 0.61,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T06:00:00Z",
+    "updated_at": "2026-06-20T03:34:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000004",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000004",
+    "full_name": "Kanya Phromsurin",
+    "given_name": "Kanya",
+    "family_name": "Phromsurin",
+    "current_role": {
+      "title": "Purchasing Manager",
+      "seniority": "MANAGER"
+    },
+    "buying_role": "PROCUREMENT",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0004_email",
+        "type": "EMAIL",
+        "value_masked": "k***@bkk-solarimport.example.com",
+        "value_hash": "sha256:cpe0004a7f3d10004",
+        "is_primary": true,
+        "verification_status": "UNVERIFIED",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000004",
+        "company_name": "Bangkok Solar Import Co., Ltd.",
+        "title": "Purchasing Manager",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "TH",
+    "locale": "th",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T06:00:00Z",
+    "updated_at": "2026-06-20T03:34:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000004",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000004",
+    "contact_id": "cta_01JZC0NT000000000000000004",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "status": "REVIEW",
+    "queue": "NEEDS_CONFIRMATION",
+    "source": {
+      "discovery_method": "PROVIDER_QUERY",
+      "provider_id": "prv_asia_trade_directory"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000004",
+    "latest_priority": 64,
+    "risk_flags": [
+      "unverified_email"
+    ],
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T06:00:00Z",
+    "updated_at": "2026-06-20T03:34:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000004",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000004",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "dimensions": {
+      "fit": {
+        "score": 76,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:04:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 TH 与行业标签命中 ICP 市场范围与行业条件（criteria c1/c2）",
+            "observed_at": "2026-06-20T03:04:00Z",
+            "field_name": "country",
+            "contribution": 46
+          }
+        ]
+      },
+      "role": {
+        "score": 68,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:04:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「Purchasing Manager」匹配购买委员会角色 PROCUREMENT（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:04:00Z",
+            "field_name": "current_role.title",
+            "contribution": 34
+          }
+        ]
+      },
+      "intent": {
+        "score": 60,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:04:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "近 180 天两批 HS 854143 进口记录，规模较小（贸易信号）",
+            "observed_at": "2026-06-20T03:04:00Z",
+            "contribution": 30
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 52,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:04:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱未验证，画像字段完整率不足 60%",
+            "observed_at": "2026-06-20T03:04:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 45,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:04:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱未通过验证，暂不可进入批量发送（母本 4.5.5）",
+            "observed_at": "2026-06-20T03:04:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 20,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:04:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "无历史互动记录",
+            "observed_at": "2026-06-20T03:04:00Z",
+            "contribution": 0
+          }
+        ]
+      }
+    },
+    "total_priority": 64,
+    "hard_exclusion_applied": false,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.3,
+      "role": 0.15,
+      "intent": 0.25,
+      "data_quality": 0.1,
+      "reachability": 0.1,
+      "engagement": 0.1
+    },
+    "computed_at": "2026-06-20T03:04:00Z",
+    "created_at": "2026-06-20T03:04:00Z",
+    "updated_at": "2026-06-20T03:04:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000004",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10004c9d5e30004",
+    "provider_id": "prv_apex_b2b_contacts",
+    "provider_record_id": "rec-apex-0004-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.7,
+    "license_id": "lic_apex_b2b_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000004",
+    "field_name": "import_history.hs_codes",
+    "value_hash": "sha256:fe20004d0e6f40004",
+    "provider_id": "prv_customs_trade_data",
+    "provider_record_id": "rec-ctd-0004-co",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2027-06-19T06:00:00Z",
+    "confidence": 0.85,
+    "license_id": "lic_tradedata_2026",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000005",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000005",
+    "name": "Penang SolarTech Sdn. Bhd.",
+    "trading_names": [
+      "Penang SolarTech"
+    ],
+    "domains": [
+      "penang-solartech.example.com"
+    ],
+    "country": "MY",
+    "industries": [
+      "solar_distribution",
+      "electrical_wholesale"
+    ],
+    "employee_range": "51-200",
+    "revenue_range": "5M-20M USD",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000001"
+    ],
+    "quality_score": 0.8,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T07:00:00Z",
+    "updated_at": "2026-06-20T03:35:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000005",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000005",
+    "full_name": "Lim Wei Jian",
+    "given_name": "Wei Jian",
+    "family_name": "Lim",
+    "current_role": {
+      "title": "General Manager",
+      "seniority": "C_LEVEL"
+    },
+    "buying_role": "DECISION_MAKER",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0005_email",
+        "type": "EMAIL",
+        "value": "weijian.lim@penang-solartech.example.com",
+        "value_masked": "w***@penang-solartech.example.com",
+        "value_hash": "sha256:cpe0005a7f3d10005",
+        "is_primary": true,
+        "verification_status": "VALID",
+        "verified_at": "2026-06-17T06:00:00Z",
+        "verification_provider_id": "prv_email_verify",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      },
+      {
+        "contact_point_id": "cpt_0005_li",
+        "type": "LINKEDIN",
+        "value": "https://www.linkedin.com/in/sample-0005-fictional",
+        "value_masked": "linkedin.com/in/s***",
+        "value_hash": "sha256:cpl0005b8e4c20005",
+        "is_primary": false,
+        "verification_status": "UNVERIFIED",
+        "consent_status": "UNKNOWN",
+        "suppressed": false
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000005",
+        "company_name": "Penang SolarTech Sdn. Bhd.",
+        "title": "General Manager",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "MY",
+    "locale": "en",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T07:00:00Z",
+    "updated_at": "2026-06-20T03:35:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000005",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000005",
+    "contact_id": "cta_01JZC0NT000000000000000005",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "status": "QUALIFIED",
+    "queue": "RECOMMENDED",
+    "source": {
+      "discovery_method": "PROVIDER_QUERY",
+      "provider_id": "prv_asia_trade_directory"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000005",
+    "latest_priority": 80,
+    "risk_flags": [],
+    "owner_user_id": "usr_01JZVSER000000000000000003",
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "qualified_at": "2026-06-20T04:05:00Z",
+    "created_at": "2026-06-16T07:00:00Z",
+    "updated_at": "2026-06-20T03:35:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000005",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000005",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "dimensions": {
+      "fit": {
+        "score": 82,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:05:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 MY 与行业标签命中 ICP 市场范围与行业条件（criteria c1/c2）",
+            "observed_at": "2026-06-20T03:05:00Z",
+            "field_name": "country",
+            "contribution": 49
+          }
+        ]
+      },
+      "role": {
+        "score": 88,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:05:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「General Manager」匹配购买委员会角色 DECISION_MAKER（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:05:00Z",
+            "field_name": "current_role.title",
+            "contribution": 44
+          }
+        ]
+      },
+      "intent": {
+        "score": 66,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:05:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "参展 2026 东南亚光伏展并发布扩品类招商信息（活动信号）",
+            "observed_at": "2026-06-20T03:05:00Z",
+            "contribution": 33
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 84,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:05:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱已验证、公司画像字段完整率 85%+，来源新鲜（近 30 天）",
+            "observed_at": "2026-06-20T03:05:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 88,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:05:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱验证通过且未被抑制，允许外联（allowed_for_outreach=true）",
+            "observed_at": "2026-06-20T03:05:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 38,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:05:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "无历史互动记录",
+            "observed_at": "2026-06-20T03:05:00Z",
+            "contribution": 0
+          }
+        ]
+      }
+    },
+    "total_priority": 80,
+    "hard_exclusion_applied": false,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.3,
+      "role": 0.15,
+      "intent": 0.25,
+      "data_quality": 0.1,
+      "reachability": 0.1,
+      "engagement": 0.1
+    },
+    "computed_at": "2026-06-20T03:05:00Z",
+    "created_at": "2026-06-20T03:05:00Z",
+    "updated_at": "2026-06-20T03:05:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000005",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10005c9d5e30005",
+    "provider_id": "prv_apex_b2b_contacts",
+    "provider_record_id": "rec-apex-0005-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.92,
+    "license_id": "lic_apex_b2b_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000005",
+    "field_name": "import_history.hs_codes",
+    "value_hash": "sha256:fe20005d0e6f40005",
+    "provider_id": "prv_customs_trade_data",
+    "provider_record_id": "rec-ctd-0005-co",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2027-06-19T06:00:00Z",
+    "confidence": 0.85,
+    "license_id": "lic_tradedata_2026",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000006",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000006",
+    "name": "Borneo Energy Distribution Sdn. Bhd.",
+    "trading_names": [
+      "Borneo Energy"
+    ],
+    "domains": [
+      "borneo-energy.example.com"
+    ],
+    "country": "MY",
+    "industries": [
+      "solar_distribution"
+    ],
+    "employee_range": "11-50",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000001"
+    ],
+    "quality_score": 0.55,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T08:00:00Z",
+    "updated_at": "2026-06-20T03:36:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000006",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000006",
+    "full_name": "Ahmad Faizal bin Rahman",
+    "given_name": "Ahmad Faizal",
+    "family_name": "bin Rahman",
+    "current_role": {
+      "title": "Director",
+      "seniority": "DIRECTOR"
+    },
+    "buying_role": "DECISION_MAKER",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0006_email",
+        "type": "EMAIL",
+        "value_masked": "f***@borneo-energy.example.com",
+        "value_hash": "sha256:cpe0006a7f3d10006",
+        "is_primary": true,
+        "verification_status": "EXPIRED",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000006",
+        "company_name": "Borneo Energy Distribution Sdn. Bhd.",
+        "title": "Director",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "MY",
+    "locale": "en",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T08:00:00Z",
+    "updated_at": "2026-06-20T03:36:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000006",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000006",
+    "contact_id": "cta_01JZC0NT000000000000000006",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "status": "REVIEW",
+    "queue": "NEEDS_CONFIRMATION",
+    "source": {
+      "discovery_method": "PROVIDER_QUERY",
+      "provider_id": "prv_asia_trade_directory"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000006",
+    "latest_priority": 61,
+    "risk_flags": [
+      "expired_data"
+    ],
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T08:00:00Z",
+    "updated_at": "2026-06-20T03:36:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000006",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000006",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "dimensions": {
+      "fit": {
+        "score": 74,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:06:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 MY 与行业标签命中 ICP 市场范围与行业条件（criteria c1/c2）",
+            "observed_at": "2026-06-20T03:06:00Z",
+            "field_name": "country",
+            "contribution": 44
+          }
+        ]
+      },
+      "role": {
+        "score": 80,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:06:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「Director」匹配购买委员会角色 DECISION_MAKER（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:06:00Z",
+            "field_name": "current_role.title",
+            "contribution": 40
+          }
+        ]
+      },
+      "intent": {
+        "score": 40,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:06:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "最近一次进口记录在 14 个月前，信号已过期自动降低 Intent（LED-014）",
+            "observed_at": "2026-06-20T03:06:00Z",
+            "contribution": 20
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 38,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:06:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "关键字段来源超过 12 个月未刷新，自动降分并进入刷新队列（母本 4.5.5）",
+            "observed_at": "2026-06-20T03:06:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 42,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:06:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱未通过验证，暂不可进入批量发送（母本 4.5.5）",
+            "observed_at": "2026-06-20T03:06:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 15,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:06:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "无历史互动记录",
+            "observed_at": "2026-06-20T03:06:00Z",
+            "contribution": 0
+          }
+        ]
+      }
+    },
+    "total_priority": 61,
+    "hard_exclusion_applied": false,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.3,
+      "role": 0.15,
+      "intent": 0.25,
+      "data_quality": 0.1,
+      "reachability": 0.1,
+      "engagement": 0.1
+    },
+    "computed_at": "2026-06-20T03:06:00Z",
+    "created_at": "2026-06-20T03:06:00Z",
+    "updated_at": "2026-06-20T03:06:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000006",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10006c9d5e30006",
+    "provider_id": "prv_apex_b2b_contacts",
+    "provider_record_id": "rec-apex-0006-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.7,
+    "license_id": "lic_apex_b2b_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000006",
+    "field_name": "industries",
+    "value_hash": "sha256:fe20006d0e6f40006",
+    "provider_id": "prv_public_web_crawl",
+    "provider_record_id": "rec-web-0006-co",
+    "source_url": "https://www.borneo-energy.example.com/about",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-09-17T06:00:00Z",
+    "confidence": 0.8,
+    "license_id": "lic_public_web_tos",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": true,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000007",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000007",
+    "name": "Manila Bright Power Corp.",
+    "trading_names": [
+      "Manila Bright Power"
+    ],
+    "domains": [
+      "manila-brightpower.example.com"
+    ],
+    "country": "PH",
+    "industries": [
+      "solar_epc"
+    ],
+    "employee_range": "51-200",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000001"
+    ],
+    "quality_score": 0.7,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T09:00:00Z",
+    "updated_at": "2026-06-20T03:37:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000007",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000007",
+    "full_name": "Jose Ramirez",
+    "given_name": "Jose",
+    "family_name": "Ramirez",
+    "current_role": {
+      "title": "VP Engineering",
+      "seniority": "VP"
+    },
+    "buying_role": "TECHNICAL",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0007_email",
+        "type": "EMAIL",
+        "value": "jose.ramirez@manila-brightpower.example.com",
+        "value_masked": "j***@manila-brightpower.example.com",
+        "value_hash": "sha256:cpe0007a7f3d10007",
+        "is_primary": true,
+        "verification_status": "VALID",
+        "verified_at": "2026-06-17T06:00:00Z",
+        "verification_provider_id": "prv_email_verify",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000007",
+        "company_name": "Manila Bright Power Corp.",
+        "title": "VP Engineering",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "PH",
+    "locale": "en",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T09:00:00Z",
+    "updated_at": "2026-06-20T03:37:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000007",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000007",
+    "contact_id": "cta_01JZC0NT000000000000000007",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "status": "REVIEW",
+    "queue": "NEEDS_CONFIRMATION",
+    "source": {
+      "discovery_method": "PROVIDER_QUERY",
+      "provider_id": "prv_asia_trade_directory"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000007",
+    "latest_priority": 58,
+    "risk_flags": [
+      "missing_decision_maker"
+    ],
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T09:00:00Z",
+    "updated_at": "2026-06-20T03:37:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000007",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000007",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "dimensions": {
+      "fit": {
+        "score": 72,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:07:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 PH 与行业标签命中 ICP 市场范围与行业条件（criteria c1/c2）",
+            "observed_at": "2026-06-20T03:07:00Z",
+            "field_name": "country",
+            "contribution": 43
+          }
+        ]
+      },
+      "role": {
+        "score": 55,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:07:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「VP Engineering」匹配购买委员会角色 TECHNICAL（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:07:00Z",
+            "field_name": "current_role.title",
+            "contribution": 28
+          }
+        ]
+      },
+      "intent": {
+        "score": 50,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:07:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "官网新增分布式项目案例页（网站变更信号，强度中等）",
+            "observed_at": "2026-06-20T03:07:00Z",
+            "contribution": 25
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 70,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:07:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱已验证、公司画像字段完整率 85%+，来源新鲜（近 30 天）",
+            "observed_at": "2026-06-20T03:07:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 74,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:07:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱验证通过且未被抑制，允许外联（allowed_for_outreach=true）",
+            "observed_at": "2026-06-20T03:07:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 22,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:07:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "无历史互动记录",
+            "observed_at": "2026-06-20T03:07:00Z",
+            "contribution": 0
+          }
+        ]
+      }
+    },
+    "total_priority": 58,
+    "hard_exclusion_applied": false,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.3,
+      "role": 0.15,
+      "intent": 0.25,
+      "data_quality": 0.1,
+      "reachability": 0.1,
+      "engagement": 0.1
+    },
+    "computed_at": "2026-06-20T03:07:00Z",
+    "created_at": "2026-06-20T03:07:00Z",
+    "updated_at": "2026-06-20T03:07:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000007",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10007c9d5e30007",
+    "provider_id": "prv_apex_b2b_contacts",
+    "provider_record_id": "rec-apex-0007-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.92,
+    "license_id": "lic_apex_b2b_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000007",
+    "field_name": "import_history.hs_codes",
+    "value_hash": "sha256:fe20007d0e6f40007",
+    "provider_id": "prv_customs_trade_data",
+    "provider_record_id": "rec-ctd-0007-co",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2027-06-19T06:00:00Z",
+    "confidence": 0.85,
+    "license_id": "lic_tradedata_2026",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000008",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000008",
+    "name": "PT Surya Nusantara Jakarta",
+    "trading_names": [
+      "Surya Nusantara"
+    ],
+    "domains": [
+      "surya-nusantara.example.com"
+    ],
+    "country": "ID",
+    "industries": [
+      "solar_distribution"
+    ],
+    "employee_range": "11-50",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000001"
+    ],
+    "quality_score": 0.74,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T10:00:00Z",
+    "updated_at": "2026-06-20T03:38:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000008",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000008",
+    "full_name": "Budi Santoso",
+    "given_name": "Budi",
+    "family_name": "Santoso",
+    "current_role": {
+      "title": "Owner",
+      "seniority": "OWNER"
+    },
+    "buying_role": "DECISION_MAKER",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0008_email",
+        "type": "EMAIL",
+        "value": "budi@surya-nusantara.example.com",
+        "value_masked": "b***@surya-nusantara.example.com",
+        "value_hash": "sha256:cpe0008a7f3d10008",
+        "is_primary": true,
+        "verification_status": "VALID",
+        "verified_at": "2026-06-17T06:00:00Z",
+        "verification_provider_id": "prv_email_verify",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000008",
+        "company_name": "PT Surya Nusantara Jakarta",
+        "title": "Owner",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "ID",
+    "locale": "id",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T10:00:00Z",
+    "updated_at": "2026-06-20T03:38:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000008",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000008",
+    "contact_id": "cta_01JZC0NT000000000000000008",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "status": "QUALIFIED",
+    "queue": "RECOMMENDED",
+    "source": {
+      "discovery_method": "PROVIDER_QUERY",
+      "provider_id": "prv_asia_trade_directory"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000008",
+    "latest_priority": 75,
+    "risk_flags": [],
+    "owner_user_id": "usr_01JZVSER000000000000000003",
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "qualified_at": "2026-06-20T04:08:00Z",
+    "created_at": "2026-06-16T10:00:00Z",
+    "updated_at": "2026-06-20T03:38:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000008",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000008",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "dimensions": {
+      "fit": {
+        "score": 78,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:08:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 ID 与行业标签命中 ICP 市场范围与行业条件（criteria c1/c2）",
+            "observed_at": "2026-06-20T03:08:00Z",
+            "field_name": "country",
+            "contribution": 47
+          }
+        ]
+      },
+      "role": {
+        "score": 86,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:08:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「Owner」匹配购买委员会角色 DECISION_MAKER（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:08:00Z",
+            "field_name": "current_role.title",
+            "contribution": 43
+          }
+        ]
+      },
+      "intent": {
+        "score": 58,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:08:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "近 120 天 HS 854143 进口记录 3 批（贸易信号）",
+            "observed_at": "2026-06-20T03:08:00Z",
+            "contribution": 29
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 76,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:08:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱已验证、公司画像字段完整率 85%+，来源新鲜（近 30 天）",
+            "observed_at": "2026-06-20T03:08:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 80,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:08:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱验证通过且未被抑制，允许外联（allowed_for_outreach=true）",
+            "observed_at": "2026-06-20T03:08:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 28,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:08:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "无历史互动记录",
+            "observed_at": "2026-06-20T03:08:00Z",
+            "contribution": 0
+          }
+        ]
+      }
+    },
+    "total_priority": 75,
+    "hard_exclusion_applied": false,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.3,
+      "role": 0.15,
+      "intent": 0.25,
+      "data_quality": 0.1,
+      "reachability": 0.1,
+      "engagement": 0.1
+    },
+    "computed_at": "2026-06-20T03:08:00Z",
+    "created_at": "2026-06-20T03:08:00Z",
+    "updated_at": "2026-06-20T03:08:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000008",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10008c9d5e30008",
+    "provider_id": "prv_apex_b2b_contacts",
+    "provider_record_id": "rec-apex-0008-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.92,
+    "license_id": "lic_apex_b2b_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000008",
+    "field_name": "import_history.hs_codes",
+    "value_hash": "sha256:fe20008d0e6f40008",
+    "provider_id": "prv_customs_trade_data",
+    "provider_record_id": "rec-ctd-0008-co",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2027-06-19T06:00:00Z",
+    "confidence": 0.85,
+    "license_id": "lic_tradedata_2026",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000009",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000009",
+    "name": "PT Bali Solar Manufacturing",
+    "trading_names": [
+      "Bali Solar Mfg"
+    ],
+    "domains": [
+      "bali-solarmfg.example.com"
+    ],
+    "country": "ID",
+    "industries": [
+      "pv_module_manufacturing"
+    ],
+    "employee_range": "201-500",
+    "matched_icp_ids": [],
+    "quality_score": 0.68,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T11:00:00Z",
+    "updated_at": "2026-06-20T03:39:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000009",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000009",
+    "full_name": "Made Wirawan",
+    "given_name": "Made",
+    "family_name": "Wirawan",
+    "current_role": {
+      "title": "Commercial Director",
+      "seniority": "DIRECTOR"
+    },
+    "buying_role": "INFLUENCER",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0009_email",
+        "type": "EMAIL",
+        "value": "made.w@bali-solarmfg.example.com",
+        "value_masked": "m***@bali-solarmfg.example.com",
+        "value_hash": "sha256:cpe0009a7f3d10009",
+        "is_primary": true,
+        "verification_status": "VALID",
+        "verified_at": "2026-06-17T06:00:00Z",
+        "verification_provider_id": "prv_email_verify",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000009",
+        "company_name": "PT Bali Solar Manufacturing",
+        "title": "Commercial Director",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "ID",
+    "locale": "id",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T11:00:00Z",
+    "updated_at": "2026-06-20T03:39:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000009",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000009",
+    "contact_id": "cta_01JZC0NT000000000000000009",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "status": "REJECTED",
+    "queue": "REJECTED",
+    "source": {
+      "discovery_method": "PROVIDER_QUERY",
+      "provider_id": "prv_asia_trade_directory"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000009",
+    "latest_priority": 0,
+    "risk_flags": [
+      "hard_exclusion:pv_module_manufacturing"
+    ],
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T11:00:00Z",
+    "updated_at": "2026-06-20T03:39:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000009",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000009",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "dimensions": {
+      "fit": {
+        "score": 0,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:09:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "命中硬性排除条件 x1_competitor：industries 含 pv_module_manufacturing（组件同业制造商），模型不可覆盖（LED-003/007）",
+            "observed_at": "2026-06-20T03:09:00Z",
+            "field_name": "country",
+            "contribution": -100
+          }
+        ]
+      },
+      "role": {
+        "score": 60,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:09:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「Commercial Director」匹配购买委员会角色 INFLUENCER（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:09:00Z",
+            "field_name": "current_role.title",
+            "contribution": 30
+          }
+        ]
+      },
+      "intent": {
+        "score": 30,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:09:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "有出口记录但为同业制造商，意向不适用",
+            "observed_at": "2026-06-20T03:09:00Z",
+            "contribution": 15
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 72,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:09:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱已验证、公司画像字段完整率 85%+，来源新鲜（近 30 天）",
+            "observed_at": "2026-06-20T03:09:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 70,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:09:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱验证通过且未被抑制，允许外联（allowed_for_outreach=true）",
+            "observed_at": "2026-06-20T03:09:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 0,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:09:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "无历史互动记录",
+            "observed_at": "2026-06-20T03:09:00Z",
+            "contribution": 0
+          }
+        ]
+      }
+    },
+    "total_priority": 0,
+    "hard_exclusion_applied": true,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.3,
+      "role": 0.15,
+      "intent": 0.25,
+      "data_quality": 0.1,
+      "reachability": 0.1,
+      "engagement": 0.1
+    },
+    "computed_at": "2026-06-20T03:09:00Z",
+    "created_at": "2026-06-20T03:09:00Z",
+    "updated_at": "2026-06-20T03:09:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000009",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10009c9d5e30009",
+    "provider_id": "prv_apex_b2b_contacts",
+    "provider_record_id": "rec-apex-0009-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.92,
+    "license_id": "lic_apex_b2b_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000009",
+    "field_name": "industries",
+    "value_hash": "sha256:fe20009d0e6f40009",
+    "provider_id": "prv_public_web_crawl",
+    "provider_record_id": "rec-web-0009-co",
+    "source_url": "https://www.bali-solarmfg.example.com/about",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-05-01T00:00:00Z",
+    "confidence": 0.5,
+    "license_id": "lic_public_web_tos",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": true,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000010",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000010",
+    "name": "Hanoi PV Components Co., Ltd.",
+    "trading_names": [
+      "Hanoi PV Components"
+    ],
+    "domains": [
+      "hanoi-pvcomponents.example.com"
+    ],
+    "country": "VN",
+    "industries": [
+      "solar_distribution"
+    ],
+    "employee_range": "11-50",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000001"
+    ],
+    "quality_score": 0.66,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T12:00:00Z",
+    "updated_at": "2026-06-20T03:40:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000010",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000010",
+    "full_name": "Le Quang Huy",
+    "given_name": "Quang Huy",
+    "family_name": "Le",
+    "current_role": {
+      "title": "Import Manager",
+      "seniority": "MANAGER"
+    },
+    "buying_role": "PROCUREMENT",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0010_email",
+        "type": "EMAIL",
+        "value_masked": "h***@hanoi-pvcomponents.example.com",
+        "value_hash": "sha256:cpe0010a7f3d10010",
+        "is_primary": true,
+        "verification_status": "VALID",
+        "verified_at": "2026-06-17T06:00:00Z",
+        "verification_provider_id": "prv_email_verify",
+        "consent_status": "OPT_OUT",
+        "suppressed": true,
+        "expires_at": "2026-12-16T06:00:00Z"
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000010",
+        "company_name": "Hanoi PV Components Co., Ltd.",
+        "title": "Import Manager",
+        "is_current": true
+      }
+    ],
+    "consent_records": [
+      {
+        "purpose": "outreach",
+        "channel": "EMAIL",
+        "status": "OPT_OUT",
+        "legal_basis": "legitimate_interest",
+        "captured_at": "2026-06-23T03:00:00Z",
+        "source": "unsubscribe_link"
+      }
+    ],
+    "suppression": {
+      "suppressed": true
+    },
+    "country": "VN",
+    "locale": "vi",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T12:00:00Z",
+    "updated_at": "2026-06-20T03:40:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000010",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000010",
+    "contact_id": "cta_01JZC0NT000000000000000010",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "status": "SUPPRESSED",
+    "queue": "DO_NOT_CONTACT",
+    "source": {
+      "discovery_method": "PROVIDER_QUERY",
+      "provider_id": "prv_asia_trade_directory"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000010",
+    "latest_priority": 45,
+    "risk_flags": [
+      "global_suppression"
+    ],
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T12:00:00Z",
+    "updated_at": "2026-06-20T03:40:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000010",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000010",
+    "icp_id": "icp_01JZ1CPD000000000000000001",
+    "dimensions": {
+      "fit": {
+        "score": 75,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:10:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 VN 与行业标签命中 ICP 市场范围与行业条件（criteria c1/c2）",
+            "observed_at": "2026-06-20T03:10:00Z",
+            "field_name": "country",
+            "contribution": 45
+          }
+        ]
+      },
+      "role": {
+        "score": 66,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:10:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「Import Manager」匹配购买委员会角色 PROCUREMENT（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:10:00Z",
+            "field_name": "current_role.title",
+            "contribution": 33
+          }
+        ]
+      },
+      "intent": {
+        "score": 52,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:10:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "近 180 天 1 批进口记录（贸易信号）",
+            "observed_at": "2026-06-20T03:10:00Z",
+            "contribution": 26
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 70,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:10:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱已验证、公司画像字段完整率 85%+，来源新鲜（近 30 天）",
+            "observed_at": "2026-06-20T03:10:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 0,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:10:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "联系人已通过退订链接 OPT_OUT，命中全局 Suppression，禁止进入发送队列（母本 4.5.5）",
+            "observed_at": "2026-06-20T03:10:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 10,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:10:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "无历史互动记录",
+            "observed_at": "2026-06-20T03:10:00Z",
+            "contribution": 0
+          }
+        ]
+      }
+    },
+    "total_priority": 45,
+    "hard_exclusion_applied": false,
+    "suppression_applied": true,
+    "weights_snapshot": {
+      "fit": 0.3,
+      "role": 0.15,
+      "intent": 0.25,
+      "data_quality": 0.1,
+      "reachability": 0.1,
+      "engagement": 0.1
+    },
+    "computed_at": "2026-06-20T03:10:00Z",
+    "created_at": "2026-06-20T03:10:00Z",
+    "updated_at": "2026-06-20T03:10:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000010",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10010c9d5e30010",
+    "provider_id": "prv_apex_b2b_contacts",
+    "provider_record_id": "rec-apex-0010-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.92,
+    "license_id": "lic_apex_b2b_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000010",
+    "field_name": "import_history.hs_codes",
+    "value_hash": "sha256:fe20010d0e6f40010",
+    "provider_id": "prv_customs_trade_data",
+    "provider_record_id": "rec-ctd-0010-co",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2027-06-19T06:00:00Z",
+    "confidence": 0.85,
+    "license_id": "lic_tradedata_2026",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000011",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000011",
+    "name": "Lagos BuildMart Distribution Ltd.",
+    "trading_names": [
+      "Lagos BuildMart"
+    ],
+    "domains": [
+      "lagos-buildmart.example.com"
+    ],
+    "country": "NG",
+    "industries": [
+      "building_materials_distribution"
+    ],
+    "employee_range": "51-200",
+    "revenue_range": "10M-50M USD",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000002"
+    ],
+    "quality_score": 0.88,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T13:00:00Z",
+    "updated_at": "2026-06-20T03:41:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000011",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000011",
+    "full_name": "Chinedu Okafor",
+    "given_name": "Chinedu",
+    "family_name": "Okafor",
+    "current_role": {
+      "title": "Managing Director",
+      "seniority": "C_LEVEL"
+    },
+    "buying_role": "DECISION_MAKER",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0011_email",
+        "type": "EMAIL",
+        "value": "c.okafor@lagos-buildmart.example.com",
+        "value_masked": "c***@lagos-buildmart.example.com",
+        "value_hash": "sha256:cpe0011a7f3d10011",
+        "is_primary": true,
+        "verification_status": "VALID",
+        "verified_at": "2026-06-17T06:00:00Z",
+        "verification_provider_id": "prv_email_verify",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      },
+      {
+        "contact_point_id": "cpt_0011_li",
+        "type": "LINKEDIN",
+        "value": "https://www.linkedin.com/in/sample-0011-fictional",
+        "value_masked": "linkedin.com/in/s***",
+        "value_hash": "sha256:cpl0011b8e4c20011",
+        "is_primary": false,
+        "verification_status": "UNVERIFIED",
+        "consent_status": "UNKNOWN",
+        "suppressed": false
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000011",
+        "company_name": "Lagos BuildMart Distribution Ltd.",
+        "title": "Managing Director",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "NG",
+    "locale": "en",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T13:00:00Z",
+    "updated_at": "2026-06-20T03:41:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000011",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000011",
+    "contact_id": "cta_01JZC0NT000000000000000011",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "status": "CONVERTED",
+    "queue": "RECOMMENDED",
+    "source": {
+      "discovery_method": "PROVIDER_QUERY",
+      "provider_id": "prv_africa_b2b_registry",
+      "campaign_id": "cam_01JZCAMP000000000000000001"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000011",
+    "latest_priority": 88,
+    "risk_flags": [],
+    "outreach_summary": {
+      "last_contacted_at": "2026-06-24T08:30:00Z",
+      "touch_count_30d": 3,
+      "active_campaign_ids": [
+        "cam_01JZCAMP000000000000000001"
+      ],
+      "conflict_detected": false
+    },
+    "owner_user_id": "usr_01JZVSER000000000000000003",
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "qualified_at": "2026-06-18T09:00:00Z",
+    "contacted_at": "2026-06-24T08:30:00Z",
+    "converted_at": "2026-06-30T16:00:00Z",
+    "opportunity_id": "opp_01JZ0PPT000000000000000001",
+    "created_at": "2026-06-16T13:00:00Z",
+    "updated_at": "2026-06-20T03:41:00Z",
+    "version": 4
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000011",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000011",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "dimensions": {
+      "fit": {
+        "score": 92,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:11:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 NG 与行业标签命中 ICP 市场范围与行业条件（criteria c1/c2）",
+            "observed_at": "2026-06-20T03:11:00Z",
+            "field_name": "country",
+            "contribution": 55
+          }
+        ]
+      },
+      "role": {
+        "score": 95,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:11:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「Managing Director」匹配购买委员会角色 DECISION_MAKER（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:11:00Z",
+            "field_name": "current_role.title",
+            "contribution": 48
+          }
+        ]
+      },
+      "intent": {
+        "score": 78,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:11:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "近 12 个月 HS 6809 石膏制品进口 6 批，且官网新增吊顶品类页（贸易+网站信号）",
+            "observed_at": "2026-06-20T03:11:00Z",
+            "contribution": 39
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 90,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:11:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱已验证、公司画像字段完整率 85%+，来源新鲜（近 30 天）",
+            "observed_at": "2026-06-20T03:11:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 90,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:11:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱验证通过且未被抑制，允许外联（allowed_for_outreach=true）",
+            "observed_at": "2026-06-20T03:11:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 85,
+        "method": "COMPOSITE",
+        "computed_at": "2026-06-20T03:11:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "回复第 2 封邮件并主动询问区域独家政策，预约会议",
+            "observed_at": "2026-06-20T03:11:00Z",
+            "contribution": 43
+          }
+        ]
+      }
+    },
+    "total_priority": 88,
+    "hard_exclusion_applied": false,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.35,
+      "role": 0.2,
+      "intent": 0.15,
+      "data_quality": 0.1,
+      "reachability": 0.15,
+      "engagement": 0.05
+    },
+    "computed_at": "2026-06-20T03:11:00Z",
+    "created_at": "2026-06-20T03:11:00Z",
+    "updated_at": "2026-06-20T03:11:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000011",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10011c9d5e30011",
+    "provider_id": "prv_afritrade_registry",
+    "provider_record_id": "rec-aft-0011-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.92,
+    "license_id": "lic_afritrade_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000011",
+    "field_name": "import_history.hs_codes",
+    "value_hash": "sha256:fe20011d0e6f40011",
+    "provider_id": "prv_customs_trade_data",
+    "provider_record_id": "rec-ctd-0011-co",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2027-06-19T06:00:00Z",
+    "confidence": 0.85,
+    "license_id": "lic_tradedata_2026",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000012",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000012",
+    "name": "Nairobi Hardware & Ceilings Ltd.",
+    "trading_names": [
+      "Nairobi Hardware"
+    ],
+    "domains": [
+      "nairobi-hardware.example.com"
+    ],
+    "country": "KE",
+    "industries": [
+      "building_materials_distribution",
+      "hardware_retail"
+    ],
+    "employee_range": "11-50",
+    "revenue_range": "1M-5M USD",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000002"
+    ],
+    "quality_score": 0.84,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T14:00:00Z",
+    "updated_at": "2026-06-20T03:42:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000012",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000012",
+    "full_name": "Grace Wanjiru",
+    "given_name": "Grace",
+    "family_name": "Wanjiru",
+    "current_role": {
+      "title": "Owner",
+      "seniority": "OWNER"
+    },
+    "buying_role": "DECISION_MAKER",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0012_email",
+        "type": "EMAIL",
+        "value": "grace.wanjiru@nairobi-hardware.example.com",
+        "value_masked": "g***@nairobi-hardware.example.com",
+        "value_hash": "sha256:cpe0012a7f3d10012",
+        "is_primary": true,
+        "verification_status": "VALID",
+        "verified_at": "2026-06-17T06:00:00Z",
+        "verification_provider_id": "prv_email_verify",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      },
+      {
+        "contact_point_id": "cpt_0012_li",
+        "type": "LINKEDIN",
+        "value": "https://www.linkedin.com/in/sample-0012-fictional",
+        "value_masked": "linkedin.com/in/s***",
+        "value_hash": "sha256:cpl0012b8e4c20012",
+        "is_primary": false,
+        "verification_status": "UNVERIFIED",
+        "consent_status": "UNKNOWN",
+        "suppressed": false
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000012",
+        "company_name": "Nairobi Hardware & Ceilings Ltd.",
+        "title": "Owner",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "KE",
+    "locale": "en",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T14:00:00Z",
+    "updated_at": "2026-06-20T03:42:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000012",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000012",
+    "contact_id": "cta_01JZC0NT000000000000000012",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "status": "CONVERTED",
+    "queue": "RECOMMENDED",
+    "source": {
+      "discovery_method": "PROVIDER_QUERY",
+      "provider_id": "prv_africa_b2b_registry",
+      "campaign_id": "cam_01JZCAMP000000000000000001"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000012",
+    "latest_priority": 84,
+    "risk_flags": [],
+    "outreach_summary": {
+      "last_contacted_at": "2026-06-24T09:00:00Z",
+      "touch_count_30d": 3,
+      "active_campaign_ids": [
+        "cam_01JZCAMP000000000000000001"
+      ],
+      "conflict_detected": false
+    },
+    "owner_user_id": "usr_01JZVSER000000000000000003",
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "qualified_at": "2026-06-18T09:05:00Z",
+    "contacted_at": "2026-06-24T09:00:00Z",
+    "converted_at": "2026-06-29T12:00:00Z",
+    "opportunity_id": "opp_01JZ0PPT000000000000000002",
+    "created_at": "2026-06-16T14:00:00Z",
+    "updated_at": "2026-06-20T03:42:00Z",
+    "version": 4
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000012",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000012",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "dimensions": {
+      "fit": {
+        "score": 86,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:12:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 KE 与行业标签命中 ICP 市场范围与行业条件（criteria c1/c2）",
+            "observed_at": "2026-06-20T03:12:00Z",
+            "field_name": "country",
+            "contribution": 52
+          }
+        ]
+      },
+      "role": {
+        "score": 94,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:12:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「Owner」匹配购买委员会角色 DECISION_MAKER（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:12:00Z",
+            "field_name": "current_role.title",
+            "contribution": 47
+          }
+        ]
+      },
+      "intent": {
+        "score": 70,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:12:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "参展 2026 内罗毕建材展并在展后询盘石膏板（活动信号）",
+            "observed_at": "2026-06-20T03:12:00Z",
+            "contribution": 35
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 84,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:12:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱已验证、公司画像字段完整率 85%+，来源新鲜（近 30 天）",
+            "observed_at": "2026-06-20T03:12:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 88,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:12:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱验证通过且未被抑制，允许外联（allowed_for_outreach=true）",
+            "observed_at": "2026-06-20T03:12:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 80,
+        "method": "COMPOSITE",
+        "computed_at": "2026-06-20T03:12:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "回复首封邮件，接受视频会议邀约",
+            "observed_at": "2026-06-20T03:12:00Z",
+            "contribution": 40
+          }
+        ]
+      }
+    },
+    "total_priority": 84,
+    "hard_exclusion_applied": false,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.35,
+      "role": 0.2,
+      "intent": 0.15,
+      "data_quality": 0.1,
+      "reachability": 0.15,
+      "engagement": 0.05
+    },
+    "computed_at": "2026-06-20T03:12:00Z",
+    "created_at": "2026-06-20T03:12:00Z",
+    "updated_at": "2026-06-20T03:12:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000012",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10012c9d5e30012",
+    "provider_id": "prv_afritrade_registry",
+    "provider_record_id": "rec-aft-0012-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.92,
+    "license_id": "lic_afritrade_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000012",
+    "field_name": "industries",
+    "value_hash": "sha256:fe20012d0e6f40012",
+    "provider_id": "prv_public_web_crawl",
+    "provider_record_id": "rec-web-0012-co",
+    "source_url": "https://www.nairobi-hardware.example.com/about",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-09-17T06:00:00Z",
+    "confidence": 0.8,
+    "license_id": "lic_public_web_tos",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": true,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000013",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000013",
+    "name": "Abuja Construction Supplies Ltd.",
+    "trading_names": [
+      "Abuja ConSupplies"
+    ],
+    "domains": [
+      "abuja-consupplies.example.com"
+    ],
+    "country": "NG",
+    "industries": [
+      "building_materials_distribution"
+    ],
+    "employee_range": "11-50",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000002"
+    ],
+    "quality_score": 0.72,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T15:00:00Z",
+    "updated_at": "2026-06-20T03:43:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000013",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000013",
+    "full_name": "Ibrahim Musa",
+    "given_name": "Ibrahim",
+    "family_name": "Musa",
+    "current_role": {
+      "title": "Procurement Manager",
+      "seniority": "MANAGER"
+    },
+    "buying_role": "PROCUREMENT",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0013_email",
+        "type": "EMAIL",
+        "value": "i.musa@abuja-consupplies.example.com",
+        "value_masked": "i***@abuja-consupplies.example.com",
+        "value_hash": "sha256:cpe0013a7f3d10013",
+        "is_primary": true,
+        "verification_status": "VALID",
+        "verified_at": "2026-06-17T06:00:00Z",
+        "verification_provider_id": "prv_email_verify",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000013",
+        "company_name": "Abuja Construction Supplies Ltd.",
+        "title": "Procurement Manager",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "NG",
+    "locale": "en",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T15:00:00Z",
+    "updated_at": "2026-06-20T03:43:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000013",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000013",
+    "contact_id": "cta_01JZC0NT000000000000000013",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "status": "CONTACTED",
+    "queue": "RECOMMENDED",
+    "source": {
+      "discovery_method": "PROVIDER_QUERY",
+      "provider_id": "prv_africa_b2b_registry",
+      "campaign_id": "cam_01JZCAMP000000000000000001"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000013",
+    "latest_priority": 72,
+    "risk_flags": [],
+    "outreach_summary": {
+      "last_contacted_at": "2026-06-25T08:00:00Z",
+      "touch_count_30d": 2,
+      "active_campaign_ids": [
+        "cam_01JZCAMP000000000000000001"
+      ],
+      "conflict_detected": false
+    },
+    "owner_user_id": "usr_01JZVSER000000000000000003",
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "qualified_at": "2026-06-18T09:10:00Z",
+    "contacted_at": "2026-06-25T08:00:00Z",
+    "created_at": "2026-06-16T15:00:00Z",
+    "updated_at": "2026-06-20T03:43:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000013",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000013",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "dimensions": {
+      "fit": {
+        "score": 78,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:13:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 NG 与行业标签命中 ICP 市场范围与行业条件（criteria c1/c2）",
+            "observed_at": "2026-06-20T03:13:00Z",
+            "field_name": "country",
+            "contribution": 47
+          }
+        ]
+      },
+      "role": {
+        "score": 70,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:13:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「Procurement Manager」匹配购买委员会角色 PROCUREMENT（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:13:00Z",
+            "field_name": "current_role.title",
+            "contribution": 35
+          }
+        ]
+      },
+      "intent": {
+        "score": 62,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:13:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "近 12 个月建材类 HS 编码进口 4 批（贸易信号）",
+            "observed_at": "2026-06-20T03:13:00Z",
+            "contribution": 31
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 76,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:13:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱已验证、公司画像字段完整率 85%+，来源新鲜（近 30 天）",
+            "observed_at": "2026-06-20T03:13:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 82,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:13:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱验证通过且未被抑制，允许外联（allowed_for_outreach=true）",
+            "observed_at": "2026-06-20T03:13:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 45,
+        "method": "COMPOSITE",
+        "computed_at": "2026-06-20T03:13:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "打开两封邮件未回复",
+            "observed_at": "2026-06-20T03:13:00Z",
+            "contribution": 23
+          }
+        ]
+      }
+    },
+    "total_priority": 72,
+    "hard_exclusion_applied": false,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.35,
+      "role": 0.2,
+      "intent": 0.15,
+      "data_quality": 0.1,
+      "reachability": 0.15,
+      "engagement": 0.05
+    },
+    "computed_at": "2026-06-20T03:13:00Z",
+    "created_at": "2026-06-20T03:13:00Z",
+    "updated_at": "2026-06-20T03:13:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000013",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10013c9d5e30013",
+    "provider_id": "prv_afritrade_registry",
+    "provider_record_id": "rec-aft-0013-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.92,
+    "license_id": "lic_afritrade_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000013",
+    "field_name": "import_history.hs_codes",
+    "value_hash": "sha256:fe20013d0e6f40013",
+    "provider_id": "prv_customs_trade_data",
+    "provider_record_id": "rec-ctd-0013-co",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2027-06-19T06:00:00Z",
+    "confidence": 0.85,
+    "license_id": "lic_tradedata_2026",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000014",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000014",
+    "name": "Accra Premier Building Materials Ltd.",
+    "trading_names": [
+      "Accra Premier BM"
+    ],
+    "domains": [
+      "accra-premier-bm.example.com"
+    ],
+    "country": "GH",
+    "industries": [
+      "building_materials_distribution"
+    ],
+    "employee_range": "51-200",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000002"
+    ],
+    "quality_score": 0.76,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T16:00:00Z",
+    "updated_at": "2026-06-20T03:44:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000014",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000014",
+    "full_name": "Kwame Mensah",
+    "given_name": "Kwame",
+    "family_name": "Mensah",
+    "current_role": {
+      "title": "Director",
+      "seniority": "DIRECTOR"
+    },
+    "buying_role": "DECISION_MAKER",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0014_email",
+        "type": "EMAIL",
+        "value": "kwame.mensah@accra-premier-bm.example.com",
+        "value_masked": "k***@accra-premier-bm.example.com",
+        "value_hash": "sha256:cpe0014a7f3d10014",
+        "is_primary": true,
+        "verification_status": "VALID",
+        "verified_at": "2026-06-17T06:00:00Z",
+        "verification_provider_id": "prv_email_verify",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000014",
+        "company_name": "Accra Premier Building Materials Ltd.",
+        "title": "Director",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "GH",
+    "locale": "en",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T16:00:00Z",
+    "updated_at": "2026-06-20T03:44:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000014",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000014",
+    "contact_id": "cta_01JZC0NT000000000000000014",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "status": "QUALIFIED",
+    "queue": "RECOMMENDED",
+    "source": {
+      "discovery_method": "CSV_IMPORT",
+      "import_batch_id": "batch_2026_06_wafr_assoc_01"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000014",
+    "latest_priority": 76,
+    "risk_flags": [],
+    "owner_user_id": "usr_01JZVSER000000000000000003",
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "qualified_at": "2026-06-19T10:00:00Z",
+    "created_at": "2026-06-16T16:00:00Z",
+    "updated_at": "2026-06-20T03:44:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000014",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000014",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "dimensions": {
+      "fit": {
+        "score": 80,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:14:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 GH 与行业标签命中 ICP 市场范围与行业条件（criteria c1/c2）",
+            "observed_at": "2026-06-20T03:14:00Z",
+            "field_name": "country",
+            "contribution": 48
+          }
+        ]
+      },
+      "role": {
+        "score": 85,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:14:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「Director」匹配购买委员会角色 DECISION_MAKER（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:14:00Z",
+            "field_name": "current_role.title",
+            "contribution": 43
+          }
+        ]
+      },
+      "intent": {
+        "score": 55,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:14:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "西非建材商协会 2026 会员名录收录，经营品类含板材（协会数据）",
+            "observed_at": "2026-06-20T03:14:00Z",
+            "contribution": 28
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 78,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:14:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱已验证、公司画像字段完整率 85%+，来源新鲜（近 30 天）",
+            "observed_at": "2026-06-20T03:14:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 84,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:14:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱验证通过且未被抑制，允许外联（allowed_for_outreach=true）",
+            "observed_at": "2026-06-20T03:14:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 20,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:14:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "无历史互动记录",
+            "observed_at": "2026-06-20T03:14:00Z",
+            "contribution": 0
+          }
+        ]
+      }
+    },
+    "total_priority": 76,
+    "hard_exclusion_applied": false,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.35,
+      "role": 0.2,
+      "intent": 0.15,
+      "data_quality": 0.1,
+      "reachability": 0.15,
+      "engagement": 0.05
+    },
+    "computed_at": "2026-06-20T03:14:00Z",
+    "created_at": "2026-06-20T03:14:00Z",
+    "updated_at": "2026-06-20T03:14:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000014",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10014c9d5e30014",
+    "provider_id": "prv_afritrade_registry",
+    "provider_record_id": "rec-aft-0014-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.92,
+    "license_id": "lic_afritrade_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000014",
+    "field_name": "import_history.hs_codes",
+    "value_hash": "sha256:fe20014d0e6f40014",
+    "provider_id": "prv_customs_trade_data",
+    "provider_record_id": "rec-ctd-0014-co",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2027-06-19T06:00:00Z",
+    "confidence": 0.85,
+    "license_id": "lic_tradedata_2026",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000015",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000015",
+    "name": "Coastal Piping & Fittings Ltd.",
+    "trading_names": [
+      "Coastal Piping"
+    ],
+    "domains": [
+      "coastal-piping.example.com"
+    ],
+    "country": "KE",
+    "industries": [
+      "plumbing_wholesale",
+      "building_materials_distribution"
+    ],
+    "employee_range": "11-50",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000002"
+    ],
+    "quality_score": 0.74,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T17:00:00Z",
+    "updated_at": "2026-06-20T03:45:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000015",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000015",
+    "full_name": "Daniel Otieno",
+    "given_name": "Daniel",
+    "family_name": "Otieno",
+    "current_role": {
+      "title": "General Manager",
+      "seniority": "C_LEVEL"
+    },
+    "buying_role": "DECISION_MAKER",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0015_email",
+        "type": "EMAIL",
+        "value": "d.otieno@coastal-piping.example.com",
+        "value_masked": "d***@coastal-piping.example.com",
+        "value_hash": "sha256:cpe0015a7f3d10015",
+        "is_primary": true,
+        "verification_status": "VALID",
+        "verified_at": "2026-06-17T06:00:00Z",
+        "verification_provider_id": "prv_email_verify",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000015",
+        "company_name": "Coastal Piping & Fittings Ltd.",
+        "title": "General Manager",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "KE",
+    "locale": "en",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T17:00:00Z",
+    "updated_at": "2026-06-20T03:45:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000015",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000015",
+    "contact_id": "cta_01JZC0NT000000000000000015",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "status": "QUALIFIED",
+    "queue": "RECOMMENDED",
+    "source": {
+      "discovery_method": "PROVIDER_QUERY",
+      "provider_id": "prv_africa_b2b_registry",
+      "campaign_id": "cam_01JZCAMP000000000000000001"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000015",
+    "latest_priority": 74,
+    "risk_flags": [],
+    "owner_user_id": "usr_01JZVSER000000000000000003",
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "qualified_at": "2026-06-19T10:05:00Z",
+    "created_at": "2026-06-16T17:00:00Z",
+    "updated_at": "2026-06-20T03:45:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000015",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000015",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "dimensions": {
+      "fit": {
+        "score": 78,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:15:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 KE 与行业标签命中 ICP 市场范围与行业条件（criteria c1/c2）",
+            "observed_at": "2026-06-20T03:15:00Z",
+            "field_name": "country",
+            "contribution": 47
+          }
+        ]
+      },
+      "role": {
+        "score": 84,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:15:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「General Manager」匹配购买委员会角色 DECISION_MAKER（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:15:00Z",
+            "field_name": "current_role.title",
+            "contribution": 42
+          }
+        ]
+      },
+      "intent": {
+        "score": 52,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:15:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "近 12 个月 HS 3917 管材进口 5 批（贸易信号，匹配泰岳管业品类）",
+            "observed_at": "2026-06-20T03:15:00Z",
+            "contribution": 26
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 74,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:15:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱已验证、公司画像字段完整率 85%+，来源新鲜（近 30 天）",
+            "observed_at": "2026-06-20T03:15:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 82,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:15:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱验证通过且未被抑制，允许外联（allowed_for_outreach=true）",
+            "observed_at": "2026-06-20T03:15:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 18,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:15:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "无历史互动记录",
+            "observed_at": "2026-06-20T03:15:00Z",
+            "contribution": 0
+          }
+        ]
+      }
+    },
+    "total_priority": 74,
+    "hard_exclusion_applied": false,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.35,
+      "role": 0.2,
+      "intent": 0.15,
+      "data_quality": 0.1,
+      "reachability": 0.15,
+      "engagement": 0.05
+    },
+    "computed_at": "2026-06-20T03:15:00Z",
+    "created_at": "2026-06-20T03:15:00Z",
+    "updated_at": "2026-06-20T03:15:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000015",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10015c9d5e30015",
+    "provider_id": "prv_afritrade_registry",
+    "provider_record_id": "rec-aft-0015-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.92,
+    "license_id": "lic_afritrade_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000015",
+    "field_name": "industries",
+    "value_hash": "sha256:fe20015d0e6f40015",
+    "provider_id": "prv_public_web_crawl",
+    "provider_record_id": "rec-web-0015-co",
+    "source_url": "https://www.coastal-piping.example.com/about",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-09-17T06:00:00Z",
+    "confidence": 0.8,
+    "license_id": "lic_public_web_tos",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": true,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000016",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000016",
+    "name": "Kilimanjaro Builders Supplies Ltd.",
+    "trading_names": [
+      "Kilimanjaro Builders"
+    ],
+    "domains": [
+      "kilimanjaro-builders.example.com"
+    ],
+    "country": "TZ",
+    "industries": [
+      "building_materials_distribution"
+    ],
+    "employee_range": "11-50",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000002"
+    ],
+    "quality_score": 0.58,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T18:00:00Z",
+    "updated_at": "2026-06-20T03:46:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000016",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000016",
+    "full_name": "Amani Mwakasege",
+    "given_name": "Amani",
+    "family_name": "Mwakasege",
+    "current_role": {
+      "title": "Purchasing Lead",
+      "seniority": "MANAGER"
+    },
+    "buying_role": "PROCUREMENT",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0016_email",
+        "type": "EMAIL",
+        "value_masked": "a***@kilimanjaro-builders.example.com",
+        "value_hash": "sha256:cpe0016a7f3d10016",
+        "is_primary": true,
+        "verification_status": "UNVERIFIED",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000016",
+        "company_name": "Kilimanjaro Builders Supplies Ltd.",
+        "title": "Purchasing Lead",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "TZ",
+    "locale": "sw",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T18:00:00Z",
+    "updated_at": "2026-06-20T03:46:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000016",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000016",
+    "contact_id": "cta_01JZC0NT000000000000000016",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "status": "REVIEW",
+    "queue": "NEEDS_CONFIRMATION",
+    "source": {
+      "discovery_method": "PROVIDER_QUERY",
+      "provider_id": "prv_africa_b2b_registry"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000016",
+    "latest_priority": 60,
+    "risk_flags": [
+      "unverified_email"
+    ],
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T18:00:00Z",
+    "updated_at": "2026-06-20T03:46:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000016",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000016",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "dimensions": {
+      "fit": {
+        "score": 72,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:16:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 TZ 与行业标签命中 ICP 市场范围与行业条件（criteria c1/c2）",
+            "observed_at": "2026-06-20T03:16:00Z",
+            "field_name": "country",
+            "contribution": 43
+          }
+        ]
+      },
+      "role": {
+        "score": 66,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:16:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「Purchasing Lead」匹配购买委员会角色 PROCUREMENT（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:16:00Z",
+            "field_name": "current_role.title",
+            "contribution": 33
+          }
+        ]
+      },
+      "intent": {
+        "score": 48,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:16:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "协会名录显示经营石膏板与龙骨，无近期进口记录（弱信号）",
+            "observed_at": "2026-06-20T03:16:00Z",
+            "contribution": 24
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 46,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:16:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱未验证，画像字段完整率不足 60%",
+            "observed_at": "2026-06-20T03:16:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 40,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:16:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱未通过验证，暂不可进入批量发送（母本 4.5.5）",
+            "observed_at": "2026-06-20T03:16:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 12,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:16:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "无历史互动记录",
+            "observed_at": "2026-06-20T03:16:00Z",
+            "contribution": 0
+          }
+        ]
+      }
+    },
+    "total_priority": 60,
+    "hard_exclusion_applied": false,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.35,
+      "role": 0.2,
+      "intent": 0.15,
+      "data_quality": 0.1,
+      "reachability": 0.15,
+      "engagement": 0.05
+    },
+    "computed_at": "2026-06-20T03:16:00Z",
+    "created_at": "2026-06-20T03:16:00Z",
+    "updated_at": "2026-06-20T03:16:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000016",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10016c9d5e30016",
+    "provider_id": "prv_afritrade_registry",
+    "provider_record_id": "rec-aft-0016-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.7,
+    "license_id": "lic_afritrade_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000016",
+    "field_name": "import_history.hs_codes",
+    "value_hash": "sha256:fe20016d0e6f40016",
+    "provider_id": "prv_customs_trade_data",
+    "provider_record_id": "rec-ctd-0016-co",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2027-06-19T06:00:00Z",
+    "confidence": 0.85,
+    "license_id": "lic_tradedata_2026",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000017",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000017",
+    "name": "Nile Delta Building Trade LLC",
+    "trading_names": [
+      "Nile Delta BT"
+    ],
+    "domains": [
+      "niledelta-buildtrade.example.com"
+    ],
+    "country": "EG",
+    "industries": [
+      "building_materials_distribution"
+    ],
+    "employee_range": "51-200",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000002"
+    ],
+    "quality_score": 0.63,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T19:00:00Z",
+    "updated_at": "2026-06-20T03:47:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000017",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000017",
+    "full_name": "Omar El-Sayed",
+    "given_name": "Omar",
+    "family_name": "El-Sayed",
+    "current_role": {
+      "title": "Commercial Director",
+      "seniority": "DIRECTOR"
+    },
+    "buying_role": "INFLUENCER",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0017_email",
+        "type": "EMAIL",
+        "value": "omar.elsayed@niledelta-buildtrade.example.com",
+        "value_masked": "o***@niledelta-buildtrade.example.com",
+        "value_hash": "sha256:cpe0017a7f3d10017",
+        "is_primary": true,
+        "verification_status": "VALID",
+        "verified_at": "2026-06-17T06:00:00Z",
+        "verification_provider_id": "prv_email_verify",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000017",
+        "company_name": "Nile Delta Building Trade LLC",
+        "title": "Commercial Director",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "EG",
+    "locale": "ar",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T19:00:00Z",
+    "updated_at": "2026-06-20T03:47:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000017",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000017",
+    "contact_id": "cta_01JZC0NT000000000000000017",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "status": "REVIEW",
+    "queue": "NEEDS_CONFIRMATION",
+    "source": {
+      "discovery_method": "PROVIDER_QUERY",
+      "provider_id": "prv_africa_b2b_registry"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000017",
+    "latest_priority": 63,
+    "risk_flags": [
+      "missing_decision_maker"
+    ],
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T19:00:00Z",
+    "updated_at": "2026-06-20T03:47:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000017",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000017",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "dimensions": {
+      "fit": {
+        "score": 74,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:17:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 EG 与行业标签命中 ICP 市场范围与行业条件（criteria c1/c2）",
+            "observed_at": "2026-06-20T03:17:00Z",
+            "field_name": "country",
+            "contribution": 44
+          }
+        ]
+      },
+      "role": {
+        "score": 52,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:17:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「Commercial Director」匹配购买委员会角色 INFLUENCER（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:17:00Z",
+            "field_name": "current_role.title",
+            "contribution": 26
+          }
+        ]
+      },
+      "intent": {
+        "score": 56,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:17:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "官网新增 gypsum board 品类页（网站变更信号）",
+            "observed_at": "2026-06-20T03:17:00Z",
+            "contribution": 28
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 68,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:17:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱已验证、公司画像字段完整率 85%+，来源新鲜（近 30 天）",
+            "observed_at": "2026-06-20T03:17:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 76,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:17:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱验证通过且未被抑制，允许外联（allowed_for_outreach=true）",
+            "observed_at": "2026-06-20T03:17:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 15,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:17:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "无历史互动记录",
+            "observed_at": "2026-06-20T03:17:00Z",
+            "contribution": 0
+          }
+        ]
+      }
+    },
+    "total_priority": 63,
+    "hard_exclusion_applied": false,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.35,
+      "role": 0.2,
+      "intent": 0.15,
+      "data_quality": 0.1,
+      "reachability": 0.15,
+      "engagement": 0.05
+    },
+    "computed_at": "2026-06-20T03:17:00Z",
+    "created_at": "2026-06-20T03:17:00Z",
+    "updated_at": "2026-06-20T03:17:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000017",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10017c9d5e30017",
+    "provider_id": "prv_afritrade_registry",
+    "provider_record_id": "rec-aft-0017-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.92,
+    "license_id": "lic_afritrade_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000017",
+    "field_name": "import_history.hs_codes",
+    "value_hash": "sha256:fe20017d0e6f40017",
+    "provider_id": "prv_customs_trade_data",
+    "provider_record_id": "rec-ctd-0017-co",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2027-06-19T06:00:00Z",
+    "confidence": 0.85,
+    "license_id": "lic_tradedata_2026",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000018",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000018",
+    "name": "Sahara Site Construction Ltd.",
+    "trading_names": [
+      "Sahara Siteworks"
+    ],
+    "domains": [
+      "sahara-siteworks.example.com"
+    ],
+    "country": "NG",
+    "industries": [
+      "construction_contractor"
+    ],
+    "employee_range": "201-500",
+    "matched_icp_ids": [],
+    "quality_score": 0.6,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T20:00:00Z",
+    "updated_at": "2026-06-20T03:48:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000018",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000018",
+    "full_name": "Aliyu Bello",
+    "given_name": "Aliyu",
+    "family_name": "Bello",
+    "current_role": {
+      "title": "Project Director",
+      "seniority": "DIRECTOR"
+    },
+    "buying_role": "USER",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0018_email",
+        "type": "EMAIL",
+        "value": "a.bello@sahara-siteworks.example.com",
+        "value_masked": "a***@sahara-siteworks.example.com",
+        "value_hash": "sha256:cpe0018a7f3d10018",
+        "is_primary": true,
+        "verification_status": "VALID",
+        "verified_at": "2026-06-17T06:00:00Z",
+        "verification_provider_id": "prv_email_verify",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000018",
+        "company_name": "Sahara Site Construction Ltd.",
+        "title": "Project Director",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "NG",
+    "locale": "en",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T20:00:00Z",
+    "updated_at": "2026-06-20T03:48:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000018",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000018",
+    "contact_id": "cta_01JZC0NT000000000000000018",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "status": "REJECTED",
+    "queue": "REJECTED",
+    "source": {
+      "discovery_method": "CSV_IMPORT",
+      "import_batch_id": "batch_2026_06_wafr_assoc_01"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000018",
+    "latest_priority": 0,
+    "risk_flags": [
+      "hard_exclusion:end_contractor"
+    ],
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T20:00:00Z",
+    "updated_at": "2026-06-20T03:48:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000018",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000018",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "dimensions": {
+      "fit": {
+        "score": 0,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:18:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "命中硬性排除条件 x1_contractor：business_model=end_contractor（终端施工方），排除优先于正向评分（LED-003）",
+            "observed_at": "2026-06-20T03:18:00Z",
+            "field_name": "country",
+            "contribution": -100
+          }
+        ]
+      },
+      "role": {
+        "score": 40,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:18:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「Project Director」匹配购买委员会角色 USER（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:18:00Z",
+            "field_name": "current_role.title",
+            "contribution": 20
+          }
+        ]
+      },
+      "intent": {
+        "score": 44,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:18:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "有建材采购量但为终端施工自用，不构成渠道意向",
+            "observed_at": "2026-06-20T03:18:00Z",
+            "contribution": 22
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 62,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:18:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱已验证、公司画像字段完整率 85%+，来源新鲜（近 30 天）",
+            "observed_at": "2026-06-20T03:18:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 68,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:18:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱验证通过且未被抑制，允许外联（allowed_for_outreach=true）",
+            "observed_at": "2026-06-20T03:18:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 0,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:18:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "无历史互动记录",
+            "observed_at": "2026-06-20T03:18:00Z",
+            "contribution": 0
+          }
+        ]
+      }
+    },
+    "total_priority": 0,
+    "hard_exclusion_applied": true,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.35,
+      "role": 0.2,
+      "intent": 0.15,
+      "data_quality": 0.1,
+      "reachability": 0.15,
+      "engagement": 0.05
+    },
+    "computed_at": "2026-06-20T03:18:00Z",
+    "created_at": "2026-06-20T03:18:00Z",
+    "updated_at": "2026-06-20T03:18:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000018",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10018c9d5e30018",
+    "provider_id": "prv_afritrade_registry",
+    "provider_record_id": "rec-aft-0018-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.92,
+    "license_id": "lic_afritrade_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000018",
+    "field_name": "industries",
+    "value_hash": "sha256:fe20018d0e6f40018",
+    "provider_id": "prv_public_web_crawl",
+    "provider_record_id": "rec-web-0018-co",
+    "source_url": "https://www.sahara-siteworks.example.com/about",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-09-17T06:00:00Z",
+    "confidence": 0.8,
+    "license_id": "lic_public_web_tos",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": true,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000019",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000019",
+    "name": "Joburg Interior Systems (Pty) Ltd.",
+    "trading_names": [
+      "Joburg Interiors"
+    ],
+    "domains": [
+      "joburg-interiors.example.com"
+    ],
+    "country": "ZA",
+    "industries": [
+      "building_materials_distribution",
+      "interior_fitout"
+    ],
+    "employee_range": "11-50",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000002"
+    ],
+    "quality_score": 0.65,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T21:00:00Z",
+    "updated_at": "2026-06-20T03:49:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000019",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000019",
+    "full_name": "Sipho Ndlovu",
+    "given_name": "Sipho",
+    "family_name": "Ndlovu",
+    "current_role": {
+      "title": "Owner",
+      "seniority": "OWNER"
+    },
+    "buying_role": "DECISION_MAKER",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0019_email",
+        "type": "EMAIL",
+        "value_masked": "s***@joburg-interiors.example.com",
+        "value_hash": "sha256:cpe0019a7f3d10019",
+        "is_primary": true,
+        "verification_status": "VALID",
+        "verified_at": "2026-06-17T06:00:00Z",
+        "verification_provider_id": "prv_email_verify",
+        "consent_status": "WITHDRAWN",
+        "suppressed": true,
+        "expires_at": "2026-12-16T06:00:00Z"
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000019",
+        "company_name": "Joburg Interior Systems (Pty) Ltd.",
+        "title": "Owner",
+        "is_current": true
+      }
+    ],
+    "consent_records": [
+      {
+        "purpose": "outreach",
+        "channel": "EMAIL",
+        "status": "WITHDRAWN",
+        "legal_basis": "consent",
+        "captured_at": "2026-06-23T03:00:00Z",
+        "source": "data_subject_request"
+      }
+    ],
+    "suppression": {
+      "suppressed": true
+    },
+    "country": "ZA",
+    "locale": "en",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T21:00:00Z",
+    "updated_at": "2026-06-20T03:49:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000019",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000019",
+    "contact_id": "cta_01JZC0NT000000000000000019",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "status": "SUPPRESSED",
+    "queue": "DO_NOT_CONTACT",
+    "source": {
+      "discovery_method": "CRM_IMPORT",
+      "import_batch_id": "batch_2026_06_crm_legacy_01"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000019",
+    "latest_priority": 35,
+    "risk_flags": [
+      "data_subject_request",
+      "out_of_market_scope"
+    ],
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T21:00:00Z",
+    "updated_at": "2026-06-20T03:49:00Z",
+    "version": 2
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000019",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000019",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "dimensions": {
+      "fit": {
+        "score": 40,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:19:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 ZA 不在 ICP market_scope 首轮范围内，Fit 降分",
+            "observed_at": "2026-06-20T03:19:00Z",
+            "field_name": "country",
+            "contribution": 24
+          }
+        ]
+      },
+      "role": {
+        "score": 82,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:19:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「Owner」匹配购买委员会角色 DECISION_MAKER（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:19:00Z",
+            "field_name": "current_role.title",
+            "contribution": 41
+          }
+        ]
+      },
+      "intent": {
+        "score": 20,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:19:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "历史 CRM 询盘记录已超过 24 个月（过期信号）",
+            "observed_at": "2026-06-20T03:19:00Z",
+            "contribution": 10
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 58,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:19:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱已验证、公司画像字段完整率 85%+，来源新鲜（近 30 天）",
+            "observed_at": "2026-06-20T03:19:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 0,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:19:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "数据主体行使删除权（WITHDRAWN），FieldEvidence 已 REVOKED，禁止任何触达与展示（DAT-006、母本 8.10）",
+            "observed_at": "2026-06-20T03:19:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 8,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:19:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "无历史互动记录",
+            "observed_at": "2026-06-20T03:19:00Z",
+            "contribution": 0
+          }
+        ]
+      }
+    },
+    "total_priority": 35,
+    "hard_exclusion_applied": false,
+    "suppression_applied": true,
+    "weights_snapshot": {
+      "fit": 0.35,
+      "role": 0.2,
+      "intent": 0.15,
+      "data_quality": 0.1,
+      "reachability": 0.15,
+      "engagement": 0.05
+    },
+    "computed_at": "2026-06-20T03:19:00Z",
+    "created_at": "2026-06-20T03:19:00Z",
+    "updated_at": "2026-06-20T03:19:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000019",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10019c9d5e30019",
+    "provider_id": "prv_afritrade_registry",
+    "provider_record_id": "rec-aft-0019-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.92,
+    "license_id": "lic_afritrade_2026",
+    "processing_purpose": [],
+    "allowed_to_display": false,
+    "allowed_to_export": false,
+    "allowed_for_ai": false,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "REVOKED"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000019",
+    "field_name": "import_history.hs_codes",
+    "value_hash": "sha256:fe20019d0e6f40019",
+    "provider_id": "prv_customs_trade_data",
+    "provider_record_id": "rec-ctd-0019-co",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2027-06-19T06:00:00Z",
+    "confidence": 0.85,
+    "license_id": "lic_tradedata_2026",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/account",
+    "id": "acc_01JZACCT000000000000000020",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "canonical_company_id": "cco_01JZCAN0000000000000000020",
+    "name": "Delta Coast Distribution Ltd.",
+    "trading_names": [
+      "Delta Coast"
+    ],
+    "domains": [
+      "deltacoast-dist.example.com"
+    ],
+    "country": "NG",
+    "industries": [
+      "building_materials_distribution"
+    ],
+    "employee_range": "11-50",
+    "matched_icp_ids": [
+      "icp_01JZ1CPD000000000000000002"
+    ],
+    "quality_score": 0.7,
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T22:00:00Z",
+    "updated_at": "2026-06-20T03:50:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/contact",
+    "id": "cta_01JZC0NT000000000000000020",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000020",
+    "full_name": "Emeka Nwosu",
+    "given_name": "Emeka",
+    "family_name": "Nwosu",
+    "current_role": {
+      "title": "Owner",
+      "seniority": "OWNER"
+    },
+    "buying_role": "DECISION_MAKER",
+    "contact_points": [
+      {
+        "contact_point_id": "cpt_0020_email",
+        "type": "EMAIL",
+        "value": "e.nwosu@deltacoast-dist.example.com",
+        "value_masked": "e***@deltacoast-dist.example.com",
+        "value_hash": "sha256:cpe0020a7f3d10020",
+        "is_primary": true,
+        "verification_status": "VALID",
+        "verified_at": "2026-06-17T06:00:00Z",
+        "verification_provider_id": "prv_email_verify",
+        "consent_status": "UNKNOWN",
+        "suppressed": false,
+        "expires_at": "2026-12-16T06:00:00Z"
+      }
+    ],
+    "employment_history": [
+      {
+        "account_id": "acc_01JZACCT000000000000000020",
+        "company_name": "Delta Coast Distribution Ltd.",
+        "title": "Owner",
+        "is_current": true
+      }
+    ],
+    "suppression": {
+      "suppressed": false
+    },
+    "country": "NG",
+    "locale": "en",
+    "last_verified_at": "2026-06-19T06:00:00Z",
+    "created_at": "2026-06-16T22:00:00Z",
+    "updated_at": "2026-06-20T03:50:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead",
+    "id": "led_01JZ1EAD000000000000000020",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "account_id": "acc_01JZACCT000000000000000020",
+    "contact_id": "cta_01JZC0NT000000000000000020",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "status": "CONVERTED",
+    "queue": "RECOMMENDED",
+    "source": {
+      "discovery_method": "PROVIDER_QUERY",
+      "provider_id": "prv_africa_b2b_registry",
+      "campaign_id": "cam_01JZCAMP000000000000000001"
+    },
+    "latest_score_id": "lsc_01JZSC0R000000000000000020",
+    "latest_priority": 70,
+    "risk_flags": [],
+    "outreach_summary": {
+      "last_contacted_at": "2026-06-25T09:00:00Z",
+      "touch_count_30d": 2,
+      "active_campaign_ids": [
+        "cam_01JZCAMP000000000000000001"
+      ],
+      "conflict_detected": false
+    },
+    "owner_user_id": "usr_01JZVSER000000000000000003",
+    "last_enriched_at": "2026-06-19T06:00:00Z",
+    "qualified_at": "2026-06-18T09:20:00Z",
+    "contacted_at": "2026-06-25T09:00:00Z",
+    "converted_at": "2026-07-01T10:00:00Z",
+    "opportunity_id": "opp_01JZ0PPT000000000000000003",
+    "created_at": "2026-06-16T22:00:00Z",
+    "updated_at": "2026-06-20T03:50:00Z",
+    "version": 4
+  },
+  {
+    "$schema_ref": "ggw://contracts/lead/lead-score",
+    "id": "lsc_01JZSC0R000000000000000020",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "lead_id": "led_01JZ1EAD000000000000000020",
+    "icp_id": "icp_01JZ1CPD000000000000000002",
+    "dimensions": {
+      "fit": {
+        "score": 76,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:20:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "国家 NG 与行业标签命中 ICP 市场范围与行业条件（criteria c1/c2）",
+            "observed_at": "2026-06-20T03:20:00Z",
+            "field_name": "country",
+            "contribution": 46
+          }
+        ]
+      },
+      "role": {
+        "score": 88,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:20:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "职位「Owner」匹配购买委员会角色 DECISION_MAKER（LED-002 角色模板）",
+            "observed_at": "2026-06-20T03:20:00Z",
+            "field_name": "current_role.title",
+            "contribution": 44
+          }
+        ]
+      },
+      "intent": {
+        "score": 50,
+        "method": "STATISTICAL",
+        "computed_at": "2026-06-20T03:20:00Z",
+        "evidence": [
+          {
+            "evidence_type": "SIGNAL",
+            "description": "近 12 个月 HS 6809 进口 2 批（贸易信号）",
+            "observed_at": "2026-06-20T03:20:00Z",
+            "contribution": 25
+          }
+        ],
+        "model_ref": "intent-scorer-v0.3",
+        "expires_at": "2026-08-04T03:00:00Z"
+      },
+      "data_quality": {
+        "score": 72,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:20:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "邮箱已验证、公司画像字段完整率 85%+，来源新鲜（近 30 天）",
+            "observed_at": "2026-06-20T03:20:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "reachability": {
+        "score": 80,
+        "method": "RULE",
+        "computed_at": "2026-06-20T03:20:00Z",
+        "evidence": [
+          {
+            "evidence_type": "FIELD_EVIDENCE",
+            "description": "主邮箱验证通过且未被抑制，允许外联（allowed_for_outreach=true）",
+            "observed_at": "2026-06-20T03:20:00Z",
+            "field_name": "contact_points.email"
+          }
+        ]
+      },
+      "engagement": {
+        "score": 60,
+        "method": "COMPOSITE",
+        "computed_at": "2026-06-20T03:20:00Z",
+        "evidence": [
+          {
+            "evidence_type": "RULE_HIT",
+            "description": "回复邮件表示有兴趣但今年预算受限",
+            "observed_at": "2026-06-20T03:20:00Z",
+            "contribution": 30
+          }
+        ]
+      }
+    },
+    "total_priority": 70,
+    "hard_exclusion_applied": false,
+    "suppression_applied": false,
+    "weights_snapshot": {
+      "fit": 0.35,
+      "role": 0.2,
+      "intent": 0.15,
+      "data_quality": 0.1,
+      "reachability": 0.15,
+      "engagement": 0.05
+    },
+    "computed_at": "2026-06-20T03:20:00Z",
+    "created_at": "2026-06-20T03:20:00Z",
+    "updated_at": "2026-06-20T03:20:00Z",
+    "version": 1
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "cta_01JZC0NT000000000000000020",
+    "field_name": "contact_points.email",
+    "value_hash": "sha256:fe10020c9d5e30020",
+    "provider_id": "prv_afritrade_registry",
+    "provider_record_id": "rec-aft-0020-em",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2026-12-16T06:00:00Z",
+    "confidence": 0.92,
+    "license_id": "lic_afritrade_2026",
+    "processing_purpose": [
+      "lead_research",
+      "outreach"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": true,
+    "allowed_for_multi_tenant_use": false,
+    "deletion_status": "ACTIVE"
+  },
+  {
+    "$schema_ref": "ggw://contracts/common/field-evidence",
+    "entity_id": "acc_01JZACCT000000000000000020",
+    "field_name": "import_history.hs_codes",
+    "value_hash": "sha256:fe20020d0e6f40020",
+    "provider_id": "prv_customs_trade_data",
+    "provider_record_id": "rec-ctd-0020-co",
+    "fetched_at": "2026-06-19T06:00:00Z",
+    "expires_at": "2027-06-19T06:00:00Z",
+    "confidence": 0.85,
+    "license_id": "lic_tradedata_2026",
+    "processing_purpose": [
+      "lead_research",
+      "icp_backtest"
+    ],
+    "allowed_to_display": true,
+    "allowed_to_export": false,
+    "allowed_for_ai": true,
+    "allowed_for_outreach": false,
+    "allowed_for_multi_tenant_use": true,
+    "deletion_status": "ACTIVE"
+  }
+]

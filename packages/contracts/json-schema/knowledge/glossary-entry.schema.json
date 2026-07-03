@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/knowledge/glossary-entry",
+  "title": "GlossaryEntry",
+  "description": "表达规范词条：术语、品牌语气规则、禁用词、免责声明和本地化规则（KNW-008；验收：不同 Market/Channel 可加载不同表达规则）。内容质量检查（CRT-005：品牌语气、术语、禁用词、敏感声明检查）从本对象加载规则。负责域：knowledge；schema_version=1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^glo_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "前缀式实体 ID，前缀 glo（knowledge 域补充前缀，见域 notes）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "entry_type": {
+      "type": "string",
+      "enum": ["TERM", "BRAND_TONE", "FORBIDDEN_WORD", "DISCLAIMER", "LOCALIZATION_RULE"],
+      "description": "词条类型：术语/品牌语气规则/禁用词/免责声明/本地化规则（KNW-008 全枚举）"
+    },
+    "key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300,
+      "description": "词条主键：TERM 为术语原文；FORBIDDEN_WORD 为被禁词；BRAND_TONE/LOCALIZATION_RULE 为规则名；DISCLAIMER 为声明标识"
+    },
+    "value": {
+      "type": "string",
+      "maxLength": 5000,
+      "description": "词条内容：TERM 为定义/标准译法；BRAND_TONE 为语气规则描述；DISCLAIMER 为声明正文；LOCALIZATION_RULE 为规则内容；FORBIDDEN_WORD 可为空"
+    },
+    "preferred_term": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "推荐替代表达（FORBIDDEN_WORD/TERM 用：检测到 key 时建议替换为此表达）"
+    },
+    "forbidden_variants": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 300 },
+      "description": "同义禁用变体（大小写/缩写/翻译变体一并拦截，KNW-008 禁用词）"
+    },
+    "enforcement_level": {
+      "type": "string",
+      "enum": ["BLOCK", "WARN", "SUGGEST"],
+      "description": "执行强度：BLOCK 阻断生成/发布，WARN 标记警告，SUGGEST 仅建议（CRT-005 质量检查结果可解释）"
+    },
+    "brand_profile_id": {
+      "type": "string",
+      "pattern": "^brd_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "所属品牌；缺省为 workspace 级通用词条"
+    },
+    "applicable_markets": {
+      "type": "array",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/country_code" },
+      "description": "适用市场（KNW-008：不同 Market 可加载不同表达规则；空数组表示全部市场）"
+    },
+    "applicable_channels": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 100 },
+      "description": "适用渠道标识，如 linkedin、email、website（KNW-008：不同 Channel 可加载不同表达规则；空数组表示全部渠道）"
+    },
+    "locale": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/locale",
+      "description": "词条语言（本地化规则按 locale 匹配）"
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "使用说明/背景"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "ARCHIVED"],
+      "description": "词条状态"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "entry_type",
+    "key",
+    "status",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

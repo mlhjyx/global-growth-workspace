@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/common/field-evidence",
+  "title": "FieldEvidence",
+  "description": "字段级来源与数据权利记录（母本 8.10、9.2、DAT-005/006）。展示/导出/AI/外联/多租户使用分别受 Policy 控制；系统保存候选值证据而非只保存最终值。",
+  "type": "object",
+  "properties": {
+    "entity_id": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+    "field_name": { "type": "string" },
+    "value_hash": { "type": "string", "description": "候选值哈希（明文按敏感级别另存）" },
+    "provider_id": { "type": "string", "description": "Provider 标识；公开采集为 source registry ID" },
+    "provider_record_id": { "type": "string" },
+    "source_url": { "type": "string", "format": "uri" },
+    "fetched_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "expires_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "confidence": { "$ref": "ggw://contracts/common/primitives#/$defs/confidence" },
+    "license_id": { "type": "string", "description": "关联 DatasetLicense/合同" },
+    "processing_purpose": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "允许的处理目的，如 lead_research、icp_backtest"
+    },
+    "allowed_to_display": { "type": "boolean" },
+    "allowed_to_export": { "type": "boolean" },
+    "allowed_for_ai": { "type": "boolean" },
+    "allowed_for_outreach": { "type": "boolean" },
+    "allowed_for_multi_tenant_use": { "type": "boolean" },
+    "deletion_status": {
+      "type": "string",
+      "enum": ["ACTIVE", "REVOKED", "DELETED"]
+    }
+  },
+  "required": [
+    "entity_id",
+    "field_name",
+    "value_hash",
+    "provider_id",
+    "fetched_at",
+    "confidence",
+    "license_id",
+    "allowed_to_display",
+    "allowed_to_export",
+    "allowed_for_ai",
+    "allowed_for_outreach",
+    "allowed_for_multi_tenant_use",
+    "deletion_status"
+  ],
+  "additionalProperties": false
+}

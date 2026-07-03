@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/workspace/workspace-policy",
+  "title": "WorkspacePolicy",
+  "description": "Workspace 策略：策略引擎在执行前评估的声明式规则集（母本 7.1.2、WSP-003；策略拒绝返回 ACTION_DENIED 并记录 Policy Decision，母本 11.15）。rule.reason_code 进入 API 错误模型的 policy_reason_codes。schema_version: 1",
+  "type": "object",
+  "$defs": {
+    "rule": {
+      "type": "object",
+      "description": "单条策略规则",
+      "properties": {
+        "rule_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "规则键，Workspace 内同一 Policy 中唯一，如 deny_export_eu_contacts、require_approval_cross_border_model"
+        },
+        "effect": {
+          "type": "string",
+          "enum": ["ALLOW", "DENY", "REQUIRE_APPROVAL", "REQUIRE_REVIEW", "WARN"],
+          "description": "命中后的效果：DENY=阻断（ACTION_DENIED）；REQUIRE_APPROVAL=生成审批任务（AUTHORIZATION_REQUIRED，母本 11.15）；REQUIRE_REVIEW=进入人工/专家复核（COMPLIANCE_REVIEW_REQUIRED）；WARN=放行并告警"
+        },
+        "condition": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "命中条件表达式（属性断言，如 resource.data_region == 'EU' && action == 'EXPORT'）；缺省恒命中"
+        },
+        "params": {
+          "type": "object",
+          "description": "规则参数字典（开放键，值限定为标量或字符串数组；对 conventions 对象封闭原则的受控开放，因策略参数天然不可枚举）",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean", "array"],
+            "items": { "type": "string" }
+          }
+        },
+        "reason_code": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "策略原因码，进入错误响应 policy_reason_codes（母本 11.15），如 EU_EXPORT_BLOCKED"
+        }
+      },
+      "required": ["rule_key", "effect"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^pol_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "策略 ID，前缀 pol（对 primitives 前缀映射的补充）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "policy_type": {
+      "type": "string",
+      "enum": [
+        "DATA_RIGHTS",
+        "PRIVACY_COMPLIANCE",
+        "MODEL_ROUTING",
+        "CONTENT_GOVERNANCE",
+        "CHANNEL_GOVERNANCE",
+        "OUTREACH_LIMIT",
+        "EXPORT_CONTROL",
+        "RETENTION",
+        "APPROVAL_GOVERNANCE",
+        "BUDGET_ENFORCEMENT"
+      ],
+      "description": "策略类别：数据权利（母本 7.4.9）、隐私合规、模型路由（境外模型控制，WSP-003）、内容治理、渠道治理（母本 7.8）、外联限额、导出控制、保留期（WSP-008）、审批治理（WSP-006）、预算执行（WSP-005）"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "策略名称"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "策略说明（业务可读）"
+    },
+    "rules": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/rule" },
+      "minItems": 1,
+      "description": "规则列表；按顺序评估，首个命中的 DENY/REQUIRE_* 生效"
+    },
+    "enforcement_mode": {
+      "type": "string",
+      "enum": ["ENFORCE", "MONITOR", "DISABLED"],
+      "description": "执行模式：ENFORCE=强制；MONITOR=只记录不阻断（灰度观察）；DISABLED=停用"
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "多个策略冲突时大者优先；Pack 规则冲突遵循母本 4.1.3 优先级"
+    },
+    "effective_from": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "生效时间（可选）"
+    },
+    "effective_until": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "失效时间（可选）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "ARCHIVED"],
+      "description": "策略生命周期状态"
+    },
+    "updated_by": {
+      "$ref": "ggw://contracts/workspace/membership#/$defs/user_id",
+      "description": "最近修改人（策略变更记审计，WSP-010）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "policy_type",
+    "name",
+    "rules",
+    "enforcement_mode",
+    "status",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

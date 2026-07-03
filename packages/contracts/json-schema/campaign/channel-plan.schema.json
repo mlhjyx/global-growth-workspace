@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/campaign/channel-plan",
+  "title": "ChannelPlan",
+  "description": "渠道计划：渠道、账号、节奏、发送窗口与限速；独立版本化、可独立审批和重试（CAM-004；母本 5.7、5.10.1 限速/可暂停）。ID 前缀 chp（对 primitives 前缀映射的补充）。本文件同时定义域内共享枚举 channel_type 与 plan_status，供 content-plan/outreach-sequence/execution-authorization/stop-condition $ref 引用，避免枚举漂移。负责域：campaign。schema_version=1。",
+  "$defs": {
+    "channel_type": {
+      "type": "string",
+      "enum": [
+        "EMAIL",
+        "LINKEDIN",
+        "X",
+        "TIKTOK",
+        "YOUTUBE",
+        "FACEBOOK",
+        "INSTAGRAM",
+        "WECHAT",
+        "WEBSITE",
+        "WEBINAR",
+        "OTHER"
+      ],
+      "description": "执行渠道类型（母本 5.8.2 资产渠道、5.10.2 适配器、附录 F CLM-003/004/005 平台能力）"
+    },
+    "plan_status": {
+      "type": "string",
+      "enum": ["DRAFT", "READY_FOR_REVIEW", "APPROVED", "SUPERSEDED", "RETIRED"],
+      "description": "计划类对象（ContentPlan/ChannelPlan/OutreachSequence）独立审批状态（CAM-004：各对象可独立审批和重试）。SUPERSEDED=被新版本替代，RETIRED=停用"
+    }
+  },
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "chp_ 前缀实体 ID"
+    },
+    "workspace_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id"
+    },
+    "campaign_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "cam_ 前缀，所属 Campaign（CAM-004）"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "渠道计划名称"
+    },
+    "status": {
+      "$ref": "#/$defs/plan_status",
+      "description": "独立审批状态（CAM-004）"
+    },
+    "channels": {
+      "type": "array",
+      "minItems": 1,
+      "description": "渠道条目：每渠道的账号、优先级与节奏（母本 5.7 渠道和触达节奏）",
+      "items": {
+        "type": "object",
+        "properties": {
+          "channel_type": { "$ref": "#/$defs/channel_type" },
+          "account_ref": {
+            "type": "string",
+            "description": "渠道账号引用（channels 域账号 ID；执行时校验账号健康，母本 5.9 账号健康风险）"
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "渠道优先级，1 最高"
+          },
+          "cadence": {
+            "type": "object",
+            "description": "触达节奏与限速（母本 5.10.1 限速；CAM-008 授权将固化频率上限）",
+            "properties": {
+              "max_actions_per_day": { "type": "integer", "minimum": 0 },
+              "max_actions_per_week": { "type": "integer", "minimum": 0 },
+              "min_interval_minutes": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "同渠道相邻动作最小间隔（分钟）"
+              },
+              "send_windows": {
+                "type": "array",
+                "description": "发送窗口（按目标市场当地时间，母本 11.14 保留显示时区）",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "days_of_week": {
+                      "type": "array",
+                      "items": { "type": "integer", "minimum": 1, "maximum": 7 },
+                      "description": "ISO 星期（1=周一 … 7=周日）"
+                    },
+                    "start_time_local": {
+                      "type": "string",
+                      "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+                      "description": "窗口开始（当地时间 HH:MM）"
+                    },
+                    "end_time_local": {
+                      "type": "string",
+                      "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+                      "description": "窗口结束（当地时间 HH:MM）"
+                    },
+                    "timezone": {
+                      "type": "string",
+                      "description": "IANA 时区，如 Asia/Shanghai、Europe/Berlin"
+                    }
+                  },
+                  "required": ["days_of_week", "start_time_local", "end_time_local", "timezone"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": ["channel_type"],
+        "additionalProperties": false
+      }
+    },
+    "estimated_total_actions": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "预计动作总量（母本 5.7 发送量；供 Dry Run 展示，CAM-007）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/version",
+      "description": "乐观锁版本 = 独立版本化（CAM-004；母本 11.16）"
+    }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "campaign_id",
+    "name",
+    "status",
+    "channels",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

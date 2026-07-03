@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/opportunity/touchpoint",
+  "title": "Touchpoint",
+  "description": "统一触点事件（母本 7.10.2 核心对象、ANA-001：曝光、点击、回复、评论、表单、会议、样品、报价和阶段变化；验收：事件具有 Campaign、Account/Contact、时间和来源；附录 G：Touchpoint 术语）。7.10.4 验收：任何 Opportunity 可回溯到客户、Campaign 和至少一个 Touchpoint。负责域：opportunity。schema_version: 1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "tpt_ 前缀（评审补丁：primitives 前缀映射未列 tpt，此处补充 tpt=Touchpoint）"
+    },
+    "workspace_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id"
+    },
+    "touchpoint_type": {
+      "type": "string",
+      "enum": [
+        "IMPRESSION",
+        "CLICK",
+        "REPLY",
+        "COMMENT",
+        "FORM_SUBMIT",
+        "MEETING",
+        "SAMPLE",
+        "QUOTE",
+        "STAGE_CHANGE"
+      ],
+      "description": "触点类型（ANA-001：曝光、点击、回复、评论、表单、会议、样品、报价、阶段变化）"
+    },
+    "campaign_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "归因 Campaign（cam_ 前缀；ANA-001 验收：事件具有 Campaign；有机/线下触点可空，但 campaign_id/account_id/contact_id 至少一项必填，见 anyOf）"
+    },
+    "account_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "关联 Account（acc_ 前缀；ANA-001 验收：事件具有 Account/Contact）"
+    },
+    "contact_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "关联 Contact（cta_ 前缀；ANA-001 验收：事件具有 Account/Contact）"
+    },
+    "lead_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "关联 Lead（led_ 前缀；身份解析后回填，ANA-010 身份未解析队列）"
+    },
+    "opportunity_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "关联 Opportunity（opp_ 前缀；ENG-015：用户可从 Opportunity 回溯所有触点）"
+    },
+    "occurred_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "触点发生时间（ANA-001 验收：事件具有时间）"
+    },
+    "source": {
+      "type": "object",
+      "description": "触点来源（ANA-001 验收：事件具有来源；母本 7.9.6 渠道范围）",
+      "properties": {
+        "channel": {
+          "type": "string",
+          "description": "来源渠道，如 email/social_comment/social_dm/form/chat/mention/manual/crm"
+        },
+        "provider_id": {
+          "type": "string",
+          "description": "产生触点的 Provider/连接器标识（母本 11.13：ProviderResult 必须返回 external_id）"
+        },
+        "external_event_id": {
+          "type": "string",
+          "description": "Provider 侧外部事件 ID（母本 11.16：Webhook 去重键至少包含 Provider、外部事件 ID 和账号）"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "触点源 URL（如帖子、表单页）"
+        }
+      },
+      "required": ["channel"],
+      "additionalProperties": false
+    },
+    "content_asset_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "关联内容资产（ANA-004：资产与 Variant 维度分析）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/version",
+      "description": "乐观锁（母本 11.16）"
+    }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "touchpoint_type",
+    "occurred_at",
+    "source",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "anyOf": [
+    { "required": ["campaign_id"] },
+    { "required": ["account_id"] },
+    { "required": ["contact_id"] }
+  ],
+  "additionalProperties": false
+}

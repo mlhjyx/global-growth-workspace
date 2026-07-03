@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/workspace/organization",
+  "title": "Organization",
+  "description": "组织：企业或代理商的顶层账户，租户根对象，可包含多个 Workspace（母本 7.1.2、WSP-001 创建与默认配置、WSP-004 代理商多客户管理）。注意：Organization 位于 Workspace 之上，是唯一不含 workspace_id 的业务对象（对 conventions.md 公共字段的必要偏离）。schema_version: 1",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^org_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "组织 ID，前缀 org（common/primitives entity_id 前缀映射）"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "组织名称（WSP-001）"
+    },
+    "display_name": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "展示名称，缺省用 name"
+    },
+    "legal_name": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "法定名称（合同与账单用）"
+    },
+    "org_type": {
+      "type": "string",
+      "enum": ["COMPANY", "AGENCY"],
+      "description": "组织类型：COMPANY=出海企业；AGENCY=代理商，可管理多个客户 Workspace（WSP-004）"
+    },
+    "default_locale": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/locale",
+      "description": "默认语言（WSP-001）"
+    },
+    "default_timezone": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_+\\-]+(/[A-Za-z0-9_+\\-]+)*$",
+      "description": "默认时区，IANA 时区名，如 Asia/Shanghai（WSP-001；显示时区，存储一律 UTC，母本 11.14）"
+    },
+    "data_region": {
+      "type": "string",
+      "enum": ["CN", "SG", "US", "EU"],
+      "description": "数据区域（WSP-001；影响数据驻留与跨境模型调用策略，母本 12.11）"
+    },
+    "business_type": {
+      "type": "string",
+      "enum": ["MANUFACTURER", "TRADER", "SAAS", "PROFESSIONAL_SERVICE", "BRAND_ECOMMERCE", "AGENCY_SERVICE", "OTHER"],
+      "description": "业务类型（WSP-001；对应母本 3.7 场景适配矩阵的企业形态）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "SUSPENDED", "CLOSED"],
+      "description": "组织状态（WSP-008 账户关闭流程）"
+    },
+    "owner_user_id": {
+      "type": "string",
+      "pattern": "^usr_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "组织所有者用户 ID，前缀 usr（对 primitives 前缀映射的补充）"
+    },
+    "billing_email": {
+      "type": "string",
+      "format": "email",
+      "description": "账单邮箱"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "name",
+    "org_type",
+    "default_locale",
+    "default_timezone",
+    "data_region",
+    "business_type",
+    "status",
+    "owner_user_id",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

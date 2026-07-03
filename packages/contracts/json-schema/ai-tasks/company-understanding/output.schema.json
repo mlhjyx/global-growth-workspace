@@ -1,0 +1,604 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/ai-tasks/company-understanding/output",
+  "title": "CompanyUnderstandingTaskOutput",
+  "description": "Company Understanding AI Task 输出（母本 9.3、KNW-002 验收：每项候选带来源、置信度和类型）。产出的是 knowledge 域对象的 Candidate 形态：字段名与 json-schema/knowledge/ 下 company-profile / offering / claim / claim-evidence / knowledge-conflict Schema 严格对齐；持久化由 knowledge-service 校验后写入（Claim 状态 EXTRACTED，见 state-machines/claim.state.ts），Task 本身不写业务状态（母本 9.1 责任矩阵）。无证据字段输出 null 并列入 missing_fields（母本 4.8.3：无答案时返回未知，禁止编造；7.2.4）；多源冲突输出 conflict_candidates，持久化后创建 KnowledgeConflict 并发布 KnowledgeConflictDetected（KNW-004：不静默覆盖）。负责域：knowledge；schema_version=1。",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "description": "输出 Schema 版本（母本 9.6 Schema Registry）"
+    },
+    "task_type": {
+      "const": "COMPANY_UNDERSTANDING",
+      "description": "任务类型标识（母本 9.3）"
+    },
+    "workspace_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id",
+      "description": "租户边界，必须与输入一致（母本 ADR-001）"
+    },
+    "detected_language": {
+      "oneOf": [
+        { "$ref": "ggw://contracts/common/primitives#/$defs/locale" },
+        { "type": "null" }
+      ],
+      "description": "来源主要语言；无法判定时为 null"
+    },
+    "company_profile_candidate": {
+      "$ref": "#/$defs/company_profile_candidate",
+      "description": "企业画像候选（母本 6.5.1 步骤 2-3：提取后由用户确认；确认动作发布 CompanyProfileConfirmed）"
+    },
+    "offering_candidates": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/offering_candidate" },
+      "maxItems": 100,
+      "description": "产品/服务候选列表（KNW-002 产品事实候选；字段对齐 knowledge/offering.schema.json）；来源中无可识别产品时为空数组并在 notes 说明"
+    },
+    "claim_candidates": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/claim_candidate" },
+      "maxItems": 500,
+      "description": "事实声明候选列表（KNW-002：企业、产品、参数、MOQ、交期、认证、案例、能力、禁用表达；字段对齐 knowledge/claim.schema.json）"
+    },
+    "conflict_candidates": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/conflict_candidate" },
+      "maxItems": 100,
+      "description": "多源/与已批准事实的冲突候选（KNW-004：不同来源不一致时不静默覆盖）；持久化后创建 KnowledgeConflict 并发布 KnowledgeConflictDetected（asyncapi/knowledge.events.yaml）"
+    },
+    "sources_processed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "pattern": "^src_[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "被处理的 KnowledgeSource（含任务运行时从 website_url 采集注册的 WEBSITE 来源）"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PROCESSED", "PARTIAL", "FAILED", "SKIPPED"],
+            "description": "处理结果：完整处理/部分处理/失败/跳过（支持部分成功语义，母本 11.15 保留部分结果）"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "PARTIAL/FAILED/SKIPPED 时的原因（如解析失败、超出预算截断、与本企业无关）"
+          }
+        },
+        "required": ["source_id", "status"],
+        "additionalProperties": false
+      },
+      "description": "来源处理清单，供 Workflow 判定部分成功与重试范围（母本 9.8）"
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "提取过程说明（如整体证据稀疏、疑似非本企业网站的提示）；仅供审核台展示，不作为事实"
+    }
+  },
+  "required": [
+    "schema_version",
+    "task_type",
+    "workspace_id",
+    "company_profile_candidate",
+    "offering_candidates",
+    "claim_candidates",
+    "conflict_candidates",
+    "sources_processed"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "source_ref": {
+      "type": "object",
+      "description": "候选值的来源引用（KNW-002 验收：每项候选带来源；持久化时转为 ClaimEvidence，location 形态与 knowledge/claim-evidence.schema.json 对齐）",
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "pattern": "^src_[0-9A-HJKMNP-TV-Z]{26}$",
+          "description": "KnowledgeSource ID（KNW-001；官网采集页面由任务运行时先注册为 WEBSITE 来源再引用）"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 2000,
+          "description": "WEBSITE 来源的具体页面 URL（辅助回查，权威定位以 source_id+location 为准）"
+        },
+        "location": {
+          "type": "object",
+          "description": "来源内定位，字段与 knowledge/claim-evidence.schema.json location 一致（KNW-001 来源位置）",
+          "properties": {
+            "page": { "type": "integer", "minimum": 1, "description": "页码（PDF/DOCX/PPTX）" },
+            "section": { "type": "string", "maxLength": 500, "description": "章节/标题路径" },
+            "char_start": { "type": "integer", "minimum": 0, "description": "片段起始字符偏移" },
+            "char_end": { "type": "integer", "minimum": 0, "description": "片段结束字符偏移" },
+            "timecode_start_ms": { "type": "integer", "minimum": 0, "description": "音频/视频起始时间（毫秒）" },
+            "timecode_end_ms": { "type": "integer", "minimum": 0, "description": "音频/视频结束时间（毫秒）" },
+            "sheet": { "type": "string", "maxLength": 200, "description": "工作表名（XLSX）" },
+            "cell_range": { "type": "string", "maxLength": 50, "description": "单元格范围，如 A1:C10（XLSX）" },
+            "url_fragment": { "type": "string", "maxLength": 1000, "description": "网页 URL 片段/锚点（WEBSITE）" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["source_id"],
+      "additionalProperties": false
+    },
+    "missing_field": {
+      "type": "object",
+      "description": "缺失字段记录：对应字段必须为 null（母本 4.8.3 无答案时返回未知、7.2.4 无证据不得生成确定性表达）",
+      "properties": {
+        "field_name": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "缺失字段名，与所在候选对象的 snake_case 字段名一致（如 founded_year、moq）"
+        },
+        "missing_reason": {
+          "type": "string",
+          "enum": [
+            "NOT_FOUND_IN_SOURCES",
+            "AMBIGUOUS",
+            "CONFLICTING_SOURCES",
+            "LOW_CONFIDENCE",
+            "SOURCE_UNREADABLE",
+            "FORBIDDEN_TO_INFER"
+          ],
+          "description": "缺失原因：来源未提及/表述含糊/来源冲突（同时输出 conflict_candidates）/置信度低于阈值/来源不可解析/属禁止推断项（如法律结论、无证据认证，母本 7.2.4、9.1）"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "补充说明，供事实审核台展示（母本 4.8.4）"
+        }
+      },
+      "required": ["field_name", "missing_reason"],
+      "additionalProperties": false
+    },
+    "field_evidence_ref": {
+      "type": "object",
+      "description": "画像/产品单字段的来源与置信度（KNW-002 验收：每项候选带来源、置信度和类型；理念对齐 common/field-evidence 的字段级证据，但本对象是 knowledge 域提取候选的轻量形态）",
+      "properties": {
+        "field_name": { "type": "string", "maxLength": 200, "description": "候选对象字段名（snake_case）" },
+        "source_ref": { "$ref": "#/$defs/source_ref" },
+        "quote": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10000,
+          "description": "来源原文逐字引用（对齐 claim-evidence.schema.json snippet；KNW-006 两次点击内可查看来源片段）"
+        },
+        "confidence": { "$ref": "ggw://contracts/common/primitives#/$defs/confidence" }
+      },
+      "required": ["field_name", "source_ref", "confidence"],
+      "additionalProperties": false
+    },
+    "company_profile_candidate": {
+      "type": "object",
+      "description": "CompanyProfile 的候选形态：业务字段名/类型/枚举与 knowledge/company-profile.schema.json 完全一致，均可为 null（缺失时列入 missing_fields）。确认后由 knowledge-service 写入 CompanyProfile（confirmation_status=DRAFT→PENDING_CONFIRMATION→CONFIRMED，母本 6.5.1 步骤 3）",
+      "properties": {
+        "legal_name": {
+          "type": ["string", "null"],
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "法定名称（KNW-002 企业事实候选；对齐 company-profile.legal_name）"
+        },
+        "display_name": {
+          "type": ["string", "null"],
+          "maxLength": 200,
+          "description": "对外展示名称（对齐 company-profile.display_name）"
+        },
+        "trading_names": {
+          "type": ["array", "null"],
+          "items": { "type": "string", "maxLength": 200 },
+          "description": "商号/曾用名/英文名等别名（对齐 company-profile.trading_names）"
+        },
+        "websites": {
+          "type": ["array", "null"],
+          "items": { "type": "string", "format": "uri" },
+          "description": "官网与相关域名（对齐 company-profile.websites）"
+        },
+        "hq_country": {
+          "oneOf": [
+            { "$ref": "ggw://contracts/common/primitives#/$defs/country_code" },
+            { "type": "null" }
+          ],
+          "description": "总部所在国家（对齐 company-profile.hq_country）"
+        },
+        "locations": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "maxLength": 200 },
+              "location_type": {
+                "type": "string",
+                "enum": ["HQ", "FACTORY", "OFFICE", "WAREHOUSE", "SHOWROOM"],
+                "description": "地点类型（枚举与 company-profile.locations 一致）"
+              },
+              "country": { "$ref": "ggw://contracts/common/primitives#/$defs/country_code" },
+              "city": { "type": "string", "maxLength": 100 }
+            },
+            "required": ["location_type", "country"],
+            "additionalProperties": false
+          },
+          "description": "工厂/办公/仓库等地点（母本 4.8.1 企业事实；对齐 company-profile.locations）"
+        },
+        "founded_year": {
+          "type": ["integer", "null"],
+          "minimum": 1800,
+          "maximum": 2100,
+          "description": "成立年份（对齐 company-profile.founded_year）"
+        },
+        "employee_range": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": ["1-10", "11-50", "51-200", "201-500", "501-1000", "1001-5000", "5000+"]
+            },
+            { "type": "null" }
+          ],
+          "description": "员工规模区间（枚举与 company-profile.employee_range 一致）"
+        },
+        "industries": {
+          "type": ["array", "null"],
+          "items": { "type": "string", "maxLength": 100 },
+          "description": "所属行业标签（对齐 company-profile.industries；industry_hint 不得在无证据时直接写入，母本 7.2.4）"
+        },
+        "description": {
+          "type": ["string", "null"],
+          "maxLength": 5000,
+          "description": "企业简介候选（母本 7.2.5：推断必须经过审核；对齐 company-profile.description）"
+        },
+        "capabilities": {
+          "type": ["array", "null"],
+          "items": { "type": "string", "maxLength": 300 },
+          "description": "能力概要（KNW-002 能力候选；权威版本走 CAPABILITY 类型 claim_candidates）"
+        },
+        "certifications": {
+          "type": ["array", "null"],
+          "items": { "type": "string", "maxLength": 200 },
+          "description": "认证概要（展示用；权威版本走 CERTIFICATION 类型 claim_candidates + 证据，母本 7.2.4）"
+        },
+        "main_markets": {
+          "type": ["array", "null"],
+          "items": { "$ref": "ggw://contracts/common/primitives#/$defs/country_code" },
+          "description": "当前主要出口/目标市场（对齐 company-profile.main_markets）"
+        },
+        "languages": {
+          "type": ["array", "null"],
+          "items": { "$ref": "ggw://contracts/common/primitives#/$defs/locale" },
+          "description": "企业可用沟通语言（对齐 company-profile.languages）"
+        },
+        "confidence": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/confidence",
+          "description": "画像整体置信度（KNW-002 验收：候选带置信度）"
+        },
+        "field_evidences": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/field_evidence_ref" },
+          "description": "非 null 字段的字段级来源与置信度（KNW-002 验收：每项候选带来源）；每个非 null 业务字段至少一条"
+        },
+        "missing_fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/missing_field" },
+          "description": "值为 null 的字段清单及原因（母本 4.8.3 禁止编造）"
+        }
+      },
+      "required": ["legal_name", "confidence", "field_evidences", "missing_fields"],
+      "additionalProperties": false
+    },
+    "offering_candidate": {
+      "type": "object",
+      "description": "Offering 的候选形态：业务字段名/类型/枚举与 knowledge/offering.schema.json 完全一致（KNW-002 产品事实候选：参数、MOQ、交期、认证、应用场景）。确认后由 knowledge-service 写入 Offering（status=DRAFT）",
+      "properties": {
+        "candidate_key": {
+          "type": "string",
+          "pattern": "^offering_[0-9]{1,3}$",
+          "description": "本次输出内的临时键（如 offering_1），供 claim_candidates.applicable_scope 与 conflict_candidates 引用；持久化后由服务替换为 off_ 前缀实体 ID"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300,
+          "description": "产品/服务名称（对齐 offering.name）"
+        },
+        "sku_code": {
+          "type": ["string", "null"],
+          "maxLength": 100,
+          "description": "企业内部型号/SKU 编码（对齐 offering.sku_code）"
+        },
+        "offering_type": {
+          "type": "string",
+          "enum": ["PRODUCT", "SERVICE", "SOLUTION"],
+          "description": "供给类型（枚举与 offering.offering_type 一致）"
+        },
+        "category": {
+          "type": ["string", "null"],
+          "maxLength": 200,
+          "description": "产品类目（对齐 offering.category）"
+        },
+        "description": {
+          "type": ["string", "null"],
+          "maxLength": 5000,
+          "description": "产品描述（对齐 offering.description）"
+        },
+        "specs": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "maxLength": 200, "description": "参数名" },
+              "value": { "type": "string", "maxLength": 500, "description": "参数值" },
+              "unit": { "type": "string", "maxLength": 50, "description": "单位" }
+            },
+            "required": ["name", "value"],
+            "additionalProperties": false
+          },
+          "description": "参数概要（KNW-002 参数候选；结构与 offering.specs 一致，权威版本走 PARAMETER 类型 claim_candidates）"
+        },
+        "moq": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "quantity": { "type": "number", "minimum": 0 },
+                "unit": { "type": "string", "maxLength": 50, "description": "计量单位，如 pcs、set、kg" },
+                "notes": { "type": "string", "maxLength": 500 }
+              },
+              "required": ["quantity", "unit"],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ],
+          "description": "最小起订量概要（KNW-002 MOQ 候选；结构与 offering.moq 一致）"
+        },
+        "lead_time": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "min_days": { "type": "integer", "minimum": 0 },
+                "max_days": { "type": "integer", "minimum": 0 },
+                "notes": { "type": "string", "maxLength": 500 }
+              },
+              "required": ["min_days", "max_days"],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ],
+          "description": "交期概要（KNW-002 交期候选；结构与 offering.lead_time 一致）"
+        },
+        "certifications": {
+          "type": ["array", "null"],
+          "items": { "type": "string", "maxLength": 200 },
+          "description": "认证概要（KNW-002 认证候选；权威版本走 CERTIFICATION 类型 claim_candidates，母本 7.2.4）"
+        },
+        "applications": {
+          "type": ["array", "null"],
+          "items": { "type": "string", "maxLength": 300 },
+          "description": "应用场景（母本 4.8.1 产品事实；对齐 offering.applications）"
+        },
+        "target_markets": {
+          "type": ["array", "null"],
+          "items": { "$ref": "ggw://contracts/common/primitives#/$defs/country_code" },
+          "description": "目标市场（对齐 offering.target_markets）"
+        },
+        "hs_codes": {
+          "type": ["array", "null"],
+          "items": { "type": "string", "pattern": "^[0-9]{4,10}$" },
+          "description": "海关 HS 编码（对齐 offering.hs_codes；仅在来源明确给出时输出，禁止推断）"
+        },
+        "price_min": {
+          "oneOf": [
+            { "$ref": "ggw://contracts/common/primitives#/$defs/money" },
+            { "type": "null" }
+          ],
+          "description": "参考价下限（母本 11.14 金额规范；对齐 offering.price_min；无证据不得输出价格，母本 7.2.4）"
+        },
+        "price_max": {
+          "oneOf": [
+            { "$ref": "ggw://contracts/common/primitives#/$defs/money" },
+            { "type": "null" }
+          ],
+          "description": "参考价上限（对齐 offering.price_max）"
+        },
+        "confidence": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/confidence",
+          "description": "该产品候选整体置信度（KNW-002）"
+        },
+        "source_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/source_ref" },
+          "minItems": 1,
+          "description": "支撑本候选的来源（KNW-002 验收：每项候选带来源）"
+        },
+        "missing_fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/missing_field" },
+          "description": "值为 null 的字段清单及原因（母本 4.8.3）"
+        }
+      },
+      "required": ["candidate_key", "name", "offering_type", "confidence", "source_refs", "missing_fields"],
+      "additionalProperties": false
+    },
+    "claim_candidate": {
+      "type": "object",
+      "description": "Claim 的候选形态（KNW-002 九类候选 + COMPLIANCE）：字段名与 knowledge/claim.schema.json 一致（statement/structured_value/confidence/status/locale/confidentiality_level），source_ref+quote 持久化时转为 ClaimEvidence（snippet=quote）。status 固定 EXTRACTED（claim.state.ts：INGESTED→EXTRACTED→NEEDS_REVIEW，审核推进由 knowledge-service 负责）",
+      "properties": {
+        "candidate_key": {
+          "type": "string",
+          "pattern": "^claim_[0-9]{1,4}$",
+          "description": "本次输出内的临时键（如 claim_1），供 conflict_candidates 引用；持久化后替换为 clm_ 前缀实体 ID"
+        },
+        "claim_type": {
+          "type": "string",
+          "enum": [
+            "COMPANY_FACT",
+            "PRODUCT_FACT",
+            "PARAMETER",
+            "MOQ",
+            "LEAD_TIME",
+            "CERTIFICATION",
+            "CASE_STUDY",
+            "CAPABILITY",
+            "FORBIDDEN_EXPRESSION",
+            "COMPLIANCE"
+          ],
+          "description": "事实类型（KNW-002 验收：每项候选带类型；枚举与 claim.schema.json 完全一致。COMPLIANCE 仅当来源本身是授权专家确认结论时输出，母本 4.10.4）"
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 5000,
+          "description": "规范化事实陈述（对齐 claim.statement；使用输入 language 指定语言；即任务要求中的候选 value 的人可读形态）"
+        },
+        "structured_value": {
+          "type": "object",
+          "description": "结构化取值（对齐 claim.structured_value，Schema 随 claim_type 变化：PARAMETER={name,value,unit}、MOQ={quantity,unit}、LEAD_TIME={min_days,max_days}）。此叶子对象有意开放，由应用层按 claim_type 校验（KNW-002）"
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10000,
+          "description": "来源原文逐字引用，不得改写或翻译（持久化为 ClaimEvidence.snippet；KNW-006 两次点击内可查看来源片段；Golden Set 以 quote 可在来源中逐字定位为事实支持判定标准）"
+        },
+        "source_ref": {
+          "$ref": "#/$defs/source_ref",
+          "description": "来源引用（KNW-002 验收：每项候选带来源；持久化为 Claim.source_id + ClaimEvidence）"
+        },
+        "confidence": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/confidence",
+          "description": "提取置信度（KNW-002 验收：每项候选带置信度；低于任务阈值的候选不输出，改列入相关对象 missing_fields）"
+        },
+        "status": {
+          "const": "EXTRACTED",
+          "description": "候选固定为 EXTRACTED（claim.state.ts / claim.schema.json status 枚举成员；后续 NEEDS_REVIEW→APPROVED 由事实审核台推进，KNW-003、母本 4.8.4）"
+        },
+        "locale": {
+          "oneOf": [
+            { "$ref": "ggw://contracts/common/primitives#/$defs/locale" },
+            { "type": "null" }
+          ],
+          "description": "statement 语言（对齐 claim.locale）"
+        },
+        "confidentiality_level": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/privacy_classification",
+          "description": "建议保密级别，默认继承来源 KnowledgeSource.confidentiality_level（KNW-005、母本 12.11）"
+        },
+        "applicable_scope": {
+          "type": "object",
+          "description": "适用范围建议（KNW-005：适用产品、市场、渠道和使用目的；字段名与 claim.schema.json applicable_*/allowed_purposes 一致），最终以审核台确认为准",
+          "properties": {
+            "applicable_offering_ids": {
+              "type": "array",
+              "items": { "type": "string", "pattern": "^off_[0-9A-HJKMNP-TV-Z]{26}$" },
+              "description": "适用的已存在 Offering（来自输入 workspace_context.existing_offering_ids；空数组表示适用全部产品，对齐 claim.applicable_offering_ids）"
+            },
+            "offering_candidate_keys": {
+              "type": "array",
+              "items": { "type": "string", "pattern": "^offering_[0-9]{1,3}$" },
+              "description": "适用的本次输出产品候选（引用 offering_candidates[].candidate_key；持久化后并入 applicable_offering_ids）"
+            },
+            "applicable_markets": {
+              "type": "array",
+              "items": { "$ref": "ggw://contracts/common/primitives#/$defs/country_code" },
+              "description": "适用市场（对齐 claim.applicable_markets；空数组表示全部市场）"
+            },
+            "applicable_channels": {
+              "type": "array",
+              "items": { "type": "string", "maxLength": 100 },
+              "description": "适用渠道标识，如 linkedin、email、website（对齐 claim.applicable_channels；空数组表示全部渠道）"
+            },
+            "allowed_purposes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "CONTENT_GENERATION",
+                  "OUTREACH",
+                  "SALES_REPLY",
+                  "RESEARCH",
+                  "INTERNAL_REFERENCE"
+                ]
+              },
+              "description": "可使用场景（枚举与 claim.allowed_purposes 完全一致；空数组表示不限用途）"
+            }
+          },
+          "additionalProperties": false
+        },
+        "effective_from": {
+          "oneOf": [
+            { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+            { "type": "null" }
+          ],
+          "description": "来源明示的生效时间（对齐 claim.effective_from；如认证签发日期），无明示为 null"
+        },
+        "expires_at": {
+          "oneOf": [
+            { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+            { "type": "null" }
+          ],
+          "description": "来源明示的失效时间（对齐 claim.expires_at，KNW-009；如证书有效期），无明示为 null，禁止推断"
+        }
+      },
+      "required": [
+        "candidate_key",
+        "claim_type",
+        "statement",
+        "quote",
+        "source_ref",
+        "confidence",
+        "status",
+        "confidentiality_level",
+        "applicable_scope"
+      ],
+      "additionalProperties": false
+    },
+    "conflict_candidate": {
+      "type": "object",
+      "description": "冲突候选（KNW-004：冲突检测，不静默覆盖）：字段名与 knowledge/knowledge-conflict.schema.json 一致（topic/conflict_type/detection_method/diff_summary）。持久化后创建 KnowledgeConflict（status=OPEN）并发布 KnowledgeConflictDetected；冲突涉及字段在候选对象中输出 null + missing_reason=CONFLICTING_SOURCES",
+      "properties": {
+        "topic": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "冲突主题，如同一产品的 MOQ、同一认证的有效期（对齐 knowledge-conflict.topic）"
+        },
+        "conflict_type": {
+          "type": "string",
+          "enum": [
+            "VALUE_MISMATCH",
+            "VALIDITY_OVERLAP",
+            "SOURCE_CONTRADICTION",
+            "DUPLICATE",
+            "VERSION_DIVERGENCE"
+          ],
+          "description": "冲突类型（枚举与 knowledge-conflict.schema.json 完全一致）"
+        },
+        "claim_candidate_keys": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^claim_[0-9]{1,4}$" },
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "涉事的本次输出 Claim 候选（引用 claim_candidates[].candidate_key）；与 existing_claim_ids 合计至少 2 方（对齐 knowledge-conflict.claim_ids minItems=2，由应用层校验）"
+        },
+        "existing_claim_ids": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^clm_[0-9A-HJKMNP-TV-Z]{26}$" },
+          "uniqueItems": true,
+          "description": "涉事的已存在 Claim（来自输入 workspace_context.approved_claim_ids；新提取与已批准事实矛盾时必填，母本 7.2.4：用户纠正后的已确认事实优先，但差异必须上报而非丢弃）"
+        },
+        "detection_method": {
+          "const": "AUTO",
+          "description": "本任务产生的冲突固定为 AUTO（knowledge-conflict.detection_method 枚举成员；母本 4.8.4：AI 自动提取候选事实并标记冲突）"
+        },
+        "diff_summary": {
+          "type": "string",
+          "maxLength": 5000,
+          "description": "取值差异摘要，逐来源列出各自的值与出处，供事实审核台比较（KNW-004 版本比较；对齐 knowledge-conflict.diff_summary）"
+        }
+      },
+      "required": ["topic", "conflict_type", "claim_candidate_keys", "detection_method", "diff_summary"],
+      "additionalProperties": false
+    }
+  }
+}

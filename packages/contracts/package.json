@@ -5,6 +5,11 @@
   "type": "module",
   "description": "跨域契约单一事实源：OpenAPI / AsyncAPI 事件 / JSON Schema / Adapter 接口。受保护路径（ADR-102）。",
   "scripts": {
-    "contracts:validate": "node -e \"console.log('[contracts] 校验器占位 — 阶段1 P0 契约生成时接入 spectral/ajv/asyncapi-cli')\""
+    "contracts:validate": "node scripts/validate.mjs"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "yaml": "^2.9.0"
   }
 }

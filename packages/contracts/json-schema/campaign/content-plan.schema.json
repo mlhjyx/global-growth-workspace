@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/campaign/content-plan",
+  "title": "ContentPlan",
+  "description": "内容计划：主题、漏斗映射、资产类型、语言与质量检查要求；独立版本化、可独立审批和重试（CAM-004；母本 5.7 内容主题和漏斗映射、5.8 资产类型与质量检查）。具体资产生产归 content 域（母本 7.7），本对象只做 Campaign 侧计划与关联。ID 前缀 cpl（对 primitives 前缀映射的补充）。负责域：campaign。schema_version=1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "cpl_ 前缀实体 ID"
+    },
+    "workspace_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id"
+    },
+    "campaign_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "cam_ 前缀，所属 Campaign（CAM-004）"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "内容计划名称"
+    },
+    "status": {
+      "$ref": "ggw://contracts/campaign/channel-plan#/$defs/plan_status",
+      "description": "独立审批状态（CAM-004；枚举定义见 channel-plan.schema.json $defs.plan_status）"
+    },
+    "themes": {
+      "type": "array",
+      "minItems": 1,
+      "description": "内容主题与漏斗映射（母本 5.7）",
+      "items": {
+        "type": "object",
+        "properties": {
+          "theme": { "type": "string", "minLength": 1, "description": "主题名称" },
+          "funnel_stage": {
+            "type": "string",
+            "description": "漏斗阶段，如 awareness、consideration、decision（母本 5.8.1 Funnel Stage）"
+          },
+          "target_persona": {
+            "type": "string",
+            "description": "目标 Persona（母本 5.8.1 ICP/Persona）"
+          },
+          "claim_ids": {
+            "type": "array",
+            "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+            "description": "clm_ 前缀，允许使用的 Approved Claim（母本 5.8.1 上下文组装：企业 Approved Claims）"
+          }
+        },
+        "required": ["theme"],
+        "additionalProperties": false
+      }
+    },
+    "asset_types": {
+      "type": "array",
+      "minItems": 1,
+      "description": "计划产出的资产类型（母本 5.8.2）",
+      "items": {
+        "type": "string",
+        "enum": [
+          "EMAIL_SEQUENCE_COPY",
+          "SOCIAL_POST",
+          "IMAGE_TEXT",
+          "VIDEO_SCRIPT",
+          "SHORT_VIDEO_SCRIPT",
+          "LANDING_PAGE_COPY",
+          "COMMENT_REPLY",
+          "DM_REPLY",
+          "SALES_COLLATERAL",
+          "FAQ",
+          "MEETING_BRIEF"
+        ]
+      }
+    },
+    "locales": {
+      "type": "array",
+      "description": "目标市场语言（母本 5.8.2 市场语言邮件；5.8.3 本地化检查）",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/locale" }
+    },
+    "quality_checks": {
+      "type": "array",
+      "description": "必须通过的质量检查项（母本 5.8.3）",
+      "items": {
+        "type": "string",
+        "enum": [
+          "FACT_CONSISTENCY",
+          "LOCALIZATION",
+          "BRAND_TONE",
+          "SENSITIVE_WORDS",
+          "CHANNEL_LENGTH",
+          "DUPLICATION",
+          "CTA",
+          "UNSUBSCRIBE_INFO",
+          "FORBIDDEN_PROMISES"
+        ]
+      }
+    },
+    "content_brief_ids": {
+      "type": "array",
+      "description": "content 域 ContentBrief 引用（母本 7.7.2；跨域仅存 ID，不同步拥有子实体，7.6.1）",
+      "items": { "type": "string" }
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/version",
+      "description": "乐观锁版本 = 独立版本化（CAM-004；母本 11.16）"
+    }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "campaign_id",
+    "name",
+    "status",
+    "themes",
+    "asset_types",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

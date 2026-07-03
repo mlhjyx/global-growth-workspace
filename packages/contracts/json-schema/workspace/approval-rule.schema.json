@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/workspace/approval-rule",
+  "title": "ApprovalRule",
+  "description": "审批规则：审批人、替代审批人、金额/风险阈值和有效期（母本 7.1.2、WSP-006；验收：高风险动作无有效 Approval Token 时执行失败，错误码 AUTHORIZATION_REQUIRED，母本 11.15）。命中规则的动作在获得审批前不得执行；Approval Token 有效期由 approval_token_ttl_minutes 控制。schema_version: 1",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^apr_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "审批规则 ID，前缀 apr（对 primitives 前缀映射的补充）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "规则名称，如「高额数据采购需 Owner 审批」"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "规则说明"
+    },
+    "governed_actions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "CAMPAIGN_LAUNCH",
+          "CONTENT_PUBLISH",
+          "OUTBOUND_SEND",
+          "DATA_EXPORT",
+          "DATA_PURCHASE",
+          "CROSS_BORDER_MODEL_CALL",
+          "BUDGET_CHANGE",
+          "POLICY_CHANGE",
+          "MEMBER_ROLE_CHANGE",
+          "EXPERT_ENGAGEMENT",
+          "HIGH_RISK_REPLY"
+        ],
+        "description": "受审批治理的高风险动作（对齐母本 3.6 PER-REV 职责与 7.6 执行授权、7.9.8 高风险回复）"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "本规则覆盖的动作集合（WSP-006）"
+    },
+    "approver_roles": {
+      "type": "array",
+      "items": { "$ref": "ggw://contracts/workspace/membership#/$defs/role" },
+      "uniqueItems": true,
+      "description": "审批人角色（WSP-006；与 approver_membership_ids 至少给出其一）"
+    },
+    "approver_membership_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^mem_[0-9A-HJKMNP-TV-Z]{26}$" },
+      "uniqueItems": true,
+      "description": "指定审批人成员 ID（WSP-006）"
+    },
+    "alternate_approver_roles": {
+      "type": "array",
+      "items": { "$ref": "ggw://contracts/workspace/membership#/$defs/role" },
+      "uniqueItems": true,
+      "description": "替代审批人角色：主审批人超时/缺席时接管（WSP-006）"
+    },
+    "alternate_approver_membership_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^mem_[0-9A-HJKMNP-TV-Z]{26}$" },
+      "uniqueItems": true,
+      "description": "替代审批人成员 ID（WSP-006）"
+    },
+    "min_approvals": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1,
+      "description": "所需最少审批数（多人会签）"
+    },
+    "amount_threshold": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/money",
+      "description": "金额阈值：动作预估成本达到或超过该金额时触发本规则（WSP-006；预估来自 Adapter estimate，母本 11.13）"
+    },
+    "risk_threshold": {
+      "type": "string",
+      "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+      "description": "风险阈值：动作风险等级达到或超过该级别时触发本规则（WSP-006）"
+    },
+    "approval_token_ttl_minutes": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Approval Token 有效期（分钟）；过期后执行失败并需重新审批（WSP-006 验收）"
+    },
+    "escalation_after_hours": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "主审批人未处理的升级时限（小时）；超时转替代审批人"
+    },
+    "valid_from": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "规则生效时间（WSP-006 有效期）"
+    },
+    "valid_until": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "规则失效时间（WSP-006 有效期；到期后 status 转 EXPIRED）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "SUSPENDED", "EXPIRED", "ARCHIVED"],
+      "description": "规则状态：SUSPENDED=临时停用；EXPIRED=有效期已过；ARCHIVED=归档"
+    },
+    "created_by": {
+      "$ref": "ggw://contracts/workspace/membership#/$defs/user_id",
+      "description": "创建人用户 ID（规则变更记审计，WSP-010）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "name",
+    "governed_actions",
+    "min_approvals",
+    "approval_token_ttl_minutes",
+    "status",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "anyOf": [
+    { "required": ["approver_roles"] },
+    { "required": ["approver_membership_ids"] }
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,232 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/campaign/execution-authorization",
+  "title": "ExecutionAuthorization",
+  "description": "不可变执行授权：固化范围、模板、频率、预算、阈值和有效期（CAM-008；母本 5.9 批准后生成不可变 ExecutionAuthorization、附录 G）。除 status/revoked_*/superseded_by_id 生命周期字段外，签发后所有字段不可变；任何边界扩大必须签发新授权并将旧授权置 SUPERSEDED（CAM-006）。执行服务只接受 status=ACTIVE 且在有效期内的授权（CAM-008 验收、7.6.4：100% 对外营销动作关联有效授权）。status 取值与 state-machines/execution-authorization.state.ts 完全一致。ID 前缀 auth。负责域：campaign。schema_version=1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "auth_ 前缀实体 ID"
+    },
+    "workspace_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id"
+    },
+    "campaign_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "cam_ 前缀，被授权的 Campaign"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ISSUED", "ACTIVE", "EXPIRED", "REVOKED", "SUPERSEDED"],
+      "description": "授权生命周期（state-machines/execution-authorization.state.ts；母本 11.9 未列，按 CAM-008/WSP-007 评审补充）"
+    },
+    "issued_by": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "mem_ 前缀，审批人（母本 5.9 Approve 阶段）"
+    },
+    "issued_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "签发时间"
+    },
+    "source_revision_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "rev_ 前缀，由哪个 CampaignRevision 触发的重新授权（可选；首个授权无此字段，CAM-006）"
+    },
+    "strategy_snapshot_hash": {
+      "type": "string",
+      "description": "签发时 Campaign.strategy_snapshot.snapshot_hash，绑定被批准的策略版本（CAM-008）"
+    },
+    "scope": {
+      "type": "object",
+      "description": "固化的执行范围（CAM-008）",
+      "properties": {
+        "audience_refs": {
+          "type": "array",
+          "minItems": 1,
+          "description": "固化的受众名单版本；运行批次据此追溯当时名单（CAM-003）",
+          "items": {
+            "type": "object",
+            "properties": {
+              "audience_id": {
+                "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+                "description": "aud_ 前缀"
+              },
+              "audience_version": {
+                "$ref": "ggw://contracts/common/primitives#/$defs/version",
+                "description": "被固化的 Audience 乐观锁版本"
+              },
+              "snapshot_hash": {
+                "type": "string",
+                "description": "对应 Audience.query_snapshot.snapshot_hash"
+              }
+            },
+            "required": ["audience_id", "audience_version"],
+            "additionalProperties": false
+          }
+        },
+        "channels": {
+          "type": "array",
+          "minItems": 1,
+          "description": "允许的渠道白名单；超出范围的动作返回 ACTION_DENIED（母本 11.15）",
+          "items": { "$ref": "ggw://contracts/campaign/channel-plan#/$defs/channel_type" }
+        },
+        "allowed_action_types": {
+          "type": "array",
+          "minItems": 1,
+          "description": "允许的动作类型（母本 5.10.2 适配器、CAM-012 Publish/Outbound/Engagement）",
+          "items": {
+            "type": "string",
+            "enum": ["PUBLISH", "OUTBOUND_EMAIL", "DM", "COMMENT", "REPLY", "FOLLOW_UP"]
+          }
+        },
+        "max_total_actions": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "本授权允许的动作总量上限（可选）"
+        }
+      },
+      "required": ["audience_refs", "channels", "allowed_action_types"],
+      "additionalProperties": false
+    },
+    "templates": {
+      "type": "array",
+      "minItems": 1,
+      "description": "固化的内容模板：以内容指纹绑定，模板内容变更后授权失配、执行拒绝（CAM-008）",
+      "items": {
+        "type": "object",
+        "properties": {
+          "template_ref": {
+            "type": "string",
+            "minLength": 1,
+            "description": "ContentAsset/模板引用（与 OutreachSequence.steps[].template_ref 对应）"
+          },
+          "content_hash": {
+            "type": "string",
+            "minLength": 1,
+            "description": "被批准内容的指纹"
+          }
+        },
+        "required": ["template_ref", "content_hash"],
+        "additionalProperties": false
+      }
+    },
+    "frequency_caps": {
+      "type": "object",
+      "description": "固化的频率上限（CAM-008；母本 5.9 渠道、时间和频率）",
+      "properties": {
+        "max_actions_per_day": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "每日动作上限（全渠道合计）"
+        },
+        "max_actions_per_contact_per_day": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "单联系人每日触达上限"
+        },
+        "max_actions_per_contact_per_week": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "单联系人每周触达上限"
+        },
+        "min_interval_minutes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "相邻动作最小间隔（分钟）"
+        }
+      },
+      "required": ["max_actions_per_day"],
+      "additionalProperties": false
+    },
+    "budget_cap": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/money",
+      "description": "固化的预算上限（CAM-008、CAM-013）；超出阻止新任务并返回 BUDGET_EXCEEDED（母本 11.15）"
+    },
+    "thresholds": {
+      "type": "object",
+      "description": "固化的自动暂停阈值（CAM-008；母本 5.9 自动化边界、暂停阈值；细粒度规则见 stop-condition.schema.json，CAM-010）",
+      "properties": {
+        "max_bounce_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "退信率上限（0-1）"
+        },
+        "max_complaint_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "投诉率上限（0-1）"
+        },
+        "max_failure_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "执行失败率上限（0-1）"
+        },
+        "stop_condition_ids": {
+          "type": "array",
+          "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+          "description": "stp_ 前缀，签发时生效的 StopCondition 集合（CAM-010）"
+        }
+      },
+      "additionalProperties": false
+    },
+    "valid_from": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "有效期开始；到达后 ISSUED→ACTIVE（CAM-008）"
+    },
+    "valid_until": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "有效期结束；到达后 ACTIVE→EXPIRED 并自动暂停执行（CAM-008；母本 5.10.1 授权过期触发自动暂停）"
+    },
+    "authorization_hash": {
+      "type": "string",
+      "minLength": 1,
+      "description": "整个授权内容（scope+templates+frequency_caps+budget_cap+thresholds+有效期）的固化指纹；执行服务据此校验授权未被篡改（CAM-008）"
+    },
+    "revoked_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "撤销时间（status=REVOKED）"
+    },
+    "revoked_by": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "mem_ 前缀，撤销操作人（含 Workspace Kill Switch 场景，WSP-007）"
+    },
+    "revoke_reason": {
+      "type": "string",
+      "description": "撤销原因（审计必填，WSP-007：已执行项保留审计）"
+    },
+    "superseded_by_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "auth_ 前缀，替代本授权的新授权（status=SUPERSEDED 时填写，CAM-006 重新授权）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/version",
+      "description": "乐观锁版本；仅随 status 生命周期字段变化，边界字段不可变（CAM-008；母本 11.16）"
+    }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "campaign_id",
+    "status",
+    "issued_by",
+    "issued_at",
+    "scope",
+    "templates",
+    "frequency_caps",
+    "budget_cap",
+    "thresholds",
+    "valid_from",
+    "valid_until",
+    "authorization_hash",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/workspace/audit-log-entry",
+  "title": "AuditLogEntry",
+  "description": "审计日志条目：记录登录、权限、导出、模型、工具、发布、发送和删除等动作（母本 7.1.2、WSP-010；验收：管理员可按人、对象、动作和时间查询）。条目只增不改（version 恒为 1）；保留策略见母本 11.17（只保留必要元数据，受限访问）。schema_version: 1",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^adt_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "审计条目 ID，前缀 adt（对 primitives 前缀映射的补充；aud 已被 Audience 占用）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "actor_type": {
+      "type": "string",
+      "enum": ["USER", "SYSTEM", "AI_AGENT", "EXPERT", "API_CLIENT"],
+      "description": "操作者类型：USER=平台用户；SYSTEM=系统自动动作；AI_AGENT=AI 任务/工作流；EXPERT=外部专家（母本 7.12）；API_CLIENT=API 集成"
+    },
+    "actor_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "操作者标识：USER 为 usr_ ID；AI_AGENT 为任务/工作流 run ID；API_CLIENT 为客户端 ID"
+    },
+    "on_behalf_of": {
+      "type": "string",
+      "description": "代理操作时的委托方标识，如代理商成员代客户 Workspace 操作（WSP-004）"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "LOGIN",
+        "LOGOUT",
+        "PERMISSION_CHANGE",
+        "ROLE_CHANGE",
+        "MEMBER_INVITED",
+        "MEMBER_REMOVED",
+        "DATA_ACCESS",
+        "DATA_EXPORT",
+        "DATA_DELETE",
+        "MODEL_INVOCATION",
+        "TOOL_INVOCATION",
+        "CONTENT_PUBLISH",
+        "OUTBOUND_SEND",
+        "POLICY_CHANGE",
+        "BUDGET_CHANGE",
+        "APPROVAL_GRANTED",
+        "APPROVAL_REJECTED",
+        "KILL_SWITCH_ACTIVATED",
+        "KILL_SWITCH_RELEASED",
+        "CAMPAIGN_PAUSED",
+        "CAMPAIGN_RESUMED",
+        "PROVIDER_DISABLED",
+        "PROVIDER_ENABLED",
+        "WORKSPACE_SETTINGS_CHANGE",
+        "ACCOUNT_CLOSE_REQUESTED"
+      ],
+      "description": "动作类型枚举（WSP-010：登录、权限、导出、模型、工具、发布、发送和删除；另含 WSP-006 审批、WSP-007 控制开关、WSP-008 账户关闭）"
+    },
+    "resource_type": {
+      "$ref": "ggw://contracts/workspace/permission-grant#/$defs/resource_type",
+      "description": "被操作资源类型（按对象查询，WSP-010）"
+    },
+    "resource_id": {
+      "type": "string",
+      "description": "被操作资源 ID（按对象查询，WSP-010）"
+    },
+    "result": {
+      "type": "string",
+      "enum": ["SUCCESS", "DENIED", "FAILED"],
+      "description": "动作结果：DENIED=被策略/权限拒绝（记录 Policy Decision，母本 11.15）；FAILED=执行失败"
+    },
+    "error_code": {
+      "type": "string",
+      "description": "失败/拒绝时的机器码（母本 11.15），如 ACTION_DENIED、BUDGET_EXCEEDED、LICENSE_RESTRICTED"
+    },
+    "policy_decision_id": {
+      "type": "string",
+      "description": "关联的策略决策记录 ID（result=DENIED 时通常存在）"
+    },
+    "approval_id": {
+      "type": "string",
+      "description": "关联的审批/Approval Token ID（WSP-006 高风险动作可追溯）"
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field_name": { "type": "string", "description": "被变更字段" },
+          "old_value_hash": { "type": "string", "description": "旧值哈希（敏感值不存明文，母本 12.11）" },
+          "new_value_hash": { "type": "string", "description": "新值哈希" }
+        },
+        "required": ["field_name"],
+        "additionalProperties": false
+      },
+      "description": "字段级变更摘要（权限/策略/预算变更时记录）"
+    },
+    "context": {
+      "type": "object",
+      "description": "补充上下文键值（开放键、字符串值；对 conventions 对象封闭原则的受控开放，因审计上下文天然不可枚举），如 export_row_count、model_id、channel_account_id",
+      "additionalProperties": { "type": "string" }
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "来源 IP（登录与敏感操作）"
+    },
+    "user_agent": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "客户端 UA"
+    },
+    "privacy_classification": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/privacy_classification",
+      "description": "本条目数据分级（母本 12.11；决定谁可查询该条目）"
+    },
+    "occurred_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "动作发生时间（按时间查询，WSP-010）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "条目不可变，恒等于 created_at（保留公共字段形态）"
+    },
+    "version": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/version",
+      "description": "条目不可变，恒为 1"
+    }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "actor_type",
+    "actor_id",
+    "action_type",
+    "result",
+    "privacy_classification",
+    "occurred_at",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

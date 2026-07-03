@@ -1,0 +1,633 @@
+# campaign 域领域事件（AsyncAPI 3.0）
+# 来源：母本 7.6（CAM-001..013）、11.10 Envelope、11.11 Campaign 类别事件。
+# 母本 11.11 列出：CampaignCreated、CampaignApproved、AuthorizationIssued、CampaignPaused、CampaignCompleted；
+# 评审补充：AuthorizationRevoked、AuthorizationExpired（CAM-008/WSP-007 授权生命周期）、
+#           CampaignResumed（CAM-009）、CampaignRevisionCreated（CAM-006）、StopConditionTriggered（CAM-010）。
+# 所有事件 schema_version=1；Envelope 引用 common/envelope.schema.json；
+# 至少一次投递、消费者幂等（母本 ADR-009）；payload 只放 ID 与变更要点。
+asyncapi: 3.0.0
+info:
+  title: Campaign Domain Events
+  version: 1.0.0
+  description: >-
+    campaign 域全部领域事件契约（母本 7.6、11.10、11.11）。
+    事件迁移映射见 state-machines/campaign.state.ts 与 state-machines/execution-authorization.state.ts，
+    枚举取值与其完全一致。
+defaultContentType: application/json
+
+channels:
+  campaign-events:
+    address: ggw.campaign.events
+    description: campaign 域事件通道（Outbox 投递，母本 11.14）
+    messages:
+      CampaignCreated:
+        $ref: '#/components/messages/CampaignCreated'
+      CampaignApproved:
+        $ref: '#/components/messages/CampaignApproved'
+      AuthorizationIssued:
+        $ref: '#/components/messages/AuthorizationIssued'
+      AuthorizationRevoked:
+        $ref: '#/components/messages/AuthorizationRevoked'
+      AuthorizationExpired:
+        $ref: '#/components/messages/AuthorizationExpired'
+      CampaignPaused:
+        $ref: '#/components/messages/CampaignPaused'
+      CampaignResumed:
+        $ref: '#/components/messages/CampaignResumed'
+      CampaignCompleted:
+        $ref: '#/components/messages/CampaignCompleted'
+      CampaignRevisionCreated:
+        $ref: '#/components/messages/CampaignRevisionCreated'
+      StopConditionTriggered:
+        $ref: '#/components/messages/StopConditionTriggered'
+
+operations:
+  publishCampaignEvents:
+    action: send
+    channel:
+      $ref: '#/channels/campaign-events'
+    summary: campaign-service 发布 campaign 域事件
+    messages:
+      - $ref: '#/channels/campaign-events/messages/CampaignCreated'
+      - $ref: '#/channels/campaign-events/messages/CampaignApproved'
+      - $ref: '#/channels/campaign-events/messages/AuthorizationIssued'
+      - $ref: '#/channels/campaign-events/messages/AuthorizationRevoked'
+      - $ref: '#/channels/campaign-events/messages/AuthorizationExpired'
+      - $ref: '#/channels/campaign-events/messages/CampaignPaused'
+      - $ref: '#/channels/campaign-events/messages/CampaignResumed'
+      - $ref: '#/channels/campaign-events/messages/CampaignCompleted'
+      - $ref: '#/channels/campaign-events/messages/CampaignRevisionCreated'
+      - $ref: '#/channels/campaign-events/messages/StopConditionTriggered'
+
+components:
+  messages:
+    CampaignCreated:
+      name: CampaignCreated
+      title: Campaign 已创建
+      summary: Campaign（含 Quick Campaign）创建进入 DRAFT（CAM-001、CAM-012；母本 11.11）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: CampaignCreated
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Campaign
+              payload:
+                $ref: '#/components/schemas/CampaignCreatedPayload'
+
+    CampaignApproved:
+      name: CampaignApproved
+      title: Campaign 已批准
+      summary: READY_FOR_REVIEW→APPROVED，批准同时签发授权（CAM-007、CAM-008；母本 5.9、11.11）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: CampaignApproved
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Campaign
+              payload:
+                $ref: '#/components/schemas/CampaignApprovedPayload'
+
+    AuthorizationIssued:
+      name: AuthorizationIssued
+      title: 执行授权已签发
+      summary: ExecutionAuthorization 进入 ISSUED（CAM-008；母本 5.9、11.11）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: AuthorizationIssued
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: ExecutionAuthorization
+              payload:
+                $ref: '#/components/schemas/AuthorizationIssuedPayload'
+
+    AuthorizationRevoked:
+      name: AuthorizationRevoked
+      title: 执行授权已撤销
+      summary: >-
+        ISSUED/ACTIVE→REVOKED（评审补充：母本 11.11 未列；依据 CAM-008 执行服务只接受有效授权、
+        WSP-007 Kill Switch 停止后未开始任务不再执行）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: AuthorizationRevoked
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: ExecutionAuthorization
+              payload:
+                $ref: '#/components/schemas/AuthorizationRevokedPayload'
+
+    AuthorizationExpired:
+      name: AuthorizationExpired
+      title: 执行授权已过期
+      summary: >-
+        ISSUED/ACTIVE→EXPIRED（评审补充：母本 11.11 未列；依据 CAM-008 有效期、
+        母本 5.10.1 授权过期触发自动暂停）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: AuthorizationExpired
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: ExecutionAuthorization
+              payload:
+                $ref: '#/components/schemas/AuthorizationExpiredPayload'
+
+    CampaignPaused:
+      name: CampaignPaused
+      title: Campaign 已暂停/阻断
+      summary: >-
+        SCHEDULED/RUNNING→PAUSED 或 BLOCKED（CAM-009、CAM-010；母本 5.10.1、11.11）。
+        执行服务收到后在 SLA 内阻断未开始动作（CAM-009 验收）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: CampaignPaused
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Campaign
+              payload:
+                $ref: '#/components/schemas/CampaignPausedPayload'
+
+    CampaignResumed:
+      name: CampaignResumed
+      title: Campaign 已恢复
+      summary: PAUSED/BLOCKED→RUNNING（CAM-009 恢复；评审补充：母本 11.11 未列）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: CampaignResumed
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Campaign
+              payload:
+                $ref: '#/components/schemas/CampaignResumedPayload'
+
+    CampaignCompleted:
+      name: CampaignCompleted
+      title: Campaign 已结束
+      summary: RUNNING/PAUSED/BLOCKED→COMPLETED（CAM-009；母本 11.11），进入 Learn 阶段（母本 5.13）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: CampaignCompleted
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: Campaign
+              payload:
+                $ref: '#/components/schemas/CampaignCompletedPayload'
+
+    CampaignRevisionCreated:
+      name: CampaignRevisionCreated
+      title: Campaign 修订已创建
+      summary: >-
+        运行中重大变更创建 Revision（CAM-006；评审补充：母本 11.11 未列）。
+        requires_reauthorization=true 时下游审批服务生成审批任务（母本 11.15 AUTHORIZATION_REQUIRED）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: CampaignRevisionCreated
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: CampaignRevision
+              payload:
+                $ref: '#/components/schemas/CampaignRevisionCreatedPayload'
+
+    StopConditionTriggered:
+      name: StopConditionTriggered
+      title: 停止条件已触发
+      summary: >-
+        退信/投诉/失败/成本/负面情绪阈值触发，自动暂停并通知（CAM-010；母本 5.10.1；
+        评审补充：母本 11.11 未列）
+      payload:
+        allOf:
+          - $ref: '../json-schema/common/envelope.schema.json'
+          - type: object
+            properties:
+              event_type:
+                const: StopConditionTriggered
+              schema_version:
+                const: 1
+              aggregate_type:
+                const: StopCondition
+              payload:
+                $ref: '#/components/schemas/StopConditionTriggeredPayload'
+
+  schemas:
+    CampaignCreatedPayload:
+      type: object
+      description: CampaignCreated 负载（CAM-001、CAM-012）
+      properties:
+        campaign_id:
+          type: string
+          description: cam_ 前缀
+        name:
+          type: string
+        motion_code:
+          type: string
+          description: Growth Motion 编码（CAM-001）
+        offering_id:
+          type: string
+          description: off_ 前缀
+        owner_id:
+          type: string
+          description: mem_ 前缀
+        is_quick_campaign:
+          type: boolean
+          description: 是否系统创建的 Quick Campaign（CAM-012）
+        status:
+          type: string
+          const: DRAFT
+          description: 初始状态（state-machines/campaign.state.ts）
+      required:
+        - campaign_id
+        - name
+        - motion_code
+        - offering_id
+        - owner_id
+        - is_quick_campaign
+        - status
+      additionalProperties: false
+
+    CampaignApprovedPayload:
+      type: object
+      description: CampaignApproved 负载（CAM-007、CAM-008）
+      properties:
+        campaign_id:
+          type: string
+        approved_by:
+          type: string
+          description: mem_ 前缀，审批人
+        authorization_id:
+          type: string
+          description: auth_ 前缀，批准同时签发的 ExecutionAuthorization（母本 5.9）
+        strategy_snapshot_hash:
+          type: string
+          description: 被批准的策略快照指纹（CAM-008）
+        revision_id:
+          type: string
+          description: rev_ 前缀；若为 Revision 重新审批则填写（CAM-006）
+      required:
+        - campaign_id
+        - approved_by
+        - authorization_id
+      additionalProperties: false
+
+    AuthorizationIssuedPayload:
+      type: object
+      description: AuthorizationIssued 负载（CAM-008）
+      properties:
+        authorization_id:
+          type: string
+          description: auth_ 前缀
+        campaign_id:
+          type: string
+        issued_by:
+          type: string
+          description: mem_ 前缀
+        valid_from:
+          type: string
+          format: date-time
+        valid_until:
+          type: string
+          format: date-time
+        budget_cap:
+          type: object
+          description: 固化预算上限（money，母本 11.14）
+          properties:
+            amount:
+              type: number
+            currency:
+              type: string
+              pattern: '^[A-Z]{3}$'
+          required:
+            - amount
+            - currency
+          additionalProperties: false
+        channels:
+          type: array
+          description: 授权渠道白名单（取值与 channel-plan $defs.channel_type 一致）
+          items:
+            type: string
+            enum:
+              - EMAIL
+              - LINKEDIN
+              - X
+              - TIKTOK
+              - YOUTUBE
+              - FACEBOOK
+              - INSTAGRAM
+              - WECHAT
+              - WEBSITE
+              - WEBINAR
+              - OTHER
+        audience_ids:
+          type: array
+          description: 固化受众（aud_ 前缀；版本详情查授权对象）
+          items:
+            type: string
+        authorization_hash:
+          type: string
+          description: 授权固化指纹（CAM-008）
+        supersedes_authorization_id:
+          type: string
+          description: >-
+            auth_ 前缀；本授权替代的旧授权（CAM-006 重新授权场景），
+            旧授权同步置 SUPERSEDED（state-machines/execution-authorization.state.ts）
+      required:
+        - authorization_id
+        - campaign_id
+        - issued_by
+        - valid_from
+        - valid_until
+        - budget_cap
+        - channels
+        - audience_ids
+        - authorization_hash
+      additionalProperties: false
+
+    AuthorizationRevokedPayload:
+      type: object
+      description: AuthorizationRevoked 负载（CAM-008、WSP-007）
+      properties:
+        authorization_id:
+          type: string
+        campaign_id:
+          type: string
+        revoked_by:
+          type: string
+          description: mem_ 前缀；Kill Switch 场景为触发管理员（WSP-007）
+        reason:
+          type: string
+          description: 撤销原因（审计，WSP-007 已执行项保留审计）
+        triggered_by:
+          type: string
+          enum:
+            - USER
+            - KILL_SWITCH
+            - INCIDENT
+          description: 撤销来源
+      required:
+        - authorization_id
+        - campaign_id
+        - revoked_by
+        - reason
+        - triggered_by
+      additionalProperties: false
+
+    AuthorizationExpiredPayload:
+      type: object
+      description: AuthorizationExpired 负载（CAM-008；母本 5.10.1 授权过期触发自动暂停）
+      properties:
+        authorization_id:
+          type: string
+        campaign_id:
+          type: string
+        valid_until:
+          type: string
+          format: date-time
+          description: 已到期的有效期终点
+      required:
+        - authorization_id
+        - campaign_id
+        - valid_until
+      additionalProperties: false
+
+    CampaignPausedPayload:
+      type: object
+      description: CampaignPaused 负载（CAM-009、CAM-010、WSP-007）
+      properties:
+        campaign_id:
+          type: string
+        previous_status:
+          type: string
+          enum:
+            - SCHEDULED
+            - RUNNING
+          description: 暂停前状态（state-machines/campaign.state.ts）
+        new_status:
+          type: string
+          enum:
+            - PAUSED
+            - BLOCKED
+          description: PAUSED=可人工恢复；BLOCKED=系统性阻断需先解除原因
+        triggered_by:
+          type: string
+          enum:
+            - USER
+            - STOP_CONDITION
+            - BUDGET_EXCEEDED
+            - AUTHORIZATION_EXPIRED
+            - AUTHORIZATION_REVOKED
+            - KILL_SWITCH
+            - PLATFORM_LIMIT
+          description: 暂停来源（CAM-010、CAM-013、WSP-007；母本 5.10.1）
+        stop_condition_id:
+          type: string
+          description: stp_ 前缀；triggered_by=STOP_CONDITION 时必填
+        paused_by:
+          type: string
+          description: mem_ 前缀；triggered_by=USER 时必填
+        reason:
+          type: string
+      required:
+        - campaign_id
+        - previous_status
+        - new_status
+        - triggered_by
+      additionalProperties: false
+
+    CampaignResumedPayload:
+      type: object
+      description: CampaignResumed 负载（CAM-009）
+      properties:
+        campaign_id:
+          type: string
+        previous_status:
+          type: string
+          enum:
+            - PAUSED
+            - BLOCKED
+        resumed_by:
+          type: string
+          description: mem_ 前缀
+        reason:
+          type: string
+      required:
+        - campaign_id
+        - previous_status
+        - resumed_by
+      additionalProperties: false
+
+    CampaignCompletedPayload:
+      type: object
+      description: CampaignCompleted 负载（CAM-009）
+      properties:
+        campaign_id:
+          type: string
+        previous_status:
+          type: string
+          enum:
+            - RUNNING
+            - PAUSED
+            - BLOCKED
+        completion_type:
+          type: string
+          enum:
+            - MANUAL
+            - SCHEDULED_END
+            - BUDGET_EXHAUSTED
+          description: 结束方式（CAM-009、CAM-013）
+        completed_by:
+          type: string
+          description: mem_ 前缀；completion_type=MANUAL 时必填
+        total_consumed:
+          type: object
+          description: 最终消耗（money；CAM-013 实时消耗终值）
+          properties:
+            amount:
+              type: number
+            currency:
+              type: string
+              pattern: '^[A-Z]{3}$'
+          required:
+            - amount
+            - currency
+          additionalProperties: false
+      required:
+        - campaign_id
+        - previous_status
+        - completion_type
+      additionalProperties: false
+
+    CampaignRevisionCreatedPayload:
+      type: object
+      description: CampaignRevisionCreated 负载（CAM-006）
+      properties:
+        revision_id:
+          type: string
+          description: rev_ 前缀
+        campaign_id:
+          type: string
+        revision_number:
+          type: integer
+          minimum: 1
+        requires_reauthorization:
+          type: boolean
+          description: 任一风险扩大为 true 时必为 true（CAM-006）
+        risk_expansion:
+          type: object
+          properties:
+            audience_expanded:
+              type: boolean
+            channel_expanded:
+              type: boolean
+            cost_increased:
+              type: boolean
+            risk_increased:
+              type: boolean
+          required:
+            - audience_expanded
+            - channel_expanded
+            - cost_increased
+            - risk_increased
+          additionalProperties: false
+        changed_field_paths:
+          type: array
+          description: 变更字段路径列表（差异详情查 CampaignRevision 对象，payload 只放要点）
+          items:
+            type: string
+        created_by:
+          type: string
+          description: mem_ 前缀
+      required:
+        - revision_id
+        - campaign_id
+        - revision_number
+        - requires_reauthorization
+        - risk_expansion
+        - created_by
+      additionalProperties: false
+
+    StopConditionTriggeredPayload:
+      type: object
+      description: StopConditionTriggered 负载（CAM-010）
+      properties:
+        stop_condition_id:
+          type: string
+          description: stp_ 前缀
+        campaign_id:
+          type: string
+        condition_type:
+          type: string
+          enum:
+            - BOUNCE_RATE
+            - COMPLAINT_RATE
+            - FAILURE_RATE
+            - COST_OVERRUN
+            - NEGATIVE_SENTIMENT
+          description: 取值与 stop-condition.schema.json 完全一致
+        observed_value:
+          type: number
+          description: 触发时观测值（比率 0-1 或金额数值）
+        threshold_value:
+          type: number
+          description: 配置的阈值
+        action_taken:
+          type: string
+          enum:
+            - PAUSE_CAMPAIGN
+            - PAUSE_CHANNEL
+            - NOTIFY_ONLY
+          description: 实际执行的动作（CAM-010 自动暂停和通知）
+        channel_scope:
+          type: array
+          description: action_taken=PAUSE_CHANNEL 时被暂停的渠道
+          items:
+            type: string
+      required:
+        - stop_condition_id
+        - campaign_id
+        - condition_type
+        - observed_value
+        - threshold_value
+        - action_taken
+      additionalProperties: false

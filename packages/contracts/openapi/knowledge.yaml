@@ -1,0 +1,1395 @@
+# knowledge 域 REST API（母本 11.12 分组 /companies /knowledge；需求 KNW-001..011；负责域：knowledge；schema_version=1）
+# - 所有写操作要求 Idempotency-Key 头（母本 11.16）
+# - 更新用 If-Match 乐观锁，冲突返回 VERSION_CONFLICT（母本 11.15/11.16）
+# - 列表统一 cursor 分页：?cursor=&limit=，响应 { items, next_cursor }
+# - 错误模型统一 { error_code, message, details?, retryable, policy_reason_codes? }（母本 11.15）
+openapi: 3.1.0
+
+info:
+  title: Knowledge Domain API
+  version: 1.0.0
+  description: |
+    企业知识域（母本 7.2）：企业画像、产品、品牌、知识来源、Claim、证据、引用、冲突与表达规范词条。
+    对外生成只允许使用适用范围内的 APPROVED Claim（KNW-003）；检索和模型上下文先做权限过滤（KNW-005）。
+    BrandProfile 的 REST 挂载在 /workspaces 品牌分组（母本 11.12），由 workspace 域契约定义，本文件不重复。
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: companies
+    description: 企业画像（KNW-002、母本 6.5.1）
+  - name: offerings
+    description: 产品/服务（KNW-002、母本 4.8.1 产品事实）
+  - name: knowledge-sources
+    description: 知识来源（KNW-001、KNW-007、KNW-009）
+  - name: claims
+    description: 企业事实 Claim（KNW-002..006、KNW-009）
+  - name: conflicts
+    description: 知识冲突（KNW-004）
+  - name: glossary
+    description: 术语与表达规范（KNW-008）
+
+paths:
+  /companies:
+    get:
+      operationId: listCompanyProfiles
+      tags: [companies]
+      summary: 列出企业画像
+      description: >-
+        列出当前 workspace 的企业画像（母本 7.2.2）。policy: knowledge.company.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: confirmation_status
+          in: query
+          schema:
+            type: string
+            enum: [DRAFT, PENDING_CONFIRMATION, CONFIRMED]
+      responses:
+        '200':
+          description: 企业画像分页列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: 'ggw://contracts/knowledge/company-profile'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      operationId: createCompanyProfile
+      tags: [companies]
+      summary: 创建企业画像
+      description: >-
+        由官网/资料提取候选或手工创建企业画像（KNW-002、母本 6.5.1 步骤 1-2）。policy: knowledge.company.write
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyProfileWrite'
+      responses:
+        '201':
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/company-profile'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /companies/{company_id}:
+    parameters:
+      - $ref: '#/components/parameters/CompanyId'
+    get:
+      operationId: getCompanyProfile
+      tags: [companies]
+      summary: 查看企业画像
+      description: >-
+        返回企业画像与来源（母本 7.2.4：知识查询返回来源、版本、时间、适用范围和权限）。policy: knowledge.company.read
+      responses:
+        '200':
+          description: 企业画像
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/company-profile'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      operationId: updateCompanyProfile
+      tags: [companies]
+      summary: 更新企业画像
+      description: >-
+        用户纠正后，新生成任务优先使用已确认事实（母本 7.2.4）。乐观锁 If-Match（母本 11.16）。policy: knowledge.company.write
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyProfileWrite'
+      responses:
+        '200':
+          description: 已更新（version 递增）
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/company-profile'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /companies/{company_id}/confirm:
+    post:
+      operationId: confirmCompanyProfile
+      tags: [companies]
+      summary: 确认企业画像
+      description: >-
+        用户确认企业画像，发布 CompanyProfileConfirmed 事件（母本 6.5.1 步骤 3、11.11；激活定义组成部分）。policy: knowledge.company.confirm
+      parameters:
+        - $ref: '#/components/parameters/CompanyId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '200':
+          description: 已确认（confirmation_status=CONFIRMED）
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/company-profile'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /offerings:
+    get:
+      operationId: listOfferings
+      tags: [offerings]
+      summary: 列出产品/服务
+      description: >-
+        按状态/类目/市场过滤（KNW-005 权限过滤先行）。policy: knowledge.offering.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [DRAFT, ACTIVE, ARCHIVED]
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: market
+          in: query
+          description: 目标市场（ISO 3166-1 alpha-2）
+          schema:
+            type: string
+            pattern: '^[A-Z]{2}$'
+        - name: q
+          in: query
+          description: 名称/描述关键词
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 产品分页列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: 'ggw://contracts/knowledge/offering'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      operationId: createOffering
+      tags: [offerings]
+      summary: 创建产品/服务
+      description: >-
+        创建产品记录；参数/MOQ/交期/认证权威事实以关联 Claim 为准（KNW-002）。policy: knowledge.offering.write
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OfferingWrite'
+      responses:
+        '201':
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/offering'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /offerings/{offering_id}:
+    parameters:
+      - $ref: '#/components/parameters/OfferingId'
+    get:
+      operationId: getOffering
+      tags: [offerings]
+      summary: 查看产品/服务
+      description: >-
+        policy: knowledge.offering.read
+      responses:
+        '200':
+          description: 产品记录
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/offering'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      operationId: updateOffering
+      tags: [offerings]
+      summary: 更新产品/服务
+      description: >-
+        乐观锁 If-Match（母本 11.16）。policy: knowledge.offering.write
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OfferingWrite'
+      responses:
+        '200':
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/offering'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /knowledge/sources:
+    get:
+      operationId: listKnowledgeSources
+      tags: [knowledge-sources]
+      summary: 列出知识来源
+      description: >-
+        按类型/索引状态/新鲜度过滤（KNW-001、KNW-009）。policy: knowledge.source.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: source_type
+          in: query
+          schema:
+            type: string
+            enum: [WEBSITE, PDF, DOCX, PPTX, XLSX, IMAGE, AUDIO, VIDEO, MANUAL_INPUT]
+        - name: index_status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, PARSING, INDEXED, FAILED]
+        - name: freshness_status
+          in: query
+          schema:
+            type: string
+            enum: [FRESH, STALE, EXPIRED]
+      responses:
+        '200':
+          description: 来源分页列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: 'ggw://contracts/knowledge/knowledge-source'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      operationId: createKnowledgeSource
+      tags: [knowledge-sources]
+      summary: 登记知识来源
+      description: >-
+        登记官网 URL、已上传文件或手工输入，触发解析/索引，完成后发布 KnowledgeSourceIndexed（KNW-001；母本 11.11）。policy: knowledge.source.upload
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KnowledgeSourceWrite'
+      responses:
+        '202':
+          description: 已登记，异步解析中（index_status=PENDING）
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/knowledge-source'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /knowledge/sources/{source_id}:
+    parameters:
+      - $ref: '#/components/parameters/SourceId'
+    get:
+      operationId: getKnowledgeSource
+      tags: [knowledge-sources]
+      summary: 查看知识来源
+      description: >-
+        policy: knowledge.source.read
+      responses:
+        '200':
+          description: 来源记录
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/knowledge-source'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      operationId: deleteKnowledgeSource
+      tags: [knowledge-sources]
+      summary: 删除知识来源（级联）
+      description: >-
+        级联删除/失效相关索引、缓存和引用；删除任务有完成证明和失败重试（KNW-007；编排见母本 11.17）。policy: knowledge.source.delete
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '202':
+          description: 删除编排已启动（deletion_status=DELETING）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  source_id:
+                    type: string
+                    pattern: '^src_[0-9A-HJKMNP-TV-Z]{26}$'
+                  deletion_status:
+                    type: string
+                    enum: [DELETING]
+                  deletion_job_id:
+                    type: string
+                    description: 级联删除 Workflow 任务 ID（KNW-007 完成证明）
+                required: [source_id, deletion_status, deletion_job_id]
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /knowledge/sources/{source_id}/refresh:
+    post:
+      operationId: refreshKnowledgeSource
+      tags: [knowledge-sources]
+      summary: 重新抓取知识来源
+      description: >-
+        触发重新抓取/重新解析，更新新鲜度（KNW-009：知识新鲜度、过期提醒和重新抓取）。仅适用于可刷新来源（如 WEBSITE），否则返回 UNSUPPORTED_OPERATION（母本 11.15）。policy: knowledge.source.refresh
+      parameters:
+        - $ref: '#/components/parameters/SourceId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '202':
+          description: 已触发重新抓取（index_status=PARSING）
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/knowledge-source'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /knowledge/claims:
+    get:
+      operationId: listClaims
+      tags: [claims]
+      summary: 检索 Claim
+      description: >-
+        检索先做租户与权限过滤，再按产品、市场、渠道、用途和时间过滤（KNW-005、母本 4.8.3）；返回来源、版本、时间、适用范围和权限（母本 7.2.4）。policy: knowledge.claim.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [INGESTED, EXTRACTED, NEEDS_REVIEW, APPROVED, EXPIRED, REVOKED]
+        - name: claim_type
+          in: query
+          schema:
+            type: string
+            enum:
+              [
+                COMPANY_FACT,
+                PRODUCT_FACT,
+                PARAMETER,
+                MOQ,
+                LEAD_TIME,
+                CERTIFICATION,
+                CASE_STUDY,
+                CAPABILITY,
+                FORBIDDEN_EXPRESSION,
+                COMPLIANCE,
+              ]
+        - name: offering_id
+          in: query
+          description: 适用产品过滤（KNW-005）
+          schema:
+            type: string
+            pattern: '^off_[0-9A-HJKMNP-TV-Z]{26}$'
+        - name: market
+          in: query
+          description: 适用市场过滤（KNW-005）
+          schema:
+            type: string
+            pattern: '^[A-Z]{2}$'
+        - name: channel
+          in: query
+          description: 适用渠道过滤（KNW-005）
+          schema:
+            type: string
+        - name: purpose
+          in: query
+          description: 使用目的过滤（KNW-005）
+          schema:
+            type: string
+            enum: [CONTENT_GENERATION, OUTREACH, SALES_REPLY, RESEARCH, INTERNAL_REFERENCE]
+        - name: confidentiality_level
+          in: query
+          description: 保密级别过滤（KNW-005、母本 12.11）
+          schema:
+            type: string
+            enum: [PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED]
+        - name: source_id
+          in: query
+          schema:
+            type: string
+            pattern: '^src_[0-9A-HJKMNP-TV-Z]{26}$'
+        - name: expiring_before
+          in: query
+          description: 有效期截止过滤，用于过期提醒（KNW-009）
+          schema:
+            type: string
+            format: date-time
+        - name: q
+          in: query
+          description: 陈述文本关键词（混合检索走 AI 检索接口，本参数仅结构化过滤，母本 4.8.3）
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Claim 分页列表（已按调用者权限过滤，KNW-005）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: 'ggw://contracts/knowledge/claim'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      operationId: createClaim
+      tags: [claims]
+      summary: 手工创建 Claim
+      description: >-
+        手工录入事实候选（KNW-001 手工输入；初始状态 NEEDS_REVIEW，推断必须经过审核，母本 7.2.5）。policy: knowledge.claim.write
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimWrite'
+      responses:
+        '201':
+          description: 已创建（status=NEEDS_REVIEW）
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/claim'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /knowledge/claims/{claim_id}:
+    parameters:
+      - $ref: '#/components/parameters/ClaimId'
+    get:
+      operationId: getClaim
+      tags: [claims]
+      summary: 查看 Claim
+      description: >-
+        返回 Claim 及其来源/适用范围/有效期（母本 7.2.4）。policy: knowledge.claim.read
+      responses:
+        '200':
+          description: Claim
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/claim'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      operationId: updateClaim
+      tags: [claims]
+      summary: 更新 Claim
+      description: >-
+        更新陈述、适用范围、保密级别、有效期等（KNW-005、KNW-009）。Claim 更新使用乐观锁（母本 11.16）。状态变更走 approve/revoke 子资源，不经本接口。policy: knowledge.claim.write
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimWrite'
+      responses:
+        '200':
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/claim'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /knowledge/claims/{claim_id}/approve:
+    post:
+      operationId: approveClaim
+      tags: [claims]
+      summary: 批准 Claim
+      description: >-
+        NEEDS_REVIEW -> APPROVED（KNW-003、state-machines/claim.state.ts），发布 ClaimApproved（母本 11.11）。事实审核台批量确认逐条调用（母本 4.8.4）。policy: knowledge.claim.approve
+      parameters:
+        - $ref: '#/components/parameters/ClaimId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: 批准时可同时设定生效/失效时间（母本 4.8.2、KNW-009）
+              properties:
+                effective_from:
+                  type: string
+                  format: date-time
+                expires_at:
+                  type: string
+                  format: date-time
+              additionalProperties: false
+      responses:
+        '200':
+          description: 已批准（status=APPROVED）
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/claim'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /knowledge/claims/{claim_id}/revoke:
+    post:
+      operationId: revokeClaim
+      tags: [claims]
+      summary: 撤销 Claim
+      description: >-
+        NEEDS_REVIEW/APPROVED -> REVOKED（母本 4.8.5：可撤销每条 Claim；state-machines/claim.state.ts），发布 ClaimRevoked，级联失效引用（KNW-007）。policy: knowledge.claim.revoke
+      parameters:
+        - $ref: '#/components/parameters/ClaimId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                revoked_reason:
+                  type: string
+                  minLength: 1
+                  maxLength: 2000
+                  description: 撤销原因（审计必填）
+              required: [revoked_reason]
+              additionalProperties: false
+      responses:
+        '200':
+          description: 已撤销（status=REVOKED）
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/claim'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /knowledge/claims/{claim_id}/evidence:
+    get:
+      operationId: listClaimEvidence
+      tags: [claims]
+      summary: 查看 Claim 的证据
+      description: >-
+        返回来源位置与片段，支撑「两次点击内查看来源片段」（KNW-006）；片段展示前经保密级别过滤（KNW-005）。policy: knowledge.claim.read
+      parameters:
+        - $ref: '#/components/parameters/ClaimId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: 证据分页列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: 'ggw://contracts/knowledge/claim-evidence'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /knowledge/conflicts:
+    get:
+      operationId: listKnowledgeConflicts
+      tags: [conflicts]
+      summary: 列出知识冲突
+      description: >-
+        不同来源不一致时不静默覆盖，冲突进入人工裁决队列（KNW-004）。policy: knowledge.conflict.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [OPEN, RESOLVED, DISMISSED]
+        - name: claim_id
+          in: query
+          description: 涉及某条 Claim 的冲突
+          schema:
+            type: string
+            pattern: '^clm_[0-9A-HJKMNP-TV-Z]{26}$'
+        - name: conflict_type
+          in: query
+          schema:
+            type: string
+            enum:
+              [VALUE_MISMATCH, VALIDITY_OVERLAP, SOURCE_CONTRADICTION, DUPLICATE, VERSION_DIVERGENCE]
+      responses:
+        '200':
+          description: 冲突分页列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: 'ggw://contracts/knowledge/knowledge-conflict'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /knowledge/conflicts/{conflict_id}:
+    parameters:
+      - $ref: '#/components/parameters/ConflictId'
+    get:
+      operationId: getKnowledgeConflict
+      tags: [conflicts]
+      summary: 查看知识冲突
+      description: >-
+        含版本比较差异摘要（KNW-004 版本比较）。policy: knowledge.conflict.read
+      responses:
+        '200':
+          description: 冲突记录
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/knowledge-conflict'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /knowledge/conflicts/{conflict_id}/resolve:
+    post:
+      operationId: resolveKnowledgeConflict
+      tags: [conflicts]
+      summary: 解决知识冲突
+      description: >-
+        人工裁决冲突：保留/合并/按适用范围拆分/过期旧版/全部撤销（KNW-004：不静默覆盖）。裁决引起的 Claim 状态变化各自发布事件。policy: knowledge.conflict.resolve
+      parameters:
+        - $ref: '#/components/parameters/ConflictId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resolution_type:
+                  type: string
+                  enum: [KEEP_ONE, MERGE, SCOPE_SPLIT, EXPIRE_OLD, REVOKE_ALL]
+                  description: 解决方式（与 knowledge-conflict.schema.json resolution 一致）
+                kept_claim_ids:
+                  type: array
+                  items:
+                    type: string
+                    pattern: '^clm_[0-9A-HJKMNP-TV-Z]{26}$'
+                  description: 解决后保留有效的 Claim
+                notes:
+                  type: string
+                  maxLength: 2000
+              required: [resolution_type]
+              additionalProperties: false
+      responses:
+        '200':
+          description: 已解决（status=RESOLVED）
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/knowledge-conflict'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /knowledge/glossary:
+    get:
+      operationId: listGlossaryEntries
+      tags: [glossary]
+      summary: 列出表达规范词条
+      description: >-
+        按类型/市场/渠道/语言过滤，供内容生成与质量检查加载（KNW-008 验收：不同 Market/Channel 可加载不同表达规则；CRT-005）。policy: knowledge.glossary.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: entry_type
+          in: query
+          schema:
+            type: string
+            enum: [TERM, BRAND_TONE, FORBIDDEN_WORD, DISCLAIMER, LOCALIZATION_RULE]
+        - name: market
+          in: query
+          schema:
+            type: string
+            pattern: '^[A-Z]{2}$'
+        - name: channel
+          in: query
+          schema:
+            type: string
+        - name: locale
+          in: query
+          schema:
+            type: string
+            pattern: '^[a-z]{2}(-[A-Z]{2})?$'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, ARCHIVED]
+      responses:
+        '200':
+          description: 词条分页列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: 'ggw://contracts/knowledge/glossary-entry'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      operationId: createGlossaryEntry
+      tags: [glossary]
+      summary: 创建表达规范词条
+      description: >-
+        术语/品牌语气/禁用词/免责声明/本地化规则（KNW-008）。policy: knowledge.glossary.write
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GlossaryEntryWrite'
+      responses:
+        '201':
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/glossary-entry'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /knowledge/glossary/{entry_id}:
+    parameters:
+      - $ref: '#/components/parameters/EntryId'
+    get:
+      operationId: getGlossaryEntry
+      tags: [glossary]
+      summary: 查看词条
+      description: >-
+        policy: knowledge.glossary.read
+      responses:
+        '200':
+          description: 词条
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/glossary-entry'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      operationId: updateGlossaryEntry
+      tags: [glossary]
+      summary: 更新词条
+      description: >-
+        乐观锁 If-Match（母本 11.16）。policy: knowledge.glossary.write
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GlossaryEntryWrite'
+      responses:
+        '200':
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: 'ggw://contracts/knowledge/glossary-entry'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    delete:
+      operationId: archiveGlossaryEntry
+      tags: [glossary]
+      summary: 归档词条
+      description: >-
+        软删除（status=ARCHIVED），生成侧不再加载；历史内容引用保留审计（KNW-008）。policy: knowledge.glossary.write
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '204':
+          description: 已归档
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: workspace 范围的访问令牌；失效返回 TOKEN_EXPIRED（母本 11.15）
+
+  parameters:
+    Cursor:
+      name: cursor
+      in: query
+      description: 游标分页起点；首页省略（conventions.md 统一 cursor 分页）
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      description: 每页数量
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: 写操作幂等键；同键重放返回首次结果（母本 11.16）
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 128
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: 乐观锁版本（对象当前 version）；不匹配返回 409 VERSION_CONFLICT（母本 11.15/11.16）
+      schema:
+        type: string
+    CompanyId:
+      name: company_id
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^cmp_[0-9A-HJKMNP-TV-Z]{26}$'
+    OfferingId:
+      name: offering_id
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^off_[0-9A-HJKMNP-TV-Z]{26}$'
+    SourceId:
+      name: source_id
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^src_[0-9A-HJKMNP-TV-Z]{26}$'
+    ClaimId:
+      name: claim_id
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^clm_[0-9A-HJKMNP-TV-Z]{26}$'
+    ConflictId:
+      name: conflict_id
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^kcf_[0-9A-HJKMNP-TV-Z]{26}$'
+    EntryId:
+      name: entry_id
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^glo_[0-9A-HJKMNP-TV-Z]{26}$'
+
+  responses:
+    ErrorResponse:
+      description: 统一错误响应（母本 11.15 错误类别与机器码）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    VersionConflict:
+      description: 乐观锁冲突：返回当前版本与差异，客户端合并或创建 Revision（母本 11.15 Conflict 行）
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Error'
+              - type: object
+                properties:
+                  error_code:
+                    const: VERSION_CONFLICT
+
+  schemas:
+    Error:
+      type: object
+      description: 统一错误模型（母本 11.15；conventions.md 错误模型）
+      properties:
+        error_code:
+          type: string
+          description: 机器码，如 INVALID_SCHEMA、TOKEN_EXPIRED、ACTION_DENIED、AUTHORIZATION_REQUIRED、PROVIDER_RATE_LIMIT、BUDGET_EXCEEDED、PROVIDER_UNAVAILABLE、UNSUPPORTED_OPERATION、LICENSE_RESTRICTED、COMPLIANCE_REVIEW_REQUIRED、CIRCUIT_BREAKER_OPEN、VERSION_CONFLICT、NOT_FOUND（母本 11.15 机器码示例）
+        message:
+          type: string
+          description: 人类可读错误说明
+        details:
+          type: object
+          description: 字段级错误明细或当前版本/Diff（VERSION_CONFLICT 时）
+        retryable:
+          type: boolean
+          description: 客户端是否可以直接重试
+        policy_reason_codes:
+          type: array
+          items:
+            type: string
+          description: Policy 拒绝原因码（ACTION_DENIED/LICENSE_RESTRICTED 时，记录 Policy Decision）
+      required: [error_code, message, retryable]
+      additionalProperties: false
+
+    CompanyProfileWrite:
+      type: object
+      description: 企业画像可写字段（服务端生成 id/created_at/updated_at/version；workspace_id 取自令牌上下文）。字段权威定义见 ggw://contracts/knowledge/company-profile
+      properties:
+        legal_name:
+          type: string
+          minLength: 1
+          maxLength: 500
+        display_name:
+          type: string
+          maxLength: 200
+        trading_names:
+          type: array
+          items:
+            type: string
+            maxLength: 200
+        websites:
+          type: array
+          items:
+            type: string
+            format: uri
+        hq_country:
+          type: string
+          pattern: '^[A-Z]{2}$'
+        locations:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                maxLength: 200
+              location_type:
+                type: string
+                enum: [HQ, FACTORY, OFFICE, WAREHOUSE, SHOWROOM]
+              country:
+                type: string
+                pattern: '^[A-Z]{2}$'
+              city:
+                type: string
+                maxLength: 100
+            required: [location_type, country]
+            additionalProperties: false
+        founded_year:
+          type: integer
+          minimum: 1800
+          maximum: 2100
+        employee_range:
+          type: string
+          enum: ['1-10', '11-50', '51-200', '201-500', '501-1000', '1001-5000', '5000+']
+        industries:
+          type: array
+          items:
+            type: string
+            maxLength: 100
+        description:
+          type: string
+          maxLength: 5000
+        capabilities:
+          type: array
+          items:
+            type: string
+            maxLength: 300
+        certifications:
+          type: array
+          items:
+            type: string
+            maxLength: 200
+        main_markets:
+          type: array
+          items:
+            type: string
+            pattern: '^[A-Z]{2}$'
+        languages:
+          type: array
+          items:
+            type: string
+            pattern: '^[a-z]{2}(-[A-Z]{2})?$'
+        source_ids:
+          type: array
+          items:
+            type: string
+            pattern: '^src_[0-9A-HJKMNP-TV-Z]{26}$'
+      required: [legal_name]
+      additionalProperties: false
+
+    OfferingWrite:
+      type: object
+      description: 产品可写字段。字段权威定义见 ggw://contracts/knowledge/offering
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 300
+        sku_code:
+          type: string
+          maxLength: 100
+        offering_type:
+          type: string
+          enum: [PRODUCT, SERVICE, SOLUTION]
+        category:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 5000
+        specs:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                maxLength: 200
+              value:
+                type: string
+                maxLength: 500
+              unit:
+                type: string
+                maxLength: 50
+            required: [name, value]
+            additionalProperties: false
+        moq:
+          type: object
+          properties:
+            quantity:
+              type: number
+              minimum: 0
+            unit:
+              type: string
+              maxLength: 50
+            notes:
+              type: string
+              maxLength: 500
+          required: [quantity, unit]
+          additionalProperties: false
+        lead_time:
+          type: object
+          properties:
+            min_days:
+              type: integer
+              minimum: 0
+            max_days:
+              type: integer
+              minimum: 0
+            notes:
+              type: string
+              maxLength: 500
+          required: [min_days, max_days]
+          additionalProperties: false
+        certifications:
+          type: array
+          items:
+            type: string
+            maxLength: 200
+        applications:
+          type: array
+          items:
+            type: string
+            maxLength: 300
+        target_markets:
+          type: array
+          items:
+            type: string
+            pattern: '^[A-Z]{2}$'
+        hs_codes:
+          type: array
+          items:
+            type: string
+            pattern: '^[0-9]{4,10}$'
+        price_min:
+          $ref: 'ggw://contracts/common/primitives#/$defs/money'
+        price_max:
+          $ref: 'ggw://contracts/common/primitives#/$defs/money'
+        media_refs:
+          type: array
+          items:
+            type: string
+            maxLength: 1000
+        primary_source_id:
+          type: string
+          pattern: '^src_[0-9A-HJKMNP-TV-Z]{26}$'
+        status:
+          type: string
+          enum: [DRAFT, ACTIVE, ARCHIVED]
+      required: [name, offering_type]
+      additionalProperties: false
+
+    KnowledgeSourceWrite:
+      type: object
+      description: 来源登记可写字段（文件先经上传接口取得 file_ref）。字段权威定义见 ggw://contracts/knowledge/knowledge-source
+      properties:
+        source_type:
+          type: string
+          enum: [WEBSITE, PDF, DOCX, PPTX, XLSX, IMAGE, AUDIO, VIDEO, MANUAL_INPUT]
+          description: KNW-001 来源类型
+        title:
+          type: string
+          maxLength: 500
+        uri:
+          type: string
+          format: uri
+          description: WEBSITE 必填（应用层校验）
+        file_ref:
+          type: string
+          maxLength: 1000
+          description: 文件类来源必填（应用层校验）
+        mime_type:
+          type: string
+          maxLength: 200
+        language:
+          type: string
+          pattern: '^[a-z]{2}(-[A-Z]{2})?$'
+        confidentiality_level:
+          type: string
+          enum: [PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED]
+          description: 默认保密级别（KNW-005）
+        refresh_interval_days:
+          type: integer
+          minimum: 1
+          description: 重新抓取周期（KNW-009；可刷新来源）
+        manual_content:
+          type: string
+          maxLength: 100000
+          description: MANUAL_INPUT 的正文内容（KNW-001 手工输入）
+      required: [source_type]
+      additionalProperties: false
+
+    ClaimWrite:
+      type: object
+      description: Claim 可写字段（创建后进入 NEEDS_REVIEW；状态由 approve/revoke 子资源驱动）。字段权威定义见 ggw://contracts/knowledge/claim
+      properties:
+        claim_type:
+          type: string
+          enum:
+            [
+              COMPANY_FACT,
+              PRODUCT_FACT,
+              PARAMETER,
+              MOQ,
+              LEAD_TIME,
+              CERTIFICATION,
+              CASE_STUDY,
+              CAPABILITY,
+              FORBIDDEN_EXPRESSION,
+              COMPLIANCE,
+            ]
+        statement:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        structured_value:
+          type: object
+          description: 结构化取值，Schema 随 claim_type 变化（KNW-002）
+        locale:
+          type: string
+          pattern: '^[a-z]{2}(-[A-Z]{2})?$'
+        source_id:
+          type: string
+          pattern: '^src_[0-9A-HJKMNP-TV-Z]{26}$'
+        owner_id:
+          type: string
+          pattern: '^mem_[0-9A-HJKMNP-TV-Z]{26}$'
+        confidentiality_level:
+          type: string
+          enum: [PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED]
+          description: 保密级别（KNW-005）
+        applicable_offering_ids:
+          type: array
+          items:
+            type: string
+            pattern: '^off_[0-9A-HJKMNP-TV-Z]{26}$'
+        applicable_markets:
+          type: array
+          items:
+            type: string
+            pattern: '^[A-Z]{2}$'
+        applicable_channels:
+          type: array
+          items:
+            type: string
+            maxLength: 100
+        allowed_purposes:
+          type: array
+          items:
+            type: string
+            enum: [CONTENT_GENERATION, OUTREACH, SALES_REPLY, RESEARCH, INTERNAL_REFERENCE]
+        effective_from:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+          description: 事实有效期（KNW-009）
+        sharing_scope:
+          type: string
+          enum: [WORKSPACE_PRIVATE, ANONYMIZED_GENERAL, PACK_CANDIDATE]
+          description: 知识回流分级（KNW-010）；默认 WORKSPACE_PRIVATE
+      required: [claim_type, statement, confidentiality_level]
+      additionalProperties: false
+
+    GlossaryEntryWrite:
+      type: object
+      description: 词条可写字段。字段权威定义见 ggw://contracts/knowledge/glossary-entry
+      properties:
+        entry_type:
+          type: string
+          enum: [TERM, BRAND_TONE, FORBIDDEN_WORD, DISCLAIMER, LOCALIZATION_RULE]
+        key:
+          type: string
+          minLength: 1
+          maxLength: 300
+        value:
+          type: string
+          maxLength: 5000
+        preferred_term:
+          type: string
+          maxLength: 300
+        forbidden_variants:
+          type: array
+          items:
+            type: string
+            maxLength: 300
+        enforcement_level:
+          type: string
+          enum: [BLOCK, WARN, SUGGEST]
+        brand_profile_id:
+          type: string
+          pattern: '^brd_[0-9A-HJKMNP-TV-Z]{26}$'
+        applicable_markets:
+          type: array
+          items:
+            type: string
+            pattern: '^[A-Z]{2}$'
+        applicable_channels:
+          type: array
+          items:
+            type: string
+            maxLength: 100
+        locale:
+          type: string
+          pattern: '^[a-z]{2}(-[A-Z]{2})?$'
+        notes:
+          type: string
+          maxLength: 2000
+      required: [entry_type, key]
+      additionalProperties: false

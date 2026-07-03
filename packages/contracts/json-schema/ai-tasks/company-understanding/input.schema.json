@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/ai-tasks/company-understanding/input",
+  "title": "CompanyUnderstandingTaskInput",
+  "description": "Company Understanding AI Task 输入（母本 9.3 领域 AI Task 目录第一项、KNW-002 自动提取候选、母本 6.5.1 第一次价值路径步骤 1-2）。website_url 与 uploaded_source_ids 至少提供一项。本 Task 为全平台 14 个 AI Task 的打样模板；输入/输出 Schema 登记于 Schema Registry（母本 9.6），完整契约见同目录 task-contract.md。负责域：knowledge；schema_version=1。",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "description": "输入 Schema 版本（母本 9.6 Schema Registry；Breaking change 提主版本，母本 ADR-017）"
+    },
+    "task_type": {
+      "const": "COMPANY_UNDERSTANDING",
+      "description": "任务类型标识，供 Task Registry / Workflow 路由（母本 9.3）"
+    },
+    "workspace_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id",
+      "description": "租户边界；所有工具调用与检索先做 workspace 过滤（母本 ADR-001、9.7 上下文组装）"
+    },
+    "website_url": {
+      "type": "string",
+      "format": "uri",
+      "maxLength": 2000,
+      "description": "企业官网 URL（母本 6.5.1 步骤 1：输入官网）。任务运行时由官网采集工具抓取并注册为 WEBSITE 类 KnowledgeSource（KNW-001），再进入提取；与 uploaded_source_ids 至少提供一项"
+    },
+    "uploaded_source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^src_[0-9A-HJKMNP-TV-Z]{26}$"
+      },
+      "maxItems": 50,
+      "description": "已上传并完成索引（index_status=INDEXED）的 KnowledgeSource 列表（KNW-001：PDF/DOCX/PPTX/XLSX/图片/音频/视频/手工输入）；与 website_url 至少提供一项"
+    },
+    "workspace_context": {
+      "type": "object",
+      "description": "workspace 已有知识上下文；用户纠正后的已确认事实优先于新提取（母本 7.2.4：新生成任务优先使用已确认事实）",
+      "properties": {
+        "existing_company_profile_id": {
+          "type": "string",
+          "pattern": "^cmp_[0-9A-HJKMNP-TV-Z]{26}$",
+          "description": "已存在的企业画像（重跑/补充提取场景）；候选输出作为对该画像的增量建议"
+        },
+        "existing_offering_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^off_[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "maxItems": 200,
+          "description": "已存在的产品/服务对象；新 Claim 候选可通过 applicable_scope.applicable_offering_ids 关联"
+        },
+        "brand_profile_id": {
+          "type": "string",
+          "pattern": "^brd_[0-9A-HJKMNP-TV-Z]{26}$",
+          "description": "品牌资料（KNW-008 品牌语气/禁用词），用于禁用表达候选比对"
+        },
+        "approved_claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^clm_[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "maxItems": 500,
+          "description": "已批准 Claim（KNW-003 APPROVED）；提取结果与之矛盾时必须输出 conflict_candidates 而非静默覆盖（KNW-004）"
+        }
+      },
+      "additionalProperties": false
+    },
+    "language": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/locale",
+      "description": "候选陈述（statement/description）的目标输出语言；缺省 zh-CN。quote 始终保留来源原文语言（KNW-006 来源片段可回查）",
+      "default": "zh-CN"
+    },
+    "industry_hint": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "可选行业提示（如 光伏、建材，PDR-001 试点行业）；仅用于加载行业 Pack 术语与字段提示（母本 8.x Pack 体系），不得作为无证据推断的依据（母本 7.2.4）"
+    },
+    "budget": {
+      "type": "object",
+      "description": "本次运行预算上限；不得超过 task-contract.md 声明的任务级上限，超限返回 BUDGET_EXCEEDED（母本 11.15、9.4 最大成本）",
+      "properties": {
+        "max_cost": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/money",
+          "description": "单次运行最大模型+采集成本（母本 11.14 金额规范；任务级上限见 task-contract.md 第 3 节）"
+        },
+        "max_model_calls": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "description": "最大模型调用次数（含分块提取与冲突比对）"
+        },
+        "max_pages_to_crawl": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "官网采集最大页面数（官网采集工具预算，母本 9.13 Tool 预算声明）"
+        }
+      },
+      "additionalProperties": false
+    },
+    "timeout_seconds": {
+      "type": "integer",
+      "minimum": 30,
+      "maximum": 900,
+      "default": 600,
+      "description": "单次运行超时（秒）；上限 900 与 task-contract.md 第 3 节一致，超时由 Workflow 取消并保留部分结果（母本 9.8）"
+    },
+    "correlation_id": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "业务关联链 ID（母本 11.10 Envelope correlation_id 口径），用于 Trace 与成本归因（母本 9.10）"
+    }
+  },
+  "required": ["schema_version", "task_type", "workspace_id"],
+  "anyOf": [
+    { "required": ["website_url"] },
+    {
+      "required": ["uploaded_source_ids"],
+      "properties": {
+        "uploaded_source_ids": { "type": "array", "minItems": 1 }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

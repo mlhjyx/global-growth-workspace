@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/workspace/workspace",
+  "title": "Workspace",
+  "description": "Workspace：租户隔离和策略执行的最小业务边界（母本 7.1.1、WSP-001）。创建后所有对象自动带 workspace_id，跨租户访问被拒绝（WSP-001 验收、ADR-001）。状态取值与 state-machines/workspace.state.ts 一致（WSP-008 账户关闭流程）。schema_version: 1",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^ws_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "Workspace ID，前缀 ws（common/primitives entity_id 前缀映射）"
+    },
+    "workspace_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id",
+      "description": "租户边界（conventions.md 公共字段）。对 Workspace 自身恒等于 id，保持所有业务对象统一按 workspace_id 过滤（母本 7.1.4：所有查询/索引/存储路径/队列均带 Workspace 范围）"
+    },
+    "organization_id": {
+      "type": "string",
+      "pattern": "^org_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "所属组织（WSP-001、WSP-004 代理商默认完全隔离）"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Workspace 名称（WSP-001）"
+    },
+    "display_name": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "展示名称，缺省用 name"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "用途说明"
+    },
+    "default_locale": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/locale",
+      "description": "默认语言（WSP-001）"
+    },
+    "default_timezone": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_+\\-]+(/[A-Za-z0-9_+\\-]+)*$",
+      "description": "默认时区，IANA 时区名（WSP-001；显示时区，存储一律 UTC，母本 11.14）"
+    },
+    "data_region": {
+      "type": "string",
+      "enum": ["CN", "SG", "US", "EU"],
+      "description": "数据区域（WSP-001；与 Organization 可不同，用于按客户驻留数据）"
+    },
+    "business_type": {
+      "type": "string",
+      "enum": ["MANUFACTURER", "TRADER", "SAAS", "PROFESSIONAL_SERVICE", "BRAND_ECOMMERCE", "AGENCY_SERVICE", "OTHER"],
+      "description": "业务类型（WSP-001；影响默认 Pack 推荐，母本 4.1）"
+    },
+    "default_currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "description": "默认展示币种，ISO 4217；金额存储保留原始币种与换算值（母本 11.14）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "SUSPENDED", "CLOSING", "CLOSED"],
+      "description": "状态，与 state-machines/workspace.state.ts 一致（WSP-008：CLOSING=删除编排进行中，CLOSED=已关闭，删除状态可追踪到对象存储、向量库和 Provider，母本 11.17）"
+    },
+    "status_reason": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "进入 SUSPENDED/CLOSING 状态的原因（审计可读）"
+    },
+    "data_retention_days": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "业务数据保留期（天），缺省按合同期间 + 宽限期（WSP-008、母本 11.17）"
+    },
+    "closed_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "进入 CLOSED 状态时间（WSP-008）"
+    },
+    "created_by": {
+      "type": "string",
+      "pattern": "^usr_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "创建者用户 ID"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "organization_id",
+    "name",
+    "default_locale",
+    "default_timezone",
+    "data_region",
+    "business_type",
+    "status",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

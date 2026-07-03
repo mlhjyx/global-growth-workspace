@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/workspace/budget",
+  "title": "Budget",
+  "description": "预算与配额：为模型、数据、媒体、邮件和专家五类支出设置软/硬限制（母本 7.1.2、WSP-005；验收：超预算前预警，超过硬限制时阻止新任务，错误码 BUDGET_EXCEEDED，母本 11.15）。health_status 取值与 state-machines/budget.state.ts 一致。schema_version: 1",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^bud_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "预算 ID，前缀 bud（对 primitives 前缀映射的补充）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "budget_category": {
+      "type": "string",
+      "enum": ["MODEL", "DATA", "MEDIA", "EMAIL", "EXPERT"],
+      "description": "预算类别（WSP-005 五类）：MODEL=模型调用；DATA=数据 Provider 采购（母本 7.4.8 成本控制）；MEDIA=媒体生成/渲染（母本 7.7.10）；EMAIL=邮件发送；EXPERT=专家服务（母本 7.12）"
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "预算名称，如「2026-07 模型预算」"
+    },
+    "period_type": {
+      "type": "string",
+      "enum": ["DAILY", "MONTHLY", "QUARTERLY", "ONE_TIME"],
+      "description": "预算周期类型；周期结束后重置用量（health 回落触发 BudgetRecovered，reason=PERIOD_RESET）"
+    },
+    "period_start": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "本期开始时间（UTC）"
+    },
+    "period_end": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "本期结束时间（UTC）"
+    },
+    "soft_limit": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/money",
+      "description": "软限制金额：达到后仅预警不阻断（WSP-005 超预算前预警）"
+    },
+    "hard_limit": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/money",
+      "description": "硬限制金额：达到后阻止新任务（WSP-005 验收；已运行任务按策略完成或中止）"
+    },
+    "warning_thresholds": {
+      "type": "array",
+      "items": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+      "uniqueItems": true,
+      "default": [0.8],
+      "description": "预警阈值（hard_limit 的占比，0-1]，如 [0.8, 0.95]；每跨越一个阈值触发一次 BudgetThresholdReached"
+    },
+    "quota": {
+      "type": "object",
+      "description": "非金额配额（与金额限制叠加，任一触顶即阻断）",
+      "properties": {
+        "unit": {
+          "type": "string",
+          "enum": ["TOKENS", "CREDITS", "RECORDS", "EMAILS", "RENDER_MINUTES", "EXPERT_HOURS", "API_CALLS"],
+          "description": "配额单位：TOKENS/CREDITS=模型；RECORDS=数据记录数；EMAILS=邮件发送量；RENDER_MINUTES=媒体渲染时长；EXPERT_HOURS=专家工时；API_CALLS=调用次数"
+        },
+        "soft_quota": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "软配额：达到后预警"
+        },
+        "hard_quota": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "硬配额：达到后阻止新任务"
+        }
+      },
+      "required": ["unit", "hard_quota"],
+      "additionalProperties": false
+    },
+    "usage": {
+      "type": "object",
+      "description": "本期用量投影（由成本账本事件投影而来，非实时 Join，母本 11.14）",
+      "properties": {
+        "spent": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/money",
+          "description": "本期已花费金额"
+        },
+        "quota_used": {
+          "type": "number",
+          "minimum": 0,
+          "description": "本期已用配额（单位同 quota.unit）"
+        },
+        "last_calculated_at": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+          "description": "投影最近更新时间"
+        }
+      },
+      "required": ["spent", "last_calculated_at"],
+      "additionalProperties": false
+    },
+    "health_status": {
+      "type": "string",
+      "enum": ["OK", "WARNING", "EXCEEDED"],
+      "description": "预算健康度，与 state-machines/budget.state.ts 一致：OK=正常；WARNING=已达预警阈值或软限制；EXCEEDED=已达硬限制，阻止新任务（WSP-005）"
+    },
+    "block_on_hard_limit": {
+      "type": "boolean",
+      "default": true,
+      "description": "达到硬限制是否阻止新任务；仅 OWNER/ADMIN 可关闭（关闭即只警不停，记审计 WSP-010）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "ARCHIVED"],
+      "description": "预算对象生命周期状态"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "budget_category",
+    "period_type",
+    "period_start",
+    "period_end",
+    "hard_limit",
+    "health_status",
+    "block_on_hard_limit",
+    "status",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

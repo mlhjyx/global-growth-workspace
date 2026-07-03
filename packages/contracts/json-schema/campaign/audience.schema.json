@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/campaign/audience",
+  "title": "Audience",
+  "description": "Audience/Cohort：由 Query Snapshot 和接受的实体组成，可冻结（FROZEN）或动态刷新（DYNAMIC）（CAM-003；母本 7.6.2）。运行批次通过 (id, version, query_snapshot.snapshot_hash) 追溯当时名单版本（CAM-003 验收）。负责域：campaign。schema_version=1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "aud_ 前缀实体 ID"
+    },
+    "workspace_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "受众名称"
+    },
+    "icp_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "icp_ 前缀，来源 ICPDefinition（可选；CAM-002 关联 ICP）"
+    },
+    "refresh_mode": {
+      "type": "string",
+      "enum": ["FROZEN", "DYNAMIC"],
+      "description": "冻结或动态刷新（CAM-003）。FROZEN：名单固化，执行只使用冻结版本；DYNAMIC：按 query_snapshot 定期重算，每次刷新提升 version 并更新 last_refreshed_at"
+    },
+    "query_snapshot": {
+      "type": "object",
+      "description": "查询快照：定义受众的筛选条件与执行结果（CAM-003）。刷新时整体替换并留存历史版本（乐观锁 version 递增）",
+      "properties": {
+        "criteria": {
+          "type": "array",
+          "description": "结构化筛选条件（字段-操作符-值）",
+          "items": {
+            "type": "object",
+            "properties": {
+              "field": { "type": "string", "minLength": 1, "description": "实体字段路径，如 company.country、contact.buying_role" },
+              "operator": {
+                "type": "string",
+                "enum": ["EQ", "NEQ", "IN", "NOT_IN", "GT", "GTE", "LT", "LTE", "CONTAINS", "EXISTS", "NOT_EXISTS"],
+                "description": "比较操作符"
+              },
+              "value": true
+            },
+            "required": ["field", "operator"],
+            "additionalProperties": false
+          }
+        },
+        "raw_query": {
+          "type": "string",
+          "description": "原始查询表达式（可选，供调试与再现）"
+        },
+        "source": {
+          "type": "string",
+          "description": "名单来源，如 lead_pool、provider 查询、导入批次"
+        },
+        "executed_at": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+          "description": "本快照的查询执行时间"
+        },
+        "result_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "查询命中总数（接受前）"
+        },
+        "snapshot_hash": {
+          "type": "string",
+          "description": "快照内容指纹；ExecutionAuthorization.scope.audience_refs 引用它固化名单版本（CAM-008）"
+        }
+      },
+      "required": ["criteria", "executed_at", "result_count"],
+      "additionalProperties": false
+    },
+    "members": {
+      "type": "array",
+      "description": "接受的实体列表（CAM-003：Audience = Query Snapshot + 接受的实体）。只有 ACCEPTED 成员参与执行",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entity_type": {
+            "type": "string",
+            "enum": ["LEAD", "CONTACT", "ACCOUNT"],
+            "description": "成员实体类型（附录 G：Lead/Contact/Account）"
+          },
+          "entity_id": {
+            "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+            "description": "led_/cta_/acc_ 前缀实体 ID"
+          },
+          "membership_status": {
+            "type": "string",
+            "enum": ["ACCEPTED", "REMOVED", "SUPPRESSED"],
+            "description": "成员状态：人工/规则接受、被移除、或因 Suppression 屏蔽（母本 7.5 Suppression 优先）"
+          },
+          "accepted_at": {
+            "$ref": "ggw://contracts/common/primitives#/$defs/timestamp"
+          },
+          "accepted_by": {
+            "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+            "description": "mem_ 前缀，接受操作人（可选；自动接受时省略）"
+          },
+          "removed_reason": {
+            "type": "string",
+            "description": "移除/屏蔽原因（membership_status 非 ACCEPTED 时填写）"
+          }
+        },
+        "required": ["entity_type", "entity_id", "membership_status", "accepted_at"],
+        "additionalProperties": false
+      }
+    },
+    "member_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "当前 ACCEPTED 成员数（冗余计数，供列表页与 Dry Run 展示，CAM-007）"
+    },
+    "frozen_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "冻结时间；refresh_mode=FROZEN 时必填（服务层校验，CAM-003）"
+    },
+    "last_refreshed_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "最近一次动态刷新时间（refresh_mode=DYNAMIC）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/version",
+      "description": "乐观锁版本；同时作为名单版本号被授权与运行批次引用（CAM-003、CAM-008；母本 11.16）"
+    }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "name",
+    "refresh_mode",
+    "query_snapshot",
+    "members",
+    "member_count",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/knowledge/citation",
+  "title": "Citation",
+  "description": "引用：生成内容/回复中的关键说法与其依据 Claim/Evidence 的关联（KNW-006：生成内容和回复时展示关键说法引用的 Claim/Evidence，用户两次点击内可查看来源片段；母本 4.8.4：内容草稿显示每个关键说法的知识来源）。来源删除时引用级联失效（KNW-007）。负责域：knowledge；schema_version=1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^cit_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "前缀式实体 ID，前缀 cit（knowledge 域补充前缀，见域 notes）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "claim_id": {
+      "type": "string",
+      "pattern": "^clm_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "被引用的 Claim（对外内容只允许引用适用范围内的 APPROVED Claim，KNW-003）"
+    },
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^evd_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "具体支撑的 ClaimEvidence；缺省时展示 Claim 的全部证据（KNW-006）"
+    },
+    "target_type": {
+      "type": "string",
+      "enum": [
+        "CONTENT_ASSET",
+        "OUTREACH_MESSAGE",
+        "CONVERSATION_REPLY",
+        "RESEARCH_REPORT",
+        "AI_ANSWER"
+      ],
+      "description": "引用发生的载体类型：内容资产/外联消息/会话回复/研究报告/AI 问答（KNW-006 生成内容和回复）"
+    },
+    "target_id": {
+      "type": "string",
+      "pattern": "^[a-z]{2,5}_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "载体实体 ID（common/primitives entity_id）"
+    },
+    "statement_text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 5000,
+      "description": "载体中被支撑的关键说法原文"
+    },
+    "position": {
+      "type": "object",
+      "description": "关键说法在载体正文中的位置（用于前端高亮定位）",
+      "properties": {
+        "start_offset": { "type": "integer", "minimum": 0 },
+        "end_offset": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["start_offset", "end_offset"],
+      "additionalProperties": false
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "INVALIDATED"],
+      "description": "引用状态：来源/Claim 删除、撤销或过期时级联置为 INVALIDATED（KNW-007、KNW-009）"
+    },
+    "invalidated_reason": {
+      "type": "string",
+      "enum": ["SOURCE_DELETED", "CLAIM_REVOKED", "CLAIM_EXPIRED", "MANUAL"],
+      "description": "失效原因（status=INVALIDATED 时必填，应用层校验）"
+    },
+    "invalidated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "claim_id",
+    "target_type",
+    "target_id",
+    "statement_text",
+    "status",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

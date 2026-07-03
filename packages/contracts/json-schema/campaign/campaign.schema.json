@@ -1,0 +1,313 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/campaign/campaign",
+  "title": "Campaign",
+  "description": "Campaign 增长业务上下文：连接目标、市场、ICP、受众、资产、渠道、预算、授权、触点与结果，通过 ID 和事件关联各对象（母本 7.6.1、附录 C；CAM-001、CAM-002、CAM-005、CAM-009、CAM-012、CAM-013）。负责域：campaign。schema_version=1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "cam_ 前缀实体 ID"
+    },
+    "workspace_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Campaign 名称（CAM-001）"
+    },
+    "objective": {
+      "type": "object",
+      "description": "商业目标：自然语言目标 + 结构化成功标准与资格口径（CAM-001；母本 5.7、附录 C objective）",
+      "properties": {
+        "goal_statement": {
+          "type": "string",
+          "minLength": 1,
+          "description": "自然语言目标；系统据此生成结构化草案而非仅聊天文本（CAM-001）"
+        },
+        "qualification_caliber": {
+          "type": "string",
+          "enum": ["QUALIFIED_LEAD", "SAO", "VERIFIED_OUTCOME"],
+          "description": "结果资格口径：Qualified Lead / Sales Accepted Opportunity / Verified Commercial Outcome（母本 5.7、附录 G）"
+        },
+        "success_metrics": {
+          "type": "array",
+          "description": "结构化成功标准（母本 5.7）",
+          "items": {
+            "type": "object",
+            "properties": {
+              "metric_name": { "type": "string", "minLength": 1 },
+              "target_value": { "type": "number" },
+              "unit": { "type": "string", "description": "计量单位，如 count、percent、usd" }
+            },
+            "required": ["metric_name", "target_value"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["goal_statement"],
+      "additionalProperties": false
+    },
+    "growth_motion": {
+      "type": "object",
+      "description": "Growth Motion 模板引用：直客开发、经销商开发、内容获客、展会跟进等增长方法（CAM-001；母本 3.4、PAK-001 Growth Motion Pack）",
+      "properties": {
+        "motion_code": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Growth Motion 编码（snake_case），如 direct_outbound、distributor_development、content_inbound、tradeshow_followup"
+        },
+        "pack_id": {
+          "type": "string",
+          "description": "版本化 Growth Motion Pack ID（母本 7.12 Pack Registry）"
+        },
+        "pack_version": {
+          "type": "string",
+          "description": "引用的 Pack 版本号"
+        }
+      },
+      "required": ["motion_code"],
+      "additionalProperties": false
+    },
+    "offering_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "off_ 前缀 Offering ID（CAM-002、附录 C offering）"
+    },
+    "market": {
+      "type": "object",
+      "description": "目标市场（CAM-002、附录 C market）",
+      "properties": {
+        "market_id": {
+          "type": "string",
+          "description": "MarketThesis / Market Pack 引用（母本 附录 C MarketThesis.market_id）"
+        },
+        "country_code": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/country_code"
+        },
+        "region": {
+          "type": "string",
+          "description": "国家内区域（可选），如省/州/城市群"
+        },
+        "locale": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/locale",
+          "description": "市场主语言"
+        }
+      },
+      "required": ["country_code"],
+      "additionalProperties": false
+    },
+    "icp_ids": {
+      "type": "array",
+      "description": "关联 ICPDefinition（icp_ 前缀，CAM-002）",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" }
+    },
+    "audience_ids": {
+      "type": "array",
+      "description": "aud_ 前缀 Audience ID 列表（CAM-002、CAM-003、附录 C audience_ids）。允许为空数组，但进入 READY_FOR_REVIEW 前必须非空（CAM-002：缺少必需上下文时不能进入 Review）",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" }
+    },
+    "owner_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "mem_ 前缀 Membership ID，Campaign 负责人（CAM-002、附录 C owner）"
+    },
+    "budget": {
+      "type": "object",
+      "description": "Campaign 成本预算与实时消耗（CAM-013、附录 C budget）；超过硬预算时自动停止新任务并返回 BUDGET_EXCEEDED（母本 11.15）",
+      "properties": {
+        "total": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/money",
+          "description": "计划总预算"
+        },
+        "hard_cap": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/money",
+          "description": "硬预算上限；超过时自动停止新任务（CAM-013）"
+        },
+        "daily_cap": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/money",
+          "description": "单日消耗上限（可选）"
+        },
+        "consumed": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/money",
+          "description": "实时消耗，由成本事件投影更新（CAM-013；母本 11.14 事件投影）"
+        }
+      },
+      "required": ["total", "hard_cap"],
+      "additionalProperties": false
+    },
+    "dates": {
+      "type": "object",
+      "description": "计划与实际时间（CAM-002、附录 C dates；UTC，母本 11.14）",
+      "properties": {
+        "planned_start_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+        "planned_end_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+        "actual_start_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+        "actual_end_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" }
+      },
+      "required": ["planned_start_at", "planned_end_at"],
+      "additionalProperties": false
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "RESEARCHING",
+        "READY_FOR_REVIEW",
+        "APPROVED",
+        "SCHEDULED",
+        "RUNNING",
+        "PAUSED",
+        "BLOCKED",
+        "COMPLETED",
+        "LEARNED",
+        "ARCHIVED"
+      ],
+      "description": "Campaign 状态（CAM-005、母本 11.9）；取值与 state-machines/campaign.state.ts 完全一致，迁移有规则与审计"
+    },
+    "strategy_snapshot": {
+      "type": "object",
+      "description": "审批时固化的策略快照（附录 C strategy_snapshot；内容对应母本 5.7 计划要素）。进入 READY_FOR_REVIEW 时由服务层要求必填；Revision 不覆盖历史快照（CAM-006、7.6.4）",
+      "properties": {
+        "snapshot_at": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+          "description": "快照生成时间"
+        },
+        "snapshot_hash": {
+          "type": "string",
+          "description": "快照内容指纹，供 ExecutionAuthorization 与审计引用（CAM-008）"
+        },
+        "audience_tiers": {
+          "type": "array",
+          "description": "客户分层（母本 5.7）",
+          "items": {
+            "type": "object",
+            "properties": {
+              "tier_name": { "type": "string", "minLength": 1 },
+              "criteria_summary": { "type": "string" },
+              "priority": { "type": "integer", "minimum": 1 }
+            },
+            "required": ["tier_name"],
+            "additionalProperties": false
+          }
+        },
+        "channel_cadence": {
+          "type": "array",
+          "description": "渠道和触达节奏（母本 5.7）",
+          "items": {
+            "type": "object",
+            "properties": {
+              "channel": { "type": "string", "minLength": 1 },
+              "cadence_summary": { "type": "string" }
+            },
+            "required": ["channel"],
+            "additionalProperties": false
+          }
+        },
+        "content_themes": {
+          "type": "array",
+          "description": "内容主题和漏斗映射（母本 5.7）",
+          "items": {
+            "type": "object",
+            "properties": {
+              "theme": { "type": "string", "minLength": 1 },
+              "funnel_stage": { "type": "string", "description": "漏斗阶段，如 awareness、consideration、decision" }
+            },
+            "required": ["theme"],
+            "additionalProperties": false
+          }
+        },
+        "variant_hypotheses": {
+          "type": "array",
+          "description": "Variant 和假设摘要（母本 5.7；详细结构见 experiment.schema.json，CAM-011）",
+          "items": { "type": "string" }
+        },
+        "estimated_cost": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/money",
+          "description": "预计成本（母本 5.7：发送量、时间、成本和团队工作量）"
+        },
+        "estimated_action_volume": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "预计发送/动作总量（母本 5.7）"
+        },
+        "approval_policy": {
+          "type": "string",
+          "description": "审批策略摘要（母本 5.7）"
+        },
+        "exit_conditions": {
+          "type": "array",
+          "description": "暂停和退出条件摘要（母本 5.7；结构化阈值见 stop-condition.schema.json，CAM-010）",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["snapshot_at"],
+      "additionalProperties": false
+    },
+    "authorization_ids": {
+      "type": "array",
+      "description": "auth_ 前缀 ExecutionAuthorization ID 列表（CAM-008、附录 C authorization_ids）。100% 对外营销动作必须关联有效授权（7.6.4）",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" }
+    },
+    "content_plan_ids": {
+      "type": "array",
+      "description": "cpl_ 前缀 ContentPlan ID 列表；独立版本化与审批（CAM-004）",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" }
+    },
+    "channel_plan_ids": {
+      "type": "array",
+      "description": "chp_ 前缀 ChannelPlan ID 列表；独立版本化与审批（CAM-004）",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" }
+    },
+    "sequence_ids": {
+      "type": "array",
+      "description": "seq_ 前缀 OutreachSequence ID 列表；独立版本化与审批（CAM-004）",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" }
+    },
+    "experiment_ids": {
+      "type": "array",
+      "description": "exp_ 前缀 Experiment ID 列表（CAM-004、CAM-011）",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" }
+    },
+    "stop_condition_ids": {
+      "type": "array",
+      "description": "stp_ 前缀 StopCondition ID 列表（CAM-010）",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" }
+    },
+    "is_quick_campaign": {
+      "type": "boolean",
+      "default": false,
+      "description": "是否为系统创建的 Quick Campaign：临时单次发布也必须关联 Campaign，保证归因不丢失（CAM-012、母本 3.10）"
+    },
+    "current_revision_number": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "当前已应用的最大 Revision 序号；0 表示无修订（CAM-006）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/version",
+      "description": "乐观锁版本（母本 11.16；冲突返回 VERSION_CONFLICT，母本 11.15）"
+    }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "name",
+    "objective",
+    "growth_motion",
+    "offering_id",
+    "market",
+    "audience_ids",
+    "owner_id",
+    "budget",
+    "dates",
+    "status",
+    "authorization_ids",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

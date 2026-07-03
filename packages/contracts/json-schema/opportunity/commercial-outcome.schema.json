@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/opportunity/commercial-outcome",
+  "title": "CommercialOutcome",
+  "description": "已验证商业结果（母本 7.9.2 核心对象、附录 C CommercialOutcome 最小字段、附录 G Verified Commercial Outcome、ENG-017 对 SAO 在 7/30/90 天回写会议/样品/报价/合同/Won/Lost、ANA-013 三级结果与滞后转化统计、ANA-014 结果纠错）。verification_status 取值与 state-machines/commercial-outcome.state.ts 完全一致。附录 C 的 value+currency 按母本 11.14 合并为 money 结构。7/30/90 天验证回写由 Temporal 定时工作流驱动（母本 9.8）。负责域：opportunity。schema_version: 1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "out_ 前缀（primitives 前缀映射：out=CommercialOutcome）"
+    },
+    "workspace_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id"
+    },
+    "opportunity_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "所属 Opportunity（opp_ 前缀；附录 C：opportunity_id；仅 SALES_ACCEPTED 及以上机会可回写结果，ENG-017）"
+    },
+    "outcome_type": {
+      "type": "string",
+      "enum": ["MEETING", "SAMPLE", "QUOTE", "CONTRACT", "WON", "LOST"],
+      "description": "结果类型（ENG-017：回写会议、样品、报价、合同、Won/Lost；附录 C：outcome_type）"
+    },
+    "occurred_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "结果实际发生时间（附录 C：occurred_at；用于 ANA-013 7/30/90 天滞后转化统计）"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+      "minItems": 1,
+      "description": "证据引用（evd_ 前缀；附录 C：evidence_refs；ENG-016 验收：证据均可审计；ENG-017 验收：不允许只靠用户点击接受永久计为有效结果）"
+    },
+    "verified_by": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "验证人 Membership（mem_ 前缀；附录 C：verified_by；verification_status=VERIFIED 时必填，见 allOf 条件）"
+    },
+    "verified_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "验证时间（verification_status=VERIFIED 时必填，见 allOf 条件）"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": ["PENDING", "VERIFIED", "EXPIRED", "REVOKED"],
+      "description": "验证状态（附录 C：verification_status；与 state-machines/commercial-outcome.state.ts 一致：PENDING→VERIFIED/EXPIRED/REVOKED，VERIFIED→REVOKED 为 ANA-014 纠错补丁）"
+    },
+    "value": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/money",
+      "description": "结果金额（附录 C value+currency 按母本 11.14 合并为 money：保存币种与原始/换算值）"
+    },
+    "followup_window": {
+      "type": "integer",
+      "enum": [7, 30, 90],
+      "description": "回写窗口（天）：本结果归属的 7/30/90 天回写窗口（ENG-017、ANA-013；附录 C：followup_window）"
+    },
+    "revoke_reason": {
+      "type": "string",
+      "description": "撤销原因（verification_status=REVOKED 时必填，见 allOf 条件；ANA-014：结果纠错，虚假或失效机会不会继续充当成功指标）"
+    },
+    "corrected_by_outcome_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "纠错后替代本结果的新 CommercialOutcome（out_ 前缀；ANA-014：结果纠错并对历史报表重算或标记版本）"
+    },
+    "report_impact": {
+      "type": "string",
+      "enum": ["RECALCULATE", "VERSION_TAG"],
+      "description": "撤销/纠错对历史报表的处理方式：重算或标记版本（ANA-014）"
+    },
+    "source_activity_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "来源 Activity（act_ 前缀；结果由哪条活动记录回写产生，ENG-016 审计链）"
+    },
+    "workflow_run_id": {
+      "type": "string",
+      "description": "触发本结果状态变化的 Temporal 工作流运行 ID（母本 9.8：7/30/90 天定时回写工作流；EXPIRED 由定时器产生时必填语义）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/version",
+      "description": "乐观锁（母本 11.16）"
+    }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "opportunity_id",
+    "outcome_type",
+    "occurred_at",
+    "evidence_refs",
+    "verification_status",
+    "followup_window",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": { "verification_status": { "const": "VERIFIED" } },
+        "required": ["verification_status"]
+      },
+      "then": {
+        "required": ["verified_by", "verified_at"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "verification_status": { "const": "REVOKED" } },
+        "required": ["verification_status"]
+      },
+      "then": {
+        "required": ["revoke_reason", "report_impact"]
+      }
+    }
+  ],
+  "additionalProperties": false
+}

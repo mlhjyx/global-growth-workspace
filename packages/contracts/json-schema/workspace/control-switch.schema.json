@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/workspace/control-switch",
+  "title": "ControlSwitch",
+  "description": "控制开关：Workspace 级 Kill Switch、Campaign Pause 和 Provider Disable（母本 7.1.2、WSP-007；验收：停止后未开始任务不再执行，已执行项保留审计）。state 取值与 state-machines/control-switch.state.ts 一致；激活期间对应范围的新任务被拒绝（CIRCUIT_BREAKER_OPEN，母本 11.15）。schema_version: 1",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^csw_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "控制开关 ID，前缀 csw（对 primitives 前缀映射的补充）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "switch_type": {
+      "type": "string",
+      "enum": ["KILL_SWITCH", "CAMPAIGN_PAUSE", "PROVIDER_DISABLE"],
+      "description": "开关类型（WSP-007）：KILL_SWITCH=停止整个 Workspace 的执行类任务；CAMPAIGN_PAUSE=暂停单个 Campaign；PROVIDER_DISABLE=停用单个 Provider"
+    },
+    "target_type": {
+      "type": "string",
+      "enum": ["WORKSPACE", "CAMPAIGN", "PROVIDER"],
+      "description": "作用目标类型，与 switch_type 一一对应（见 allOf 约束）"
+    },
+    "target_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "作用目标 ID：WORKSPACE=ws_ ID（等于 workspace_id）；CAMPAIGN=cam_ ID；PROVIDER=Provider 注册 ID（母本 7.13）"
+    },
+    "state": {
+      "type": "string",
+      "enum": ["ACTIVE", "RELEASED"],
+      "description": "开关状态，与 state-machines/control-switch.state.ts 一致：ACTIVE=已触发（阻断新任务）；RELEASED=已解除"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "description": "触发原因（审计必填，WSP-010；如事故、投诉率超标、合规要求）"
+    },
+    "activated_by": {
+      "$ref": "ggw://contracts/workspace/membership#/$defs/user_id",
+      "description": "触发人用户 ID（母本 3.6 PER-ADMIN 拥有 Kill Switch 权限）"
+    },
+    "activated_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "触发时间"
+    },
+    "released_by": {
+      "$ref": "ggw://contracts/workspace/membership#/$defs/user_id",
+      "description": "解除人用户 ID（state=RELEASED 时必填）"
+    },
+    "released_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "解除时间（state=RELEASED 时必填）"
+    },
+    "auto_release_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "计划自动解除时间（可选；到点后系统解除并记审计）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "switch_type",
+    "target_type",
+    "target_id",
+    "state",
+    "reason",
+    "activated_by",
+    "activated_at",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "switch_type": { "const": "KILL_SWITCH" } } },
+      "then": { "properties": { "target_type": { "const": "WORKSPACE" } } }
+    },
+    {
+      "if": { "properties": { "switch_type": { "const": "CAMPAIGN_PAUSE" } } },
+      "then": { "properties": { "target_type": { "const": "CAMPAIGN" } } }
+    },
+    {
+      "if": { "properties": { "switch_type": { "const": "PROVIDER_DISABLE" } } },
+      "then": { "properties": { "target_type": { "const": "PROVIDER" } } }
+    },
+    {
+      "if": { "properties": { "state": { "const": "RELEASED" } } },
+      "then": { "required": ["released_by", "released_at"] }
+    }
+  ],
+  "additionalProperties": false
+}

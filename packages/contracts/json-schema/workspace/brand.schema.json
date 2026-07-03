@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/workspace/brand",
+  "title": "Brand",
+  "description": "品牌：Workspace 内可管理多个品牌/市场身份（母本 7.1.1、7.1.2、WSP-001）。品牌声音/内容规范属 content 域（母本 7.7），此处只定义组织身份与市场归属。schema_version: 1",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^brd_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "品牌 ID，前缀 brd（对 primitives 前缀映射的补充）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "品牌名称（WSP-001）"
+    },
+    "display_name": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "对外展示名称，缺省用 name"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "品牌定位说明"
+    },
+    "default_locale": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/locale",
+      "description": "品牌默认语言（WSP-001）"
+    },
+    "locales": {
+      "type": "array",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/locale" },
+      "uniqueItems": true,
+      "description": "品牌覆盖语言列表（本地化范围）"
+    },
+    "target_markets": {
+      "type": "array",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/country_code" },
+      "uniqueItems": true,
+      "description": "目标市场国家/地区（ISO 3166-1 alpha-2）"
+    },
+    "industry": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "所属行业（用于 Industry Pack 推荐，母本 4.1）"
+    },
+    "domains": {
+      "type": "array",
+      "items": { "type": "string", "format": "hostname" },
+      "uniqueItems": true,
+      "description": "品牌拥有的域名（发信域名健康与渠道治理归属，母本 7.8）"
+    },
+    "logo_asset_id": {
+      "type": "string",
+      "description": "品牌 Logo 资产 ID（media 域资产引用）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "ARCHIVED"],
+      "description": "品牌状态"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "name",
+    "default_locale",
+    "status",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/opportunity/activity",
+  "title": "Activity",
+  "description": "机会活动记录（母本 7.9.2 核心对象 Activity；支撑 ENG-010 下一步/截止时间/Owner、ENG-015 机会时间线统一可见、ENG-016 审计链）。附录 C 未列 Activity 最小字段，本 Schema 为评审补丁按 7.9 域语义补齐。负责域：opportunity。schema_version: 1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "act_ 前缀（评审补丁：primitives 前缀映射未列 act，此处补充 act=Activity）"
+    },
+    "workspace_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id"
+    },
+    "opportunity_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "所属 Opportunity（opp_ 前缀）"
+    },
+    "activity_type": {
+      "type": "string",
+      "enum": [
+        "NOTE",
+        "CALL",
+        "EMAIL",
+        "MEETING",
+        "SAMPLE",
+        "QUOTE",
+        "TASK",
+        "STAGE_CHANGE",
+        "CRM_SYNC"
+      ],
+      "description": "活动类型：备注/电话/邮件/会议/样品/报价/待办/阶段变化/CRM 同步（母本 7.9.6 人工录入补充线下展会、电话和会议；ENG-011 CRM 同步；STAGE_CHANGE 与 Touchpoint.touchpoint_type=STAGE_CHANGE 对应，ANA-001）"
+    },
+    "subject": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "活动主题"
+    },
+    "detail": {
+      "type": "string",
+      "description": "活动详情（备注正文、通话纪要等）"
+    },
+    "occurred_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "活动发生时间"
+    },
+    "due_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "待办截止时间（activity_type=TASK 时使用；ENG-010：下一步、截止时间）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["OPEN", "DONE", "CANCELLED"],
+      "description": "活动完成状态（TASK 类活动的执行状态；非状态机对象，不入 11.9）",
+      "default": "DONE"
+    },
+    "owner_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "活动负责人 Membership（mem_ 前缀；ENG-010：Owner）"
+    },
+    "conversation_id": {
+      "type": "string",
+      "description": "关联 Conversation ID（engage 域对象，跨域用字符串引用；ENG-015：会话、联系人、机会和 Campaign 时间线统一可见）"
+    },
+    "touchpoint_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "由本活动产生的 Touchpoint（tpt_ 前缀；ANA-001：会议、样品、报价等进入统一 Touchpoint）"
+    },
+    "outcome_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "由本活动回写产生的 CommercialOutcome（out_ 前缀；ENG-017）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/version",
+      "description": "乐观锁（母本 11.16）"
+    }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "opportunity_id",
+    "activity_type",
+    "occurred_at",
+    "owner_id",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

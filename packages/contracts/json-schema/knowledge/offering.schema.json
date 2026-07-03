@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/knowledge/offering",
+  "title": "Offering",
+  "description": "产品/服务对象：企业对外销售的产品或服务及其产品事实（母本 7.2.2 核心对象、4.8.1 产品事实：参数、MOQ、交期、认证、应用场景；KNW-002）。展示字段为概要，权威事实以关联 Claim（applicable_offering_ids 指向本对象）为准。负责域：knowledge；schema_version=1。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^off_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "前缀式实体 ID，前缀 off（common/primitives entity_id 前缀映射）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300,
+      "description": "产品/服务名称"
+    },
+    "sku_code": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "企业内部型号/SKU 编码"
+    },
+    "offering_type": {
+      "type": "string",
+      "enum": ["PRODUCT", "SERVICE", "SOLUTION"],
+      "description": "供给类型：实体产品/服务/解决方案"
+    },
+    "category": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "产品类目"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 5000,
+      "description": "产品描述"
+    },
+    "specs": {
+      "type": "array",
+      "description": "参数概要（KNW-002 参数候选；每项参数的权威版本是 PARAMETER 类型 Claim）",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "maxLength": 200, "description": "参数名" },
+          "value": { "type": "string", "maxLength": 500, "description": "参数值" },
+          "unit": { "type": "string", "maxLength": 50, "description": "单位" }
+        },
+        "required": ["name", "value"],
+        "additionalProperties": false
+      }
+    },
+    "moq": {
+      "type": "object",
+      "description": "最小起订量概要（KNW-002 MOQ 候选）",
+      "properties": {
+        "quantity": { "type": "number", "minimum": 0 },
+        "unit": { "type": "string", "maxLength": 50, "description": "计量单位，如 pcs、set、kg" },
+        "notes": { "type": "string", "maxLength": 500 }
+      },
+      "required": ["quantity", "unit"],
+      "additionalProperties": false
+    },
+    "lead_time": {
+      "type": "object",
+      "description": "交期概要（KNW-002 交期候选）",
+      "properties": {
+        "min_days": { "type": "integer", "minimum": 0 },
+        "max_days": { "type": "integer", "minimum": 0 },
+        "notes": { "type": "string", "maxLength": 500 }
+      },
+      "required": ["min_days", "max_days"],
+      "additionalProperties": false
+    },
+    "certifications": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 200 },
+      "description": "认证概要（KNW-002 认证候选；权威认证以 CERTIFICATION 类型 Claim 为准，母本 7.2.4：无证据不得生成确定性公开表达）"
+    },
+    "applications": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 300 },
+      "description": "应用场景（母本 4.8.1 产品事实）"
+    },
+    "target_markets": {
+      "type": "array",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/country_code" },
+      "description": "目标市场"
+    },
+    "hs_codes": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[0-9]{4,10}$" },
+      "description": "海关 HS 编码（贸易研究关联用，母本 7.3）"
+    },
+    "price_min": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/money",
+      "description": "参考价下限（母本 11.14 金额规范）"
+    },
+    "price_max": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/money",
+      "description": "参考价上限（母本 11.14 金额规范）"
+    },
+    "media_refs": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 1000 },
+      "description": "产品图片/视频等对象存储引用"
+    },
+    "primary_source_id": {
+      "type": "string",
+      "pattern": "^src_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "主要来源 KnowledgeSource（KNW-001）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["DRAFT", "ACTIVE", "ARCHIVED"],
+      "description": "产品记录状态：草稿/在售可用/归档"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "name",
+    "offering_type",
+    "status",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

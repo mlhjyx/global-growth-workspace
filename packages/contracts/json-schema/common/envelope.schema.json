@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/common/envelope",
+  "title": "DomainEventEnvelope",
+  "description": "领域事件统一 Envelope（母本 11.10）。event_type 为 PascalCase 事件名 + schema_version（母本 0.5）；至少一次投递、消费者幂等（母本 ADR-009）。",
+  "type": "object",
+  "properties": {
+    "event_id": { "type": "string", "format": "uuid" },
+    "event_type": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Za-z0-9]+$",
+      "description": "PascalCase 事件名，如 LeadQualified、CampaignApproved"
+    },
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "aggregate_type": {
+      "type": "string",
+      "description": "聚合类型，如 Lead、Campaign、Claim、Opportunity"
+    },
+    "aggregate_id": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+    "occurred_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "producer": { "type": "string", "description": "生产服务名，如 lead-service" },
+    "correlation_id": {
+      "type": "string",
+      "description": "业务关联链 ID（常为 campaign/goal/workflow 层级）"
+    },
+    "causation_id": {
+      "type": "string",
+      "description": "直接因果上游（事件或 workflow run）"
+    },
+    "privacy_classification": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/privacy_classification"
+    },
+    "payload": {
+      "type": "object",
+      "description": "事件负载；具体 Schema 见各域 asyncapi/<domain>.events.yaml。放 ID 与变更要点，不放可查询的完整对象。"
+    }
+  },
+  "required": [
+    "event_id",
+    "event_type",
+    "schema_version",
+    "workspace_id",
+    "aggregate_type",
+    "aggregate_id",
+    "occurred_at",
+    "producer",
+    "payload"
+  ],
+  "additionalProperties": false
+}

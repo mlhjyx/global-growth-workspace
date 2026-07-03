@@ -1,0 +1,1848 @@
+# campaign 域 REST API（OpenAPI 3.1）
+# 来源：母本 7.6（CAM-001..013）、11.12（API 分组 /campaigns /audiences /experiments）、
+#       11.15（统一错误模型）、11.16（Idempotency-Key、乐观锁）。
+# 授权资源路径：11.12 将「授权」归入 /campaigns 分组，此处以顶层 /authorizations 暴露（评审补充，
+# 便于执行服务独立校验授权，CAM-008）。schema_version=1。负责域：campaign。
+openapi: 3.1.0
+info:
+  title: Campaign Domain API
+  version: 1.0.0
+  description: >-
+    Campaign、Audience、Experiment、CampaignRevision、StopCondition、ExecutionAuthorization
+    的 REST 契约（母本 7.6、11.12）。所有写操作要求 Idempotency-Key 头（母本 11.16）；
+    更新用 If-Match 乐观锁，冲突返回 VERSION_CONFLICT（母本 11.15）；列表统一 cursor 分页。
+    状态迁移规则见 state-machines/campaign.state.ts 与 execution-authorization.state.ts。
+
+servers:
+  - url: /api/v1
+    description: BFF/API Gateway（母本 11.18）
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: campaigns
+    description: Campaign 生命周期（CAM-001、CAM-002、CAM-005、CAM-009）
+  - name: audiences
+    description: 受众与名单版本（CAM-003）
+  - name: experiments
+    description: 实验与胜出规则（CAM-011）
+  - name: revisions
+    description: 运行中变更修订（CAM-006）
+  - name: stop-conditions
+    description: 停止条件（CAM-010）
+  - name: authorizations
+    description: 不可变执行授权（CAM-008）
+
+paths:
+  /campaigns:
+    get:
+      operationId: listCampaigns
+      tags: [campaigns]
+      summary: 列出 Campaign
+      description: "按 workspace 列出 Campaign，cursor 分页（CAM-005）。policy: campaign.read"
+      x-policy: campaign.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          description: 按状态过滤（取值与 state-machines/campaign.state.ts 一致）
+          schema:
+            type: string
+            enum: [DRAFT, RESEARCHING, READY_FOR_REVIEW, APPROVED, SCHEDULED, RUNNING, PAUSED, BLOCKED, COMPLETED, LEARNED, ARCHIVED]
+        - name: owner_id
+          in: query
+          schema:
+            type: string
+        - name: is_quick_campaign
+          in: query
+          description: 过滤 Quick Campaign（CAM-012）
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Campaign 列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '../json-schema/campaign/campaign.schema.json'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/PolicyDenied' }
+    post:
+      operationId: createCampaign
+      tags: [campaigns]
+      summary: 创建 Campaign
+      description: >-
+        按 Growth Motion 模板和自然语言目标创建 Campaign，生成结构化草案而非仅聊天文本（CAM-001）；
+        初始状态 DRAFT。policy: campaign.create
+      x-policy: campaign.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignCreateRequest'
+      responses:
+        '201':
+          description: 已创建（发布 CampaignCreated 事件）
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/campaign.schema.json'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/PolicyDenied' }
+
+  /campaigns/{campaign_id}:
+    parameters:
+      - $ref: '#/components/parameters/CampaignId'
+    get:
+      operationId: getCampaign
+      tags: [campaigns]
+      summary: 获取 Campaign
+      description: "获取单个 Campaign 全量对象（CAM-002）。policy: campaign.read"
+      x-policy: campaign.read
+      responses:
+        '200':
+          description: Campaign
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/campaign.schema.json'
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      operationId: updateCampaign
+      tags: [campaigns]
+      summary: 更新 Campaign（草稿阶段字段级更新）
+      description: >-
+        更新 DRAFT/RESEARCHING/READY_FOR_REVIEW 阶段的 Campaign 配置（CAM-002）。
+        RUNNING 中的重大变更不得走本端点，必须创建 CampaignRevision（CAM-006）。
+        If-Match 乐观锁，冲突返回 VERSION_CONFLICT 及当前版本与 Diff（母本 11.15、11.16）。
+        policy: campaign.update
+      x-policy: campaign.update
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignUpdateRequest'
+      responses:
+        '200':
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/campaign.schema.json'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/VersionConflict' }
+
+  /campaigns/{campaign_id}/dry-run:
+    post:
+      operationId: dryRunCampaign
+      tags: [campaigns]
+      summary: 生成 Dry Run 报告
+      description: >-
+        Dry Run 展示人群、样例、内容、渠道、时间、成本、数据权利和风险，供审批人逐项审查与退回
+        （CAM-007；母本 5.9 审批页面必须展示项）。不产生任何对外动作。policy: campaign.review
+      x-policy: campaign.review
+      parameters:
+        - $ref: '#/components/parameters/CampaignId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Dry Run 报告
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DryRunReport'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422':
+          description: 上下文不完整，无法生成报告（CAM-002：缺少必需上下文时不能进入 Review）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /campaigns/{campaign_id}/approve:
+    post:
+      operationId: approveCampaign
+      tags: [campaigns]
+      summary: 批准 Campaign 并签发执行授权
+      description: >-
+        READY_FOR_REVIEW→APPROVED；批准后生成不可变 ExecutionAuthorization（CAM-007、CAM-008；
+        母本 5.9）。发布 CampaignApproved 与 AuthorizationIssued 事件。policy: campaign.approve
+      x-policy: campaign.approve
+      parameters:
+        - $ref: '#/components/parameters/CampaignId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignApproveRequest'
+      responses:
+        '200':
+          description: 已批准；返回 Campaign 与新签发授权
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  campaign:
+                    $ref: '../json-schema/campaign/campaign.schema.json'
+                  authorization:
+                    $ref: '../json-schema/campaign/execution-authorization.schema.json'
+                required: [campaign, authorization]
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: 状态不允许批准（非 READY_FOR_REVIEW）或版本冲突（母本 11.15）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /campaigns/{campaign_id}/pause:
+    post:
+      operationId: pauseCampaign
+      tags: [campaigns]
+      summary: 暂停 Campaign
+      description: >-
+        SCHEDULED/RUNNING→PAUSED；暂停可在 SLA 内阻断未开始动作（CAM-009；WSP-007）。
+        发布 CampaignPaused 事件。policy: campaign.pause
+      x-policy: campaign.pause
+      parameters:
+        - $ref: '#/components/parameters/CampaignId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: 暂停原因（审计）
+              additionalProperties: false
+      responses:
+        '200':
+          description: 已暂停
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/campaign.schema.json'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: 当前状态不允许暂停（state-machines/campaign.state.ts）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /campaigns/{campaign_id}/resume:
+    post:
+      operationId: resumeCampaign
+      tags: [campaigns]
+      summary: 恢复 Campaign
+      description: >-
+        PAUSED/BLOCKED→RUNNING（CAM-009）。BLOCKED 需先解除阻断原因（授权有效、预算未超），
+        否则返回 AUTHORIZATION_REQUIRED/BUDGET_EXCEEDED（母本 11.15）。发布 CampaignResumed 事件。
+        policy: campaign.resume
+      x-policy: campaign.resume
+      parameters:
+        - $ref: '#/components/parameters/CampaignId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: 已恢复
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/campaign.schema.json'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: 阻断原因未解除或状态不允许恢复
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /campaigns/{campaign_id}/complete:
+    post:
+      operationId: completeCampaign
+      tags: [campaigns]
+      summary: 结束 Campaign
+      description: "RUNNING/PAUSED/BLOCKED→COMPLETED（CAM-009）。发布 CampaignCompleted 事件。policy: campaign.complete"
+      x-policy: campaign.complete
+      parameters:
+        - $ref: '#/components/parameters/CampaignId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+              additionalProperties: false
+      responses:
+        '200':
+          description: 已结束
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/campaign.schema.json'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: 状态不允许结束
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /campaigns/{campaign_id}/archive:
+    post:
+      operationId: archiveCampaign
+      tags: [campaigns]
+      summary: 归档 Campaign
+      description: "DRAFT/RESEARCHING/LEARNED→ARCHIVED（CAM-009；state-machines/campaign.state.ts）。policy: campaign.archive"
+      x-policy: campaign.archive
+      parameters:
+        - $ref: '#/components/parameters/CampaignId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: 已归档
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/campaign.schema.json'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: 状态不允许归档
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /campaigns/{campaign_id}/duplicate:
+    post:
+      operationId: duplicateCampaign
+      tags: [campaigns]
+      summary: 复制 Campaign
+      description: >-
+        复制配置生成新 DRAFT Campaign（CAM-009 复制）。不复制授权、消耗、Revision 与运行数据；
+        受众引用保留、名单需重新接受（CAM-003）。policy: campaign.create
+      x-policy: campaign.create
+      parameters:
+        - $ref: '#/components/parameters/CampaignId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                new_name:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+              additionalProperties: false
+      responses:
+        '201':
+          description: 新 Campaign（DRAFT）
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/campaign.schema.json'
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /campaigns/{campaign_id}/revisions:
+    parameters:
+      - $ref: '#/components/parameters/CampaignId'
+    get:
+      operationId: listCampaignRevisions
+      tags: [revisions]
+      summary: 列出 Campaign 修订
+      description: "修订历史不覆盖历史配置和归因（CAM-006、7.6.4）。policy: campaign.read"
+      x-policy: campaign.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: 修订列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '../json-schema/campaign/campaign-revision.schema.json'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      operationId: createCampaignRevision
+      tags: [revisions]
+      summary: 创建 Campaign 修订
+      description: >-
+        运行中的重大变更创建 CampaignRevision 并展示差异（CAM-006）。服务计算 risk_expansion；
+        任一风险扩大 → requires_reauthorization=true，需走 /campaigns/{id}/approve 重新授权后方可 APPLIED。
+        发布 CampaignRevisionCreated 事件。policy: campaign.revise
+      x-policy: campaign.revise
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevisionCreateRequest'
+      responses:
+        '201':
+          description: 已创建修订（含服务端计算的差异与风险判定）
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/campaign-revision.schema.json'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/VersionConflict' }
+
+  /campaigns/{campaign_id}/stop-conditions:
+    parameters:
+      - $ref: '#/components/parameters/CampaignId'
+    get:
+      operationId: listStopConditions
+      tags: [stop-conditions]
+      summary: 列出停止条件
+      description: "CAM-010。policy: campaign.read"
+      x-policy: campaign.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: 停止条件列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '../json-schema/campaign/stop-condition.schema.json'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      operationId: createStopCondition
+      tags: [stop-conditions]
+      summary: 创建停止条件
+      description: >-
+        配置退信/投诉/失败/成本/负面情绪阈值，触发自动暂停和通知（CAM-010）。
+        policy: campaign.stop_condition.manage
+      x-policy: campaign.stop_condition.manage
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StopConditionCreateRequest'
+      responses:
+        '201':
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/stop-condition.schema.json'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /audiences:
+    get:
+      operationId: listAudiences
+      tags: [audiences]
+      summary: 列出受众
+      description: "CAM-003。policy: audience.read"
+      x-policy: audience.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: refresh_mode
+          in: query
+          schema:
+            type: string
+            enum: [FROZEN, DYNAMIC]
+      responses:
+        '200':
+          description: 受众列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '../json-schema/campaign/audience.schema.json'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+    post:
+      operationId: createAudience
+      tags: [audiences]
+      summary: 创建受众
+      description: >-
+        由 Query Snapshot 创建受众；成员需逐个/批量接受后方可执行（CAM-003）。
+        policy: audience.create
+      x-policy: audience.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AudienceCreateRequest'
+      responses:
+        '201':
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/audience.schema.json'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/PolicyDenied' }
+
+  /audiences/{audience_id}:
+    parameters:
+      - $ref: '#/components/parameters/AudienceId'
+    get:
+      operationId: getAudience
+      tags: [audiences]
+      summary: 获取受众
+      description: "CAM-003。policy: audience.read"
+      x-policy: audience.read
+      responses:
+        '200':
+          description: 受众
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/audience.schema.json'
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      operationId: updateAudience
+      tags: [audiences]
+      summary: 更新受众（名称/成员接受状态）
+      description: >-
+        更新名称或成员 membership_status（接受/移除，CAM-003）。已冻结受众不可改成员，
+        返回 ACTION_DENIED（母本 11.15）。policy: audience.update
+      x-policy: audience.update
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AudienceUpdateRequest'
+      responses:
+        '200':
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/audience.schema.json'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/VersionConflict' }
+
+  /audiences/{audience_id}/freeze:
+    post:
+      operationId: freezeAudience
+      tags: [audiences]
+      summary: 冻结受众
+      description: >-
+        refresh_mode→FROZEN 并记录 frozen_at；冻结后名单版本固定，供授权与运行批次追溯
+        （CAM-003、CAM-008）。policy: audience.freeze
+      x-policy: audience.freeze
+      parameters:
+        - $ref: '#/components/parameters/AudienceId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: 已冻结
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/audience.schema.json'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: 已处于冻结状态
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /audiences/{audience_id}/refresh:
+    post:
+      operationId: refreshAudience
+      tags: [audiences]
+      summary: 动态刷新受众
+      description: >-
+        按 query_snapshot 重新执行查询并生成新名单版本（version 递增；CAM-003 动态刷新）。
+        FROZEN 受众返回 ACTION_DENIED。刷新扩大名单不影响已签发授权（授权固化旧版本，CAM-008）。
+        policy: audience.refresh
+      x-policy: audience.refresh
+      parameters:
+        - $ref: '#/components/parameters/AudienceId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: 已刷新（新名单版本）
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/audience.schema.json'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: FROZEN 受众不可刷新（ACTION_DENIED）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /audiences/{audience_id}/members:
+    get:
+      operationId: listAudienceMembers
+      tags: [audiences]
+      summary: 列出受众成员
+      description: >-
+        分页列出成员（CAM-003 接受的实体；供 Dry Run 人群样例，CAM-007）。字段展示受
+        FieldEvidence 数据权利约束（LICENSE_RESTRICTED，母本 11.15）。policy: audience.read
+      x-policy: audience.read
+      parameters:
+        - $ref: '#/components/parameters/AudienceId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: membership_status
+          in: query
+          schema:
+            type: string
+            enum: [ACCEPTED, REMOVED, SUPPRESSED]
+      responses:
+        '200':
+          description: 成员列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        entity_type:
+                          type: string
+                          enum: [LEAD, CONTACT, ACCOUNT]
+                        entity_id:
+                          type: string
+                        membership_status:
+                          type: string
+                          enum: [ACCEPTED, REMOVED, SUPPRESSED]
+                        accepted_at:
+                          type: string
+                          format: date-time
+                        accepted_by:
+                          type: string
+                        removed_reason:
+                          type: string
+                      required: [entity_type, entity_id, membership_status, accepted_at]
+                      additionalProperties: false
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /experiments:
+    get:
+      operationId: listExperiments
+      tags: [experiments]
+      summary: 列出实验
+      description: "CAM-011。policy: experiment.read"
+      x-policy: experiment.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: campaign_id
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [DRAFT, RUNNING, EVALUATING, CONCLUDED, CANCELLED]
+      responses:
+        '200':
+          description: 实验列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '../json-schema/campaign/experiment.schema.json'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+    post:
+      operationId: createExperiment
+      tags: [experiments]
+      summary: 创建实验
+      description: >-
+        Variant、对照、假设和胜出规则（CAM-011）。服务校验：variants≥2、恰好一个对照、
+        流量分配和为 1。policy: experiment.create
+      x-policy: experiment.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExperimentCreateRequest'
+      responses:
+        '201':
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/experiment.schema.json'
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /experiments/{experiment_id}:
+    parameters:
+      - $ref: '#/components/parameters/ExperimentId'
+    get:
+      operationId: getExperiment
+      tags: [experiments]
+      summary: 获取实验
+      description: "结果可回溯到资产和受众（CAM-011 验收）。policy: experiment.read"
+      x-policy: experiment.read
+      responses:
+        '200':
+          description: 实验
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/experiment.schema.json'
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      operationId: updateExperiment
+      tags: [experiments]
+      summary: 更新实验（DRAFT 阶段）
+      description: >-
+        仅 DRAFT 状态可修改变体与胜出规则；RUNNING 后修改需取消重建（保证结果可回溯，CAM-011）。
+        policy: experiment.update
+      x-policy: experiment.update
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExperimentUpdateRequest'
+      responses:
+        '200':
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/experiment.schema.json'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/VersionConflict' }
+
+  /experiments/{experiment_id}/evaluate:
+    post:
+      operationId: evaluateExperiment
+      tags: [experiments]
+      summary: 评估实验并判定胜出
+      description: >-
+        按 winning_rule 评估（样本量、置信度、窗口），写入 winner_variant_key 并 CONCLUDED；
+        发布 ExperimentEvaluated 事件（analytics 域消费，母本 11.11 结果与学习）。
+        policy: experiment.evaluate
+      x-policy: experiment.evaluate
+      parameters:
+        - $ref: '#/components/parameters/ExperimentId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: 评估完成
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/experiment.schema.json'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: 样本量/窗口未满足，无法判定（详情在 details）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /authorizations:
+    get:
+      operationId: listAuthorizations
+      tags: [authorizations]
+      summary: 列出执行授权
+      description: "执行服务/审计用（CAM-008、7.6.4）。policy: authorization.read"
+      x-policy: authorization.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: campaign_id
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: 取值与 state-machines/execution-authorization.state.ts 一致
+          schema:
+            type: string
+            enum: [ISSUED, ACTIVE, EXPIRED, REVOKED, SUPERSEDED]
+      responses:
+        '200':
+          description: 授权列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '../json-schema/campaign/execution-authorization.schema.json'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+    post:
+      operationId: issueAuthorization
+      tags: [authorizations]
+      summary: 签发执行授权
+      description: >-
+        为已批准的 Campaign/Revision 签发不可变授权（CAM-008；常规路径由 /campaigns/{id}/approve
+        级联签发，本端点供 Revision 重新授权与运维场景）。若 supersedes_authorization_id 非空，
+        旧授权原子置 SUPERSEDED（CAM-006）。发布 AuthorizationIssued 事件。policy: authorization.issue
+      x-policy: authorization.issue
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorizationIssueRequest'
+      responses:
+        '201':
+          description: 已签发（ISSUED）
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/execution-authorization.schema.json'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403':
+          description: 审批缺失（AUTHORIZATION_REQUIRED，母本 11.15）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /authorizations/{authorization_id}:
+    get:
+      operationId: getAuthorization
+      tags: [authorizations]
+      summary: 获取执行授权
+      description: >-
+        执行服务动作前校验授权状态、范围与 authorization_hash（CAM-008：执行服务只接受有效授权）。
+        授权不可变，无 PATCH 端点；变更走重新签发（CAM-006）。policy: authorization.read
+      x-policy: authorization.read
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationId'
+      responses:
+        '200':
+          description: 授权对象
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/execution-authorization.schema.json'
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /authorizations/{authorization_id}/revoke:
+    post:
+      operationId: revokeAuthorization
+      tags: [authorizations]
+      summary: 撤销执行授权
+      description: >-
+        ISSUED/ACTIVE→REVOKED（终态）。撤销后未开始任务不再执行、已执行项保留审计（WSP-007）；
+        关联 Campaign 自动进入 BLOCKED（母本 5.10.1）。发布 AuthorizationRevoked 事件。
+        policy: authorization.revoke
+      x-policy: authorization.revoke
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  minLength: 1
+                  description: 撤销原因（审计必填，WSP-007）
+              required: [reason]
+              additionalProperties: false
+      responses:
+        '200':
+          description: 已撤销
+          content:
+            application/json:
+              schema:
+                $ref: '../json-schema/campaign/execution-authorization.schema.json'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: 已处于终态（EXPIRED/REVOKED/SUPERSEDED）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Workspace 范围内的用户/服务令牌（母本 ADR-001 租户边界）
+
+  parameters:
+    CampaignId:
+      name: campaign_id
+      in: path
+      required: true
+      description: cam_ 前缀 Campaign ID
+      schema:
+        type: string
+        pattern: '^cam_[0-9A-HJKMNP-TV-Z]{26}$'
+    AudienceId:
+      name: audience_id
+      in: path
+      required: true
+      description: aud_ 前缀 Audience ID
+      schema:
+        type: string
+        pattern: '^aud_[0-9A-HJKMNP-TV-Z]{26}$'
+    ExperimentId:
+      name: experiment_id
+      in: path
+      required: true
+      description: exp_ 前缀 Experiment ID
+      schema:
+        type: string
+        pattern: '^exp_[0-9A-HJKMNP-TV-Z]{26}$'
+    AuthorizationId:
+      name: authorization_id
+      in: path
+      required: true
+      description: auth_ 前缀 ExecutionAuthorization ID
+      schema:
+        type: string
+        pattern: '^auth_[0-9A-HJKMNP-TV-Z]{26}$'
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: cursor 分页游标（conventions：列表统一 cursor 分页）
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: 每页条数
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: 所有写操作必需的幂等键（母本 11.16）
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: 乐观锁版本（Campaign 等对象 version；冲突返回 VERSION_CONFLICT，母本 11.15、11.16）
+      schema:
+        type: string
+
+  responses:
+    BadRequest:
+      description: 输入校验失败（INVALID_SCHEMA，母本 11.15：不执行，返回字段错误）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: 未认证或令牌过期（TOKEN_EXPIRED，母本 11.15）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    PolicyDenied:
+      description: Policy 拒绝（ACTION_DENIED，母本 11.15：记录 Policy Decision，不重试）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: 对象不存在或不在当前 workspace（母本 ADR-001 租户边界）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    VersionConflict:
+      description: 乐观锁冲突（VERSION_CONFLICT，母本 11.15：返回当前版本和 Diff，用户合并或创建 Revision）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      description: 统一错误模型（母本 11.15）
+      properties:
+        error_code:
+          type: string
+          description: >-
+            机器码（母本 11.15），如 INVALID_SCHEMA、TOKEN_EXPIRED、ACTION_DENIED、
+            AUTHORIZATION_REQUIRED、PROVIDER_RATE_LIMIT、BUDGET_EXCEEDED、PROVIDER_UNAVAILABLE、
+            UNSUPPORTED_OPERATION、LICENSE_RESTRICTED、COMPLIANCE_REVIEW_REQUIRED、
+            CIRCUIT_BREAKER_OPEN、VERSION_CONFLICT
+        message:
+          type: string
+          description: 人类可读说明（中文/用户 locale）
+        details:
+          type: object
+          description: 字段级错误、当前版本与 Diff（VERSION_CONFLICT）等结构化详情
+          additionalProperties: true
+        retryable:
+          type: boolean
+          description: 是否可重试（母本 11.15 系统行为列）
+        policy_reason_codes:
+          type: array
+          items:
+            type: string
+          description: Policy 拒绝原因码（OPA 决策，母本 12）
+      required: [error_code, message, retryable]
+
+    CampaignCreateRequest:
+      type: object
+      description: 创建 Campaign 请求（CAM-001、CAM-002；字段语义与 campaign.schema.json 一致）
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        objective:
+          type: object
+          description: 自然语言目标 + 成功标准（CAM-001）
+          properties:
+            goal_statement:
+              type: string
+              minLength: 1
+            qualification_caliber:
+              type: string
+              enum: [QUALIFIED_LEAD, SAO, VERIFIED_OUTCOME]
+            success_metrics:
+              type: array
+              items:
+                type: object
+                properties:
+                  metric_name: { type: string }
+                  target_value: { type: number }
+                  unit: { type: string }
+                required: [metric_name, target_value]
+                additionalProperties: false
+          required: [goal_statement]
+          additionalProperties: false
+        growth_motion:
+          type: object
+          properties:
+            motion_code: { type: string, minLength: 1 }
+            pack_id: { type: string }
+            pack_version: { type: string }
+          required: [motion_code]
+          additionalProperties: false
+        offering_id:
+          type: string
+          description: off_ 前缀（CAM-002）
+        market:
+          type: object
+          properties:
+            market_id: { type: string }
+            country_code:
+              type: string
+              pattern: '^[A-Z]{2}$'
+            region: { type: string }
+            locale:
+              type: string
+              pattern: '^[a-z]{2}(-[A-Z]{2})?$'
+          required: [country_code]
+          additionalProperties: false
+        icp_ids:
+          type: array
+          items: { type: string }
+        audience_ids:
+          type: array
+          items: { type: string }
+        owner_id:
+          type: string
+          description: mem_ 前缀（CAM-002）
+        budget:
+          type: object
+          properties:
+            total:
+              $ref: '#/components/schemas/MoneyInput'
+            hard_cap:
+              $ref: '#/components/schemas/MoneyInput'
+            daily_cap:
+              $ref: '#/components/schemas/MoneyInput'
+          required: [total, hard_cap]
+          additionalProperties: false
+        dates:
+          type: object
+          properties:
+            planned_start_at:
+              type: string
+              format: date-time
+            planned_end_at:
+              type: string
+              format: date-time
+          required: [planned_start_at, planned_end_at]
+          additionalProperties: false
+        is_quick_campaign:
+          type: boolean
+          default: false
+          description: 系统创建 Quick Campaign 时为 true（CAM-012）
+      required: [name, objective, growth_motion, offering_id, market, owner_id, budget, dates]
+      additionalProperties: false
+
+    CampaignUpdateRequest:
+      type: object
+      description: 草稿阶段部分更新（CAM-002）；status 不可直接改，走动作端点（CAM-005 迁移规则）
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        objective:
+          type: object
+          properties:
+            goal_statement: { type: string, minLength: 1 }
+            qualification_caliber:
+              type: string
+              enum: [QUALIFIED_LEAD, SAO, VERIFIED_OUTCOME]
+            success_metrics:
+              type: array
+              items:
+                type: object
+                properties:
+                  metric_name: { type: string }
+                  target_value: { type: number }
+                  unit: { type: string }
+                required: [metric_name, target_value]
+                additionalProperties: false
+          required: [goal_statement]
+          additionalProperties: false
+        icp_ids:
+          type: array
+          items: { type: string }
+        audience_ids:
+          type: array
+          items: { type: string }
+        owner_id:
+          type: string
+        budget:
+          type: object
+          properties:
+            total: { $ref: '#/components/schemas/MoneyInput' }
+            hard_cap: { $ref: '#/components/schemas/MoneyInput' }
+            daily_cap: { $ref: '#/components/schemas/MoneyInput' }
+          required: [total, hard_cap]
+          additionalProperties: false
+        dates:
+          type: object
+          properties:
+            planned_start_at: { type: string, format: date-time }
+            planned_end_at: { type: string, format: date-time }
+          required: [planned_start_at, planned_end_at]
+          additionalProperties: false
+        strategy_snapshot:
+          type: object
+          description: 结构见 campaign.schema.json#strategy_snapshot；进入 READY_FOR_REVIEW 前必须提供
+          additionalProperties: true
+      additionalProperties: false
+
+    CampaignApproveRequest:
+      type: object
+      description: 批准请求：授权参数（CAM-008 固化项；未给出的上限从 ChannelPlan/预算推导）
+      properties:
+        note:
+          type: string
+          description: 审批意见
+        expected_snapshot_hash:
+          type: string
+          description: 审批人所见 strategy_snapshot 指纹；不一致返回 VERSION_CONFLICT（防审批目标漂移）
+        valid_from:
+          type: string
+          format: date-time
+          description: 授权生效时间（默认立即）
+        valid_until:
+          type: string
+          format: date-time
+          description: 授权有效期终点（CAM-008；必填）
+        revision_id:
+          type: string
+          description: rev_ 前缀；Revision 重新审批场景（CAM-006）
+      required: [valid_until]
+      additionalProperties: false
+
+    RevisionCreateRequest:
+      type: object
+      description: 创建修订请求（CAM-006）；差异与风险判定由服务端对比计算
+      properties:
+        reason:
+          type: string
+          minLength: 1
+        base_campaign_version:
+          type: integer
+          minimum: 1
+          description: 客户端所见 Campaign 版本（乐观锁，母本 11.16）
+        proposed_changes:
+          type: array
+          minItems: 1
+          description: 期望变更（字段路径 + 新值）
+          items:
+            type: object
+            properties:
+              field_path: { type: string, minLength: 1 }
+              new_value: true
+            required: [field_path]
+            additionalProperties: false
+      required: [reason, base_campaign_version, proposed_changes]
+      additionalProperties: false
+
+    StopConditionCreateRequest:
+      type: object
+      description: 创建停止条件（CAM-010；字段语义与 stop-condition.schema.json 一致）
+      properties:
+        condition_type:
+          type: string
+          enum: [BOUNCE_RATE, COMPLAINT_RATE, FAILURE_RATE, COST_OVERRUN, NEGATIVE_SENTIMENT]
+        threshold:
+          type: object
+          properties:
+            threshold_value:
+              type: number
+              minimum: 0
+            threshold_money:
+              $ref: '#/components/schemas/MoneyInput'
+            comparison:
+              type: string
+              enum: [GT, GTE]
+            window_minutes:
+              type: integer
+              minimum: 1
+            min_sample_size:
+              type: integer
+              minimum: 1
+          required: [comparison]
+          additionalProperties: false
+        action:
+          type: string
+          enum: [PAUSE_CAMPAIGN, PAUSE_CHANNEL, NOTIFY_ONLY]
+        channel_scope:
+          type: array
+          items:
+            type: string
+            enum: [EMAIL, LINKEDIN, X, TIKTOK, YOUTUBE, FACEBOOK, INSTAGRAM, WECHAT, WEBSITE, WEBINAR, OTHER]
+        notify_roles:
+          type: array
+          items: { type: string }
+        enabled:
+          type: boolean
+          default: true
+      required: [condition_type, threshold, action]
+      additionalProperties: false
+
+    AudienceCreateRequest:
+      type: object
+      description: 创建受众（CAM-003；字段语义与 audience.schema.json 一致）
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        icp_id:
+          type: string
+        refresh_mode:
+          type: string
+          enum: [FROZEN, DYNAMIC]
+        query_snapshot:
+          type: object
+          properties:
+            criteria:
+              type: array
+              items:
+                type: object
+                properties:
+                  field: { type: string, minLength: 1 }
+                  operator:
+                    type: string
+                    enum: [EQ, NEQ, IN, NOT_IN, GT, GTE, LT, LTE, CONTAINS, EXISTS, NOT_EXISTS]
+                  value: true
+                required: [field, operator]
+                additionalProperties: false
+            raw_query: { type: string }
+            source: { type: string }
+          required: [criteria]
+          additionalProperties: false
+      required: [name, refresh_mode, query_snapshot]
+      additionalProperties: false
+
+    AudienceUpdateRequest:
+      type: object
+      description: 更新受众名称/成员接受状态（CAM-003）
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        member_updates:
+          type: array
+          description: 成员接受/移除批量操作
+          items:
+            type: object
+            properties:
+              entity_type:
+                type: string
+                enum: [LEAD, CONTACT, ACCOUNT]
+              entity_id: { type: string }
+              membership_status:
+                type: string
+                enum: [ACCEPTED, REMOVED, SUPPRESSED]
+              removed_reason: { type: string }
+            required: [entity_type, entity_id, membership_status]
+            additionalProperties: false
+      additionalProperties: false
+
+    ExperimentCreateRequest:
+      type: object
+      description: 创建实验（CAM-011；字段语义与 experiment.schema.json 一致）
+      properties:
+        campaign_id:
+          type: string
+          description: cam_ 前缀
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        hypothesis:
+          type: string
+          minLength: 1
+        variants:
+          type: array
+          minItems: 2
+          items:
+            type: object
+            properties:
+              variant_key: { type: string, minLength: 1 }
+              description: { type: string }
+              is_control: { type: boolean }
+              asset_ids:
+                type: array
+                items: { type: string }
+              audience_id: { type: string }
+              traffic_allocation:
+                type: number
+                minimum: 0
+                maximum: 1
+            required: [variant_key, is_control]
+            additionalProperties: false
+        control_variant_key:
+          type: string
+          minLength: 1
+        winning_rule:
+          type: object
+          properties:
+            primary_metric: { type: string, minLength: 1 }
+            comparison:
+              type: string
+              enum: [LIFT_OVER_CONTROL, ABSOLUTE_TARGET]
+            min_lift: { type: number }
+            target_value: { type: number }
+            min_sample_size:
+              type: integer
+              minimum: 1
+            min_confidence:
+              type: number
+              minimum: 0
+              maximum: 1
+            evaluation_window_days:
+              type: integer
+              minimum: 1
+          required: [primary_metric, comparison, min_sample_size]
+          additionalProperties: false
+      required: [campaign_id, name, hypothesis, variants, control_variant_key, winning_rule]
+      additionalProperties: false
+
+    ExperimentUpdateRequest:
+      type: object
+      description: DRAFT 阶段实验更新（CAM-011）
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        hypothesis:
+          type: string
+          minLength: 1
+        variants:
+          type: array
+          minItems: 2
+          items:
+            type: object
+            properties:
+              variant_key: { type: string, minLength: 1 }
+              description: { type: string }
+              is_control: { type: boolean }
+              asset_ids:
+                type: array
+                items: { type: string }
+              audience_id: { type: string }
+              traffic_allocation:
+                type: number
+                minimum: 0
+                maximum: 1
+            required: [variant_key, is_control]
+            additionalProperties: false
+        control_variant_key:
+          type: string
+        winning_rule:
+          type: object
+          properties:
+            primary_metric: { type: string, minLength: 1 }
+            comparison:
+              type: string
+              enum: [LIFT_OVER_CONTROL, ABSOLUTE_TARGET]
+            min_lift: { type: number }
+            target_value: { type: number }
+            min_sample_size:
+              type: integer
+              minimum: 1
+            min_confidence:
+              type: number
+              minimum: 0
+              maximum: 1
+            evaluation_window_days:
+              type: integer
+              minimum: 1
+          required: [primary_metric, comparison, min_sample_size]
+          additionalProperties: false
+      additionalProperties: false
+
+    AuthorizationIssueRequest:
+      type: object
+      description: 签发授权请求（CAM-008 固化项全集）
+      properties:
+        campaign_id:
+          type: string
+        source_revision_id:
+          type: string
+          description: rev_ 前缀（CAM-006 重新授权场景）
+        supersedes_authorization_id:
+          type: string
+          description: auth_ 前缀，被替代的旧授权（置 SUPERSEDED）
+        scope:
+          type: object
+          properties:
+            audience_refs:
+              type: array
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  audience_id: { type: string }
+                  audience_version:
+                    type: integer
+                    minimum: 1
+                  snapshot_hash: { type: string }
+                required: [audience_id, audience_version]
+                additionalProperties: false
+            channels:
+              type: array
+              minItems: 1
+              items:
+                type: string
+                enum: [EMAIL, LINKEDIN, X, TIKTOK, YOUTUBE, FACEBOOK, INSTAGRAM, WECHAT, WEBSITE, WEBINAR, OTHER]
+            allowed_action_types:
+              type: array
+              minItems: 1
+              items:
+                type: string
+                enum: [PUBLISH, OUTBOUND_EMAIL, DM, COMMENT, REPLY, FOLLOW_UP]
+            max_total_actions:
+              type: integer
+              minimum: 1
+          required: [audience_refs, channels, allowed_action_types]
+          additionalProperties: false
+        templates:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            properties:
+              template_ref: { type: string, minLength: 1 }
+              content_hash: { type: string, minLength: 1 }
+            required: [template_ref, content_hash]
+            additionalProperties: false
+        frequency_caps:
+          type: object
+          properties:
+            max_actions_per_day:
+              type: integer
+              minimum: 0
+            max_actions_per_contact_per_day:
+              type: integer
+              minimum: 0
+            max_actions_per_contact_per_week:
+              type: integer
+              minimum: 0
+            min_interval_minutes:
+              type: integer
+              minimum: 0
+          required: [max_actions_per_day]
+          additionalProperties: false
+        budget_cap:
+          $ref: '#/components/schemas/MoneyInput'
+        thresholds:
+          type: object
+          properties:
+            max_bounce_rate:
+              type: number
+              minimum: 0
+              maximum: 1
+            max_complaint_rate:
+              type: number
+              minimum: 0
+              maximum: 1
+            max_failure_rate:
+              type: number
+              minimum: 0
+              maximum: 1
+            stop_condition_ids:
+              type: array
+              items: { type: string }
+          additionalProperties: false
+        valid_from:
+          type: string
+          format: date-time
+        valid_until:
+          type: string
+          format: date-time
+      required: [campaign_id, scope, templates, frequency_caps, budget_cap, thresholds, valid_from, valid_until]
+      additionalProperties: false
+
+    MoneyInput:
+      type: object
+      description: 金额输入（母本 11.14；与 primitives money 一致）
+      properties:
+        amount:
+          type: number
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+      required: [amount, currency]
+      additionalProperties: false
+
+    DryRunReport:
+      type: object
+      description: >-
+        Dry Run 报告：人群、样例、内容、渠道、时间、成本、数据权利和风险（CAM-007；
+        母本 5.9 审批页面必须展示项）。审批人可据 finding_id 退回具体问题（CAM-007 验收）
+      properties:
+        campaign_id:
+          type: string
+        generated_at:
+          type: string
+          format: date-time
+        objective_summary:
+          type: object
+          description: 目标和成功标准（母本 5.9）
+          properties:
+            goal_statement: { type: string }
+            qualification_caliber:
+              type: string
+              enum: [QUALIFIED_LEAD, SAO, VERIFIED_OUTCOME]
+            success_metrics:
+              type: array
+              items:
+                type: object
+                properties:
+                  metric_name: { type: string }
+                  target_value: { type: number }
+                  unit: { type: string }
+                required: [metric_name, target_value]
+                additionalProperties: false
+          required: [goal_statement]
+          additionalProperties: false
+        audience_preview:
+          type: object
+          description: 人群数量和样例（母本 5.9）
+          properties:
+            total_count:
+              type: integer
+              minimum: 0
+            per_audience:
+              type: array
+              items:
+                type: object
+                properties:
+                  audience_id: { type: string }
+                  audience_version:
+                    type: integer
+                    minimum: 1
+                  accepted_count:
+                    type: integer
+                    minimum: 0
+                required: [audience_id, audience_version, accepted_count]
+                additionalProperties: false
+            sample_members:
+              type: array
+              description: 样例成员（字段展示受数据权利约束，LICENSE_RESTRICTED 字段脱敏）
+              items:
+                type: object
+                properties:
+                  entity_type:
+                    type: string
+                    enum: [LEAD, CONTACT, ACCOUNT]
+                  entity_id: { type: string }
+                  display_fields:
+                    type: object
+                    additionalProperties: true
+                required: [entity_type, entity_id]
+                additionalProperties: false
+          required: [total_count]
+          additionalProperties: false
+        data_sources:
+          type: array
+          description: 数据来源和质量（母本 5.9；FieldEvidence 汇总，DAT-005/006）
+          items:
+            type: object
+            properties:
+              provider_id: { type: string }
+              record_count:
+                type: integer
+                minimum: 0
+              avg_confidence:
+                type: number
+                minimum: 0
+                maximum: 1
+              license_id: { type: string }
+            required: [provider_id]
+            additionalProperties: false
+        content_samples:
+          type: array
+          description: 内容样例与差异（母本 5.9；含 Variant 差异，CAM-011）
+          items:
+            type: object
+            properties:
+              template_ref: { type: string }
+              channel: { type: string }
+              locale: { type: string }
+              variant_key: { type: string }
+              excerpt: { type: string }
+              quality_check_results:
+                type: array
+                description: 质量检查结果（母本 5.8.3）
+                items:
+                  type: object
+                  properties:
+                    check:
+                      type: string
+                      enum: [FACT_CONSISTENCY, LOCALIZATION, BRAND_TONE, SENSITIVE_WORDS, CHANNEL_LENGTH, DUPLICATION, CTA, UNSUBSCRIBE_INFO, FORBIDDEN_PROMISES]
+                    passed: { type: boolean }
+                    note: { type: string }
+                  required: [check, passed]
+                  additionalProperties: false
+            required: [template_ref, channel]
+            additionalProperties: false
+        channel_schedule:
+          type: array
+          description: 渠道、时间和频率（母本 5.9）
+          items:
+            type: object
+            properties:
+              channel: { type: string }
+              planned_actions:
+                type: integer
+                minimum: 0
+              first_action_at:
+                type: string
+                format: date-time
+              last_action_at:
+                type: string
+                format: date-time
+              frequency_summary: { type: string }
+            required: [channel, planned_actions]
+            additionalProperties: false
+        cost_estimate:
+          type: object
+          description: 预计模型、数据和发送成本（母本 5.9；CAM-013）
+          properties:
+            model_cost: { $ref: '#/components/schemas/MoneyInput' }
+            data_cost: { $ref: '#/components/schemas/MoneyInput' }
+            send_cost: { $ref: '#/components/schemas/MoneyInput' }
+            total: { $ref: '#/components/schemas/MoneyInput' }
+            budget_hard_cap: { $ref: '#/components/schemas/MoneyInput' }
+            exceeds_budget:
+              type: boolean
+              description: 预估是否超出硬预算（CAM-013）
+          required: [total, exceeds_budget]
+          additionalProperties: false
+        data_rights:
+          type: object
+          description: 数据权利汇总（母本 5.9；FieldEvidence allowed_* 聚合，母本 9.2）
+          properties:
+            all_display_allowed: { type: boolean }
+            all_outreach_allowed: { type: boolean }
+            restricted_fields:
+              type: array
+              description: 受限字段与原因（LICENSE_RESTRICTED，母本 11.15）
+              items:
+                type: object
+                properties:
+                  field_name: { type: string }
+                  restriction: { type: string }
+                  license_id: { type: string }
+                required: [field_name, restriction]
+                additionalProperties: false
+          required: [all_display_allowed, all_outreach_allowed]
+          additionalProperties: false
+        risks:
+          type: array
+          description: 合规与账号健康风险（母本 5.9）
+          items:
+            type: object
+            properties:
+              finding_id:
+                type: string
+                description: 审批人退回具体问题的引用键（CAM-007 验收）
+              risk_type:
+                type: string
+                enum: [COMPLIANCE, ACCOUNT_HEALTH, DELIVERABILITY, DATA_RIGHTS, BUDGET, OTHER]
+              severity:
+                type: string
+                enum: [LOW, MEDIUM, HIGH, BLOCKER]
+              description: { type: string }
+            required: [finding_id, risk_type, severity, description]
+            additionalProperties: false
+        automation_boundaries:
+          type: object
+          description: 自动化边界、暂停阈值和有效期（母本 5.9；CAM-008/CAM-010 预览）
+          properties:
+            pause_thresholds:
+              type: array
+              items:
+                type: object
+                properties:
+                  condition_type:
+                    type: string
+                    enum: [BOUNCE_RATE, COMPLAINT_RATE, FAILURE_RATE, COST_OVERRUN, NEGATIVE_SENTIMENT]
+                  threshold_value: { type: number }
+                  action:
+                    type: string
+                    enum: [PAUSE_CAMPAIGN, PAUSE_CHANNEL, NOTIFY_ONLY]
+                required: [condition_type, action]
+                additionalProperties: false
+            proposed_validity:
+              type: object
+              properties:
+                valid_from:
+                  type: string
+                  format: date-time
+                valid_until:
+                  type: string
+                  format: date-time
+              required: [valid_until]
+              additionalProperties: false
+          additionalProperties: false
+      required:
+        - campaign_id
+        - generated_at
+        - objective_summary
+        - audience_preview
+        - data_sources
+        - content_samples
+        - channel_schedule
+        - cost_estimate
+        - data_rights
+        - risks
+        - automation_boundaries
+      additionalProperties: false

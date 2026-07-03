@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/lead/lead-score",
+  "title": "LeadScore",
+  "description": "线索六维评分（LED-006：Fit/Role/Intent/Data Quality/Reachability/Engagement，各维度有独立证据和时间；LED-007：规则/统计/LLM/人工反馈组合，模型不能覆盖硬性排除和 Suppression；母本 4.5.3：不使用单一黑盒分数，各维度独立展示；4.4：评分可解释覆盖率 100%，两次点击内查看依据）。负责域：lead；schema_version=1。id 前缀 lsc_。",
+  "type": "object",
+  "$defs": {
+    "score_evidence": {
+      "type": "object",
+      "description": "单条评分证据（LED-006 验收：各维度有独立证据和时间；7.5.4：评分理由可见）",
+      "properties": {
+        "evidence_id": { "type": "string", "description": "FieldEvidence/Signal/Evidence Store 引用" },
+        "evidence_type": {
+          "type": "string",
+          "enum": ["FIELD_EVIDENCE", "SIGNAL", "RULE_HIT", "MODEL_INFERENCE", "HUMAN_FEEDBACK"],
+          "description": "证据类别"
+        },
+        "field_name": { "type": "string", "description": "涉及的字段路径（如 employee_range）" },
+        "description": { "type": "string", "description": "人类可读依据（母本 4.4 可解释性）" },
+        "source_url": { "type": "string", "format": "uri" },
+        "observed_at": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+          "description": "证据观测时间（LED-006：时间独立）"
+        },
+        "contribution": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100,
+          "description": "对该维度分数的贡献（可回放纠正影响，母本 4.4）"
+        }
+      },
+      "required": ["evidence_type", "description", "observed_at"],
+      "additionalProperties": false
+    },
+    "score_dimension": {
+      "type": "object",
+      "description": "单一评分维度（LED-006）",
+      "properties": {
+        "score": { "type": "number", "minimum": 0, "maximum": 100 },
+        "method": {
+          "type": "string",
+          "enum": ["RULE", "STATISTICAL", "LLM", "HUMAN_FEEDBACK", "COMPOSITE"],
+          "description": "本维度的评估方式（LED-007）"
+        },
+        "model_ref": { "type": "string", "description": "统计/LLM 模型版本标识（可追溯）" },
+        "computed_at": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+          "description": "本维度计算时间（LED-006：各维度时间独立）"
+        },
+        "expires_at": {
+          "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+          "description": "有效期：过期数据自动降分并进入刷新队列（母本 4.5.5）；Intent 维度受 Signal.expires_at 驱动（LED-014）"
+        },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/score_evidence" },
+          "description": "本维度的独立证据列表（LED-006 验收）"
+        }
+      },
+      "required": ["score", "method", "computed_at", "evidence"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "前缀 lsc_（对 primitives 前缀映射的 lead 域补充）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "lead_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "被评分 Lead（led_ 前缀）"
+    },
+    "icp_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "评分依据的 ICP 版本（icp_ 前缀）"
+    },
+    "dimensions": {
+      "type": "object",
+      "description": "六个维度（LED-006），全部必填、独立展示（母本 4.5.3）",
+      "properties": {
+        "fit": { "$ref": "#/$defs/score_dimension", "description": "公司与 ICP 匹配度" },
+        "role": { "$ref": "#/$defs/score_dimension", "description": "联系人是否为正确角色（LED-002 购买委员会）" },
+        "intent": { "$ref": "#/$defs/score_dimension", "description": "当前意向/触发信号（LED-014；信号过期自动降低本维度）" },
+        "data_quality": { "$ref": "#/$defs/score_dimension", "description": "数据完整性、时效性和验证状态" },
+        "reachability": { "$ref": "#/$defs/score_dimension", "description": "可触达性：已验证联系方式、未被抑制、渠道可用" },
+        "engagement": { "$ref": "#/$defs/score_dimension", "description": "与企业内容、邮件和网站的互动程度" }
+      },
+      "required": ["fit", "role", "intent", "data_quality", "reachability", "engagement"],
+      "additionalProperties": false
+    },
+    "total_priority": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "综合优先级：由规则、统计、LLM 和人工反馈按 ICP weights 组合（LED-007、附录 C weights），但每个维度独立展示（母本 4.5.3）"
+    },
+    "hard_exclusion_applied": {
+      "type": "boolean",
+      "description": "为 true 时命中 HARD_EXCLUSION，Lead 出局且 total_priority 置 0；任何统计/LLM 模型不得覆盖（LED-003/007 验收）"
+    },
+    "suppression_applied": {
+      "type": "boolean",
+      "description": "为 true 时命中全局 Suppression，禁止进入发送队列；模型不得覆盖（LED-007 验收、母本 4.5.5）"
+    },
+    "triggered_rule_ids": {
+      "type": "array",
+      "items": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
+      "description": "命中的 QualificationRule（qrl_ 前缀），用于回放解释（母本 4.4）"
+    },
+    "weights_snapshot": {
+      "type": "object",
+      "description": "评分时使用的六维权重快照（来自 ICPDefinition.weights，保证可回放）",
+      "properties": {
+        "fit": { "type": "number", "minimum": 0, "maximum": 1 },
+        "role": { "type": "number", "minimum": 0, "maximum": 1 },
+        "intent": { "type": "number", "minimum": 0, "maximum": 1 },
+        "data_quality": { "type": "number", "minimum": 0, "maximum": 1 },
+        "reachability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "engagement": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "computed_at": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
+      "description": "本次综合评分时间"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "lead_id",
+    "dimensions",
+    "total_priority",
+    "hard_exclusion_applied",
+    "suppression_applied",
+    "computed_at",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "additionalProperties": false
+}

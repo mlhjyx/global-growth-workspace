@@ -1,0 +1,906 @@
+# Opportunity 域 REST API（OpenAPI 3.1）
+# 负责域：opportunity。路径分组见母本 11.12（/opportunities）与 7.10（/touchpoints 属 /analytics 采集入口，评审确认由 opportunity 域持有触点写入契约）。
+# 需求追踪：ENG-007..010/016/017、ANA-001/013/014；错误模型 母本 11.15；幂等/乐观锁 母本 11.16。
+# SAO 7/30/90 天验证回写由 Temporal 定时工作流驱动（补母本 9.8 用例）——EXPIRED 无人工端点。
+openapi: 3.1.0
+info:
+  title: Opportunity Domain API
+  version: 1.0.0
+  description: |
+    三级结果链（ENG-016）与北极星 SAO 修复契约：机会 CRUD 与阶段管理（ENG-008/010）、
+    SAO 接受/撤回/降级（ENG-009/017、ANA-014 评审补丁）、商业结果 7/30/90 天回写与验证
+    （ENG-017、ANA-013）、统一触点（ANA-001）。所有写操作要求 Idempotency-Key（母本 11.16），
+    更新用 If-Match 乐观锁，冲突返回 VERSION_CONFLICT（母本 11.15）。
+
+paths:
+  /opportunities:
+    get:
+      operationId: listOpportunities
+      summary: 机会列表
+      description: 按阶段/三级状态/Owner/Campaign/Account 过滤（ENG-008/016、ANA-013 统计口径来源）。cursor 分页。policy:opportunity.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: stage
+          in: query
+          description: 阶段过滤（与 state-machines/opportunity.state.ts 一致）
+          schema:
+            $ref: '#/components/schemas/OpportunityStage'
+        - name: qualification_status
+          in: query
+          description: 三级结果状态过滤（ENG-016/ANA-013）
+          schema:
+            $ref: '#/components/schemas/QualificationStatus'
+        - name: owner_id
+          in: query
+          schema:
+            type: string
+        - name: campaign_id
+          in: query
+          schema:
+            type: string
+        - name: account_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 机会分页列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Opportunity'
+                  next_cursor:
+                    type: [string, 'null']
+                    description: 下一页游标；空表示无更多
+                required: [items, next_cursor]
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      operationId: createOpportunity
+      summary: 创建机会
+      description: 高意向互动创建/关联为机会（ENG-007，保留来源和会话上下文）。初始 stage=NEW、qualification_status=QUALIFIED_LEAD。policy:opportunity.write
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpportunityCreateRequest'
+      responses:
+        '201':
+          description: 已创建（同时发布 OpportunityAccepted 事件，母本 11.11）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Opportunity'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /opportunities/{opportunity_id}:
+    parameters:
+      - $ref: '#/components/parameters/OpportunityId'
+    get:
+      operationId: getOpportunity
+      summary: 机会详情
+      description: 含 touchpoint_ids 时间线回溯（ENG-015、7.10.4 验收）。policy:opportunity.read
+      responses:
+        '200':
+          description: 机会详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Opportunity'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    patch:
+      operationId: updateOpportunity
+      summary: 更新机会
+      description: 更新 Owner/下一步/金额区间/产品/目标市场（ENG-010）。乐观锁 If-Match（母本 11.16），冲突返回 VERSION_CONFLICT（母本 11.15）。阶段与三级状态不走本端点，用 /stage /accept /withdraw /downgrade。policy:opportunity.write
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpportunityUpdateRequest'
+      responses:
+        '200':
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Opportunity'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /opportunities/{opportunity_id}/stage:
+    post:
+      operationId: changeOpportunityStage
+      summary: 阶段变更
+      description: 沿 state-machines/opportunity.state.ts 转移（ENG-008、母本 11.9）；非法转移返回 422 INVALID_STATE_TRANSITION（母本 11.15 Validation 类扩展码）。发布 OpportunityStageChanged 并记录 STAGE_CHANGE Touchpoint（ANA-001）。policy:opportunity.write
+      parameters:
+        - $ref: '#/components/parameters/OpportunityId'
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                to_stage:
+                  $ref: '#/components/schemas/OpportunityStage'
+                reason:
+                  type: string
+                  description: 阶段原因；LOST 必填失败原因（ENG-009/ENG-017）
+              required: [to_stage]
+              additionalProperties: false
+      responses:
+        '200':
+          description: 已转移
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Opportunity'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          description: 非法状态转移（INVALID_STATE_TRANSITION）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /opportunities/{opportunity_id}/accept:
+    post:
+      operationId: acceptOpportunityAsSAO
+      summary: 接受为 SAO（三级结果链第二级）
+      description: qualification_status QUALIFIED_LEAD -> SALES_ACCEPTED（ENG-009/ENG-016）；写入 accepted_at/accepted_by，发布 SAOAccepted 并启动 Temporal 7/30/90 天回写工作流（母本 9.8 补充用例）。policy:opportunity.accept
+      parameters:
+        - $ref: '#/components/parameters/OpportunityId'
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+                  description: 接受说明（ENG-016 验收：进入条件可审计）
+                pack_label:
+                  type: string
+                  description: 行业 Pack 映射标签（ENG-016）
+              additionalProperties: false
+      responses:
+        '200':
+          description: 已接受为 SAO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Opportunity'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /opportunities/{opportunity_id}/withdraw:
+    post:
+      operationId: withdrawOpportunity
+      summary: 撤回机会（评审补丁）
+      description: stage -> WITHDRAWN、qualification_status 回落（ENG-017/ANA-014 评审补丁：不再符合条件、重复合并或纠错）。发布 SAOWithdrawn；Analytics 按 report_impact 重算或标记版本（ANA-014 验收：虚假或失效机会不会继续充当成功指标）。policy:opportunity.withdraw
+      parameters:
+        - $ref: '#/components/parameters/OpportunityId'
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason_code:
+                  $ref: '#/components/schemas/WithdrawReasonCode'
+                reason_note:
+                  type: string
+                merged_into_id:
+                  type: string
+                  description: 重复合并时指向保留的 Opportunity（ANA-014；合并用可回放命令与审计，母本 11.16）
+                report_impact:
+                  $ref: '#/components/schemas/ReportImpact'
+              required: [reason_code, report_impact]
+              additionalProperties: false
+      responses:
+        '200':
+          description: 已撤回
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Opportunity'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /opportunities/{opportunity_id}/downgrade:
+    post:
+      operationId: downgradeOpportunity
+      summary: 降级机会（评审补丁）
+      description: stage -> DOWNGRADED、qualification_status SALES_ACCEPTED -> QUALIFIED_LEAD（ENG-017/ANA-014 评审补丁）。发布 SAODowngraded。重新符合条件后可经 /stage 回 QUALIFIED。policy:opportunity.withdraw
+      parameters:
+        - $ref: '#/components/parameters/OpportunityId'
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason_code:
+                  $ref: '#/components/schemas/WithdrawReasonCode'
+                reason_note:
+                  type: string
+                report_impact:
+                  $ref: '#/components/schemas/ReportImpact'
+              required: [reason_code, report_impact]
+              additionalProperties: false
+      responses:
+        '200':
+          description: 已降级
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Opportunity'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /opportunities/{opportunity_id}/outcomes:
+    parameters:
+      - $ref: '#/components/parameters/OpportunityId'
+    get:
+      operationId: listOutcomes
+      summary: 商业结果列表
+      description: 机会的 7/30/90 天回写结果（ENG-017、ANA-013）。policy:opportunity.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: verification_status
+          in: query
+          schema:
+            $ref: '#/components/schemas/VerificationStatus'
+      responses:
+        '200':
+          description: 结果分页列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CommercialOutcome'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      operationId: createOutcome
+      summary: 回写商业结果
+      description: 对 SAO 回写会议/样品/报价/合同/Won/Lost（ENG-017）；初始 verification_status=PENDING，必须附证据（evidence_refs minItems=1，ENG-016 验收）。机会未达 SALES_ACCEPTED 返回 422。policy:outcome.write
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OutcomeCreateRequest'
+      responses:
+        '201':
+          description: 已回写（PENDING，等待验证或 Temporal 窗口过期）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommercialOutcome'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /opportunities/{opportunity_id}/outcomes/{outcome_id}/verify:
+    post:
+      operationId: verifyOutcome
+      summary: 验证商业结果（三级结果链第三级）
+      description: PENDING -> VERIFIED（state-machines/commercial-outcome.state.ts）；机会 qualification_status -> VERIFIED，发布 OutcomeVerified（ENG-016/ENG-017、ANA-013）。policy:outcome.verify
+      parameters:
+        - $ref: '#/components/parameters/OpportunityId'
+        - $ref: '#/components/parameters/OutcomeId'
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                additional_evidence_refs:
+                  type: array
+                  items:
+                    type: string
+                  description: 追加验证证据（evd_ 前缀；ENG-016 验收：证据均可审计）
+                value:
+                  $ref: '#/components/schemas/Money'
+              additionalProperties: false
+      responses:
+        '200':
+          description: 已验证
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommercialOutcome'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        '422':
+          description: 非法状态转移（INVALID_STATE_TRANSITION，如已 EXPIRED/REVOKED）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /opportunities/{opportunity_id}/outcomes/{outcome_id}/revoke:
+    post:
+      operationId: revokeOutcome
+      summary: 撤销/纠错商业结果
+      description: PENDING/VERIFIED -> REVOKED（ANA-014 纠错补丁）；发布 OutcomeRevoked，Analytics 按 report_impact 处理历史报表。policy:outcome.revoke
+      parameters:
+        - $ref: '#/components/parameters/OpportunityId'
+        - $ref: '#/components/parameters/OutcomeId'
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason_code:
+                  $ref: '#/components/schemas/WithdrawReasonCode'
+                reason_note:
+                  type: string
+                corrected_by_outcome_id:
+                  type: string
+                  description: 纠错替代结果（ANA-014）
+                report_impact:
+                  $ref: '#/components/schemas/ReportImpact'
+              required: [reason_code, report_impact]
+              additionalProperties: false
+      responses:
+        '200':
+          description: 已撤销
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommercialOutcome'
+        '409':
+          $ref: '#/components/responses/VersionConflict'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /opportunities/{opportunity_id}/activities:
+    parameters:
+      - $ref: '#/components/parameters/OpportunityId'
+    get:
+      operationId: listActivities
+      summary: 机会活动时间线
+      description: 机会活动记录，支撑统一时间线（ENG-015）。policy:opportunity.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: 活动分页列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Activity'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      operationId: createActivity
+      summary: 记录机会活动
+      description: 记录电话/会议/样品/报价/备注等（母本 7.9.6 人工录入；ENG-010 下一步）。policy:opportunity.write
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityCreateRequest'
+      responses:
+        '201':
+          description: 已记录
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /touchpoints:
+    get:
+      operationId: listTouchpoints
+      summary: 统一触点列表
+      description: 按 Campaign/Account/Contact/Opportunity/类型/时间过滤（ANA-001；ENG-015 用户可从 Opportunity 回溯所有触点）。policy:touchpoint.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: touchpoint_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/TouchpointType'
+        - name: campaign_id
+          in: query
+          schema:
+            type: string
+        - name: account_id
+          in: query
+          schema:
+            type: string
+        - name: contact_id
+          in: query
+          schema:
+            type: string
+        - name: opportunity_id
+          in: query
+          schema:
+            type: string
+        - name: occurred_after
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: occurred_before
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: 触点分页列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Touchpoint'
+                  next_cursor:
+                    type: [string, 'null']
+                required: [items, next_cursor]
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      operationId: recordTouchpoint
+      summary: 记录统一触点
+      description: 曝光/点击/回复/评论/表单/会议/样品/报价/阶段变化（ANA-001）；发布 TouchpointRecorded（母本 11.11）。Webhook 来源按 provider+external_event_id 去重（母本 11.16）。policy:touchpoint.write
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TouchpointCreateRequest'
+      responses:
+        '201':
+          description: 已记录
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Touchpoint'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+components:
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: 写操作幂等键（母本 11.16：所有写操作使用稳定 idempotency_key）
+      schema:
+        type: string
+        maxLength: 128
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: 乐观锁版本（母本 11.16 optimistic locking；不匹配返回 409 VERSION_CONFLICT，母本 11.15）
+      schema:
+        type: string
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: cursor 分页游标（conventions.md 统一分页）
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+    OpportunityId:
+      name: opportunity_id
+      in: path
+      required: true
+      description: opp_ 前缀实体 ID
+      schema:
+        type: string
+        pattern: '^opp_[0-9A-HJKMNP-TV-Z]{26}$'
+    OutcomeId:
+      name: outcome_id
+      in: path
+      required: true
+      description: out_ 前缀实体 ID
+      schema:
+        type: string
+        pattern: '^out_[0-9A-HJKMNP-TV-Z]{26}$'
+
+  responses:
+    ErrorResponse:
+      description: 统一错误（母本 11.15：INVALID_SCHEMA/TOKEN_EXPIRED/ACTION_DENIED/AUTHORIZATION_REQUIRED/BUDGET_EXCEEDED/LICENSE_RESTRICTED 等）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    VersionConflict:
+      description: 乐观锁冲突（母本 11.15 Conflict：返回当前版本和 Diff，用户合并或创建 Revision）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      description: 统一错误模型（母本 11.15）
+      properties:
+        error_code:
+          type: string
+          description: 机器码（母本 11.15），如 INVALID_SCHEMA、ACTION_DENIED、AUTHORIZATION_REQUIRED、BUDGET_EXCEEDED、LICENSE_RESTRICTED、VERSION_CONFLICT、INVALID_STATE_TRANSITION（Validation 类扩展）
+        message:
+          type: string
+          description: 人读错误说明
+        details:
+          type: object
+          description: 字段级错误或当前版本 Diff（VERSION_CONFLICT 时）
+        retryable:
+          type: boolean
+        policy_reason_codes:
+          type: array
+          items:
+            type: string
+          description: Policy 拒绝原因码（母本 9.9）
+      required: [error_code, message, retryable]
+
+    Money:
+      description: 金额（母本 11.14：保存币种与原始/换算值；与 common/primitives money 一致）
+      $ref: '../json-schema/common/primitives.schema.json#/$defs/money'
+
+    OpportunityStage:
+      type: string
+      enum: [NEW, QUALIFIED, MEETING, SAMPLE_DEMO, PROPOSAL, WON, LOST, WITHDRAWN, DOWNGRADED]
+      description: 与 state-machines/opportunity.state.ts 完全一致（母本 11.9 + ENG-017/ANA-014 评审补丁）
+
+    QualificationStatus:
+      type: string
+      enum: [QUALIFIED_LEAD, SALES_ACCEPTED, VERIFIED]
+      description: 三级结果模型（ENG-016）
+
+    VerificationStatus:
+      type: string
+      enum: [PENDING, VERIFIED, EXPIRED, REVOKED]
+      description: 与 state-machines/commercial-outcome.state.ts 完全一致
+
+    TouchpointType:
+      type: string
+      enum: [IMPRESSION, CLICK, REPLY, COMMENT, FORM_SUBMIT, MEETING, SAMPLE, QUOTE, STAGE_CHANGE]
+      description: ANA-001 触点类型
+
+    WithdrawReasonCode:
+      type: string
+      enum: [DUPLICATE_MERGED, NO_LONGER_QUALIFIED, INVALID_DATA, CUSTOMER_WITHDREW, CORRECTION, OTHER]
+      description: 撤回/降级/撤销原因码（ENG-017/ANA-014；与 asyncapi/opportunity.events.yaml withdraw_reason_code 一致）
+
+    ReportImpact:
+      type: string
+      enum: [RECALCULATE, VERSION_TAG]
+      description: 历史报表处理方式（ANA-014：重算或标记版本）
+
+    Opportunity:
+      description: 领域对象单一事实源：json-schema/opportunity/opportunity.schema.json（附录 C Opportunity）
+      $ref: '../json-schema/opportunity/opportunity.schema.json'
+
+    CommercialOutcome:
+      description: 领域对象单一事实源：json-schema/opportunity/commercial-outcome.schema.json（附录 C CommercialOutcome）
+      $ref: '../json-schema/opportunity/commercial-outcome.schema.json'
+
+    Touchpoint:
+      description: 领域对象单一事实源：json-schema/opportunity/touchpoint.schema.json（ANA-001）
+      $ref: '../json-schema/opportunity/touchpoint.schema.json'
+
+    Activity:
+      description: 领域对象单一事实源：json-schema/opportunity/activity.schema.json（母本 7.9.2）
+      $ref: '../json-schema/opportunity/activity.schema.json'
+
+    OpportunityCreateRequest:
+      type: object
+      description: 创建机会（ENG-007/ENG-010；stage/qualification_status/id/审计字段服务端生成）
+      properties:
+        account_id:
+          type: string
+          description: acc_ 前缀（附录 C account/contact）
+        contact_id:
+          type: string
+        lead_id:
+          type: string
+          description: 来源 Lead（ENG-007）
+        title:
+          type: string
+          maxLength: 200
+        type:
+          type: string
+          enum: [SALES, PARTNER]
+          description: 母本 7.9.1 销售或伙伴机会
+        pack_label:
+          type: string
+          description: 行业 Pack 映射标签（ENG-016）
+        owner_id:
+          type: string
+          description: ENG-010 验收：机会不能没有 Owner
+        next_step:
+          type: object
+          description: ENG-010：下一步、截止时间
+          properties:
+            description:
+              type: string
+            due_at:
+              type: string
+              format: date-time
+            owner_id:
+              type: string
+          required: [description, due_at]
+          additionalProperties: false
+        value_range:
+          type: object
+          description: ENG-010 金额区间（母本 11.14 money）
+          properties:
+            min:
+              $ref: '#/components/schemas/Money'
+            max:
+              $ref: '#/components/schemas/Money'
+          required: [min, max]
+          additionalProperties: false
+        offering_id:
+          type: string
+          description: ENG-010 产品
+        target_market:
+          type: string
+          pattern: '^[A-Z]{2}$'
+          description: ENG-010 目标市场（ISO 3166-1 alpha-2）
+        campaign_id:
+          type: string
+        touchpoint_ids:
+          type: array
+          items:
+            type: string
+        source:
+          type: object
+          description: ENG-007 验收：转化动作保留来源和会话上下文
+          properties:
+            conversation_id:
+              type: string
+            message_id:
+              type: string
+            channel:
+              type: string
+            context_note:
+              type: string
+          additionalProperties: false
+      required: [account_id, type, owner_id, next_step]
+      additionalProperties: false
+
+    OpportunityUpdateRequest:
+      type: object
+      description: 部分更新（ENG-010 字段；全部可选，至少一项）
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        contact_id:
+          type: string
+        owner_id:
+          type: string
+        pack_label:
+          type: string
+        next_step:
+          type: object
+          properties:
+            description:
+              type: string
+            due_at:
+              type: string
+              format: date-time
+            owner_id:
+              type: string
+          required: [description, due_at]
+          additionalProperties: false
+        value_range:
+          type: object
+          properties:
+            min:
+              $ref: '#/components/schemas/Money'
+            max:
+              $ref: '#/components/schemas/Money'
+          required: [min, max]
+          additionalProperties: false
+        offering_id:
+          type: string
+        target_market:
+          type: string
+          pattern: '^[A-Z]{2}$'
+        crm_ref:
+          type: object
+          description: ENG-011 CRM 引用
+          properties:
+            system:
+              type: string
+            external_id:
+              type: string
+            last_synced_at:
+              type: string
+              format: date-time
+          required: [system, external_id]
+          additionalProperties: false
+      minProperties: 1
+      additionalProperties: false
+
+    OutcomeCreateRequest:
+      type: object
+      description: 回写商业结果（ENG-017；verification_status 由服务端置 PENDING）
+      properties:
+        outcome_type:
+          type: string
+          enum: [MEETING, SAMPLE, QUOTE, CONTRACT, WON, LOST]
+          description: ENG-017：会议、样品、报价、合同、Won/Lost
+        occurred_at:
+          type: string
+          format: date-time
+        evidence_refs:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          description: evd_ 前缀；ENG-016 验收：证据均可审计
+        value:
+          $ref: '#/components/schemas/Money'
+        followup_window:
+          type: integer
+          enum: [7, 30, 90]
+          description: 归属回写窗口（ENG-017/ANA-013）
+        source_activity_id:
+          type: string
+      required: [outcome_type, occurred_at, evidence_refs, followup_window]
+      additionalProperties: false
+
+    ActivityCreateRequest:
+      type: object
+      description: 记录机会活动（母本 7.9.2 Activity）
+      properties:
+        activity_type:
+          type: string
+          enum: [NOTE, CALL, EMAIL, MEETING, SAMPLE, QUOTE, TASK, STAGE_CHANGE, CRM_SYNC]
+        subject:
+          type: string
+          maxLength: 200
+        detail:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        due_at:
+          type: string
+          format: date-time
+        owner_id:
+          type: string
+          description: 缺省为当前用户 Membership
+        conversation_id:
+          type: string
+        touchpoint_id:
+          type: string
+      required: [activity_type, occurred_at]
+      additionalProperties: false
+
+    TouchpointCreateRequest:
+      type: object
+      description: 记录统一触点（ANA-001 验收：事件具有 Campaign、Account/Contact、时间和来源；campaign_id/account_id/contact_id 至少一项）
+      properties:
+        touchpoint_type:
+          $ref: '#/components/schemas/TouchpointType'
+        campaign_id:
+          type: string
+        account_id:
+          type: string
+        contact_id:
+          type: string
+        lead_id:
+          type: string
+        opportunity_id:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        source:
+          type: object
+          properties:
+            channel:
+              type: string
+            provider_id:
+              type: string
+            external_event_id:
+              type: string
+              description: Webhook 去重键组成部分（母本 11.16）
+            url:
+              type: string
+              format: uri
+          required: [channel]
+          additionalProperties: false
+        content_asset_id:
+          type: string
+      required: [touchpoint_type, occurred_at, source]
+      anyOf:
+        - required: [campaign_id]
+        - required: [account_id]
+        - required: [contact_id]
+      additionalProperties: false

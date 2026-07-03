@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ggw://contracts/lead/lead-decision",
+  "title": "LeadDecision",
+  "description": "线索人工决策与结果回写（LED-009：支持接受/拒绝原因和后续结果回写，反馈进入租户私有学习和评估；LED-008：批量操作前展示差异；母本 5.6.3：接受、拒绝、纠正和后续转化回流评分评估，租户数据默认不跨企业共享）。负责域：lead；schema_version=1。id 前缀 ldc_。",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "前缀 ldc_（对 primitives 前缀映射的 lead 域补充）"
+    },
+    "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
+    "lead_id": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "被决策 Lead（led_ 前缀）"
+    },
+    "decision": {
+      "type": "string",
+      "enum": ["ACCEPTED", "REJECTED"],
+      "description": "决策结果（LED-009）。ACCEPTED 触发 REVIEW→QUALIFIED（LeadQualified 事件），REJECTED 触发 REVIEW→REJECTED（LeadRejected 事件），见 state-machines/lead.state.ts"
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "NOT_ICP_FIT",
+          "WRONG_ROLE",
+          "BAD_DATA",
+          "ALREADY_CUSTOMER",
+          "COMPETITOR",
+          "BAD_TIMING",
+          "DUPLICATE",
+          "COMPLIANCE_RISK",
+          "OTHER"
+        ]
+      },
+      "description": "结构化原因（LED-009；进入租户私有学习）。decision=REJECTED 时必填"
+    },
+    "reason_note": { "type": "string", "description": "自由文本补充说明" },
+    "decided_by": { "type": "string", "description": "决策人用户 ID" },
+    "decided_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "queue_at_decision": {
+      "type": "string",
+      "enum": ["RECOMMENDED", "NEEDS_CONFIRMATION", "REJECTED", "DO_NOT_CONTACT"],
+      "description": "决策时 Lead 所在队列快照（LED-008）"
+    },
+    "score_id_at_decision": {
+      "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
+      "description": "决策时的评分快照（lsc_ 前缀），用于评估评分质量（LED-009 反馈进入评估）"
+    },
+    "batch_id": {
+      "type": "string",
+      "description": "批量决策批次（母本 11.16：批量操作记录 Batch ID、选择快照、成功/失败明细）"
+    },
+    "outcome_feedback": {
+      "type": "object",
+      "description": "后续结果回写（LED-009；附录 G Verified Commercial Outcome 支持 7/30/90 天回写和纠错）",
+      "properties": {
+        "outcome_type": {
+          "type": "string",
+          "enum": [
+            "REPLIED",
+            "MEETING",
+            "OPPORTUNITY",
+            "CONVERTED",
+            "NO_RESPONSE",
+            "BOUNCED",
+            "UNSUBSCRIBED",
+            "LOST",
+            "INVALID_DATA"
+          ],
+          "description": "实际结果类别"
+        },
+        "occurred_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+        "recorded_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+        "note": { "type": "string" }
+      },
+      "required": ["outcome_type", "occurred_at", "recorded_at"],
+      "additionalProperties": false
+    },
+    "learning_scope": {
+      "type": "string",
+      "enum": ["TENANT_PRIVATE"],
+      "description": "学习范围：固定为租户私有（LED-009 验收：反馈进入租户私有学习和评估；母本 5.6.3 不跨企业共享）"
+    },
+    "created_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "updated_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
+    "version": { "$ref": "ggw://contracts/common/primitives#/$defs/version" }
+  },
+  "required": [
+    "id",
+    "workspace_id",
+    "lead_id",
+    "decision",
+    "decided_by",
+    "decided_at",
+    "learning_scope",
+    "created_at",
+    "updated_at",
+    "version"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": { "decision": { "const": "REJECTED" } },
+        "required": ["decision"]
+      },
+      "then": { "required": ["reason_codes"] }
+    }
+  ],
+  "additionalProperties": false
+}
