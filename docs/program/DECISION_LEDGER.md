@@ -13,6 +13,7 @@
 | ADR-103 | 本地环境 docker-compose（PG+Redis）；Temporal M1 引入 | APPROVED | 同上 |
 | ADR-104 | CI = GitHub Actions（verify：type-check/build/format/contracts） | APPROVED | 同上 |
 | PDR-002 | 开发执行主体 = Claude Code（非 Codex）；v2.1 已全文修正第 15 部分 | APPROVED | 母本 v2.1 附录 P.1 |
+| PDR-003 | **不升级 GitHub Pro**：私有仓库维持 Free，服务端分支保护/Required Checks 不启用；以 CLAUDE.md 合并纪律 + CHANGE_CONTROL R0-R3 判定协议为唯一补偿控制（业务负责人拍板 2026-07-03） | APPROVED | RISK-101 更新为"接受残余风险" |
 
 ## 被取代/拒绝（防回潮）
 
