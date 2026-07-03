@@ -37,10 +37,26 @@
           "items": {
             "type": "object",
             "properties": {
-              "field": { "type": "string", "minLength": 1, "description": "实体字段路径，如 company.country、contact.buying_role" },
+              "field": {
+                "type": "string",
+                "minLength": 1,
+                "description": "实体字段路径，如 company.country、contact.buying_role"
+              },
               "operator": {
                 "type": "string",
-                "enum": ["EQ", "NEQ", "IN", "NOT_IN", "GT", "GTE", "LT", "LTE", "CONTAINS", "EXISTS", "NOT_EXISTS"],
+                "enum": [
+                  "EQ",
+                  "NEQ",
+                  "IN",
+                  "NOT_IN",
+                  "GT",
+                  "GTE",
+                  "LT",
+                  "LTE",
+                  "CONTAINS",
+                  "EXISTS",
+                  "NOT_EXISTS"
+                ],
                 "description": "比较操作符"
               },
               "value": true

@@ -47,7 +47,15 @@
     },
     "business_type": {
       "type": "string",
-      "enum": ["MANUFACTURER", "TRADER", "SAAS", "PROFESSIONAL_SERVICE", "BRAND_ECOMMERCE", "AGENCY_SERVICE", "OTHER"],
+      "enum": [
+        "MANUFACTURER",
+        "TRADER",
+        "SAAS",
+        "PROFESSIONAL_SERVICE",
+        "BRAND_ECOMMERCE",
+        "AGENCY_SERVICE",
+        "OTHER"
+      ],
       "description": "业务类型（WSP-001；对应母本 3.7 场景适配矩阵的企业形态）"
     },
     "status": {

@@ -5,7 +5,12 @@ interface StepIndicatorProps {
   onStepClick: (step: number) => void;
 }
 
-export default function StepIndicator({ currentStep, totalSteps, steps, onStepClick }: StepIndicatorProps) {
+export default function StepIndicator({
+  currentStep,
+  totalSteps,
+  steps,
+  onStepClick,
+}: StepIndicatorProps) {
   return (
     <div className="w-full max-w-2xl mx-auto mb-8">
       {/* Step labels */}
@@ -13,17 +18,23 @@ export default function StepIndicator({ currentStep, totalSteps, steps, onStepCl
         {steps.map((step, idx) => (
           <button
             key={idx}
-            onClick={() => idx < currentStep ? onStepClick(idx) : undefined}
+            onClick={() => (idx < currentStep ? onStepClick(idx) : undefined)}
             className={`flex flex-col items-center gap-1 transition-all ${idx <= currentStep ? 'cursor-pointer' : 'cursor-default'}`}
           >
-            <span className={`text-xs font-medium whitespace-nowrap ${
-              idx === currentStep ? 'text-white' :
-              idx < currentStep ? 'text-primary-400' :
-              'text-foreground-500'
-            }`}>
+            <span
+              className={`text-xs font-medium whitespace-nowrap ${
+                idx === currentStep
+                  ? 'text-white'
+                  : idx < currentStep
+                    ? 'text-primary-400'
+                    : 'text-foreground-500'
+              }`}
+            >
               {step.title}
             </span>
-            <span className="text-foreground-500 text-xs whitespace-nowrap hidden sm:block">{step.subtitle}</span>
+            <span className="text-foreground-500 text-xs whitespace-nowrap hidden sm:block">
+              {step.subtitle}
+            </span>
           </button>
         ))}
       </div>

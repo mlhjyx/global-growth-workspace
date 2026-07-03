@@ -1,9 +1,5 @@
 import { useState } from 'react';
-import {
-  teamMembers,
-  pendingApprovals,
-  auditLogs,
-} from '@/mocks/teamData';
+import { teamMembers, pendingApprovals, auditLogs } from '@/mocks/teamData';
 import type { TeamMember, PendingApproval } from '@/mocks/teamData';
 
 export default function TeamPage() {
@@ -58,9 +54,10 @@ export default function TeamPage() {
     return icons[type] || 'ri-file-list-line text-foreground-500';
   };
 
-  const filteredApprovals = approvalFilter === 'all'
-    ? pendingApprovals
-    : pendingApprovals.filter(a => a.type === approvalFilter);
+  const filteredApprovals =
+    approvalFilter === 'all'
+      ? pendingApprovals
+      : pendingApprovals.filter((a) => a.type === approvalFilter);
 
   return (
     <div className="flex flex-col h-full">
@@ -86,7 +83,7 @@ export default function TeamPage() {
             { key: 'members', label: '团队成员', icon: 'ri-team-line' },
             { key: 'approvals', label: '待审批', icon: 'ri-task-line' },
             { key: 'audit', label: '审计日志', icon: 'ri-shield-keyhole-line' },
-          ].map(tab => (
+          ].map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key as typeof activeTab)}
@@ -111,12 +108,24 @@ export default function TeamPage() {
             <table className="w-full min-w-[640px]">
               <thead>
                 <tr className="border-b border-primary-500/8">
-                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">成员</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">部门 / 角色</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">状态</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">活跃时间</th>
-                  <th className="text-center px-4 py-3 text-xs font-medium text-foreground-500">战役</th>
-                  <th className="text-center px-4 py-3 text-xs font-medium text-foreground-500">转化线索</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">
+                    成员
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">
+                    部门 / 角色
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">
+                    状态
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">
+                    活跃时间
+                  </th>
+                  <th className="text-center px-4 py-3 text-xs font-medium text-foreground-500">
+                    战役
+                  </th>
+                  <th className="text-center px-4 py-3 text-xs font-medium text-foreground-500">
+                    Qualified Lead
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -126,7 +135,9 @@ export default function TeamPage() {
                       <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-data-highlight flex items-center justify-center text-white text-xs font-semibold relative">
                           {m.avatar}
-                          <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-deep-dark ${statusDot(m.status)}`}></span>
+                          <span
+                            className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-deep-dark ${statusDot(m.status)}`}
+                          ></span>
                         </div>
                         <div>
                           <p className="text-xs font-medium text-white">{m.name}</p>
@@ -139,17 +150,25 @@ export default function TeamPage() {
                       <p className="text-[11px] text-foreground-600">{m.role}</p>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`text-[11px] px-2 py-0.5 rounded-full ${
-                        m.status === 'active' ? 'bg-green-500/15 text-green-400' :
-                        m.status === 'away' ? 'bg-amber-500/15 text-amber-400' :
-                        'bg-foreground-700/15 text-foreground-600'
-                      }`}>
+                      <span
+                        className={`text-[11px] px-2 py-0.5 rounded-full ${
+                          m.status === 'active'
+                            ? 'bg-green-500/15 text-green-400'
+                            : m.status === 'away'
+                              ? 'bg-amber-500/15 text-amber-400'
+                              : 'bg-foreground-700/15 text-foreground-600'
+                        }`}
+                      >
                         {m.status === 'active' ? '在线' : m.status === 'away' ? '离开' : '离线'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-xs text-foreground-500">{m.lastActive}</td>
-                    <td className="px-4 py-3 text-center text-xs text-white">{m.campaignsManaged}</td>
-                    <td className="px-4 py-3 text-center text-xs text-primary-400 font-medium">{m.leadsConverted.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-center text-xs text-white">
+                      {m.campaignsManaged}
+                    </td>
+                    <td className="px-4 py-3 text-center text-xs text-primary-400 font-medium">
+                      {m.leadsConverted.toLocaleString()}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -168,12 +187,14 @@ export default function TeamPage() {
                 { key: 'content', label: '内容' },
                 { key: 'budget', label: '预算' },
                 { key: 'access', label: '权限' },
-              ].map(f => (
+              ].map((f) => (
                 <button
                   key={f.key}
                   onClick={() => setApprovalFilter(f.key)}
                   className={`px-2.5 py-1 rounded-full text-xs cursor-pointer whitespace-nowrap ${
-                    approvalFilter === f.key ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30' : 'text-foreground-500 hover:text-foreground-300'
+                    approvalFilter === f.key
+                      ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
+                      : 'text-foreground-500 hover:text-foreground-300'
                   }`}
                 >
                   {f.label}
@@ -195,12 +216,20 @@ export default function TeamPage() {
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-medium text-white">{a.title}</span>
-                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${priorityBadge(a.priority)}`}>
-                            {a.priority === 'urgent' ? '紧急' : a.priority === 'normal' ? '普通' : '低优'}
+                          <span
+                            className={`text-[10px] px-1.5 py-0.5 rounded-full ${priorityBadge(a.priority)}`}
+                          >
+                            {a.priority === 'urgent'
+                              ? '紧急'
+                              : a.priority === 'normal'
+                                ? '普通'
+                                : '低优'}
                           </span>
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[11px] text-foreground-500">{approvalTypeLabel(a.type)}</span>
+                          <span className="text-[11px] text-foreground-500">
+                            {approvalTypeLabel(a.type)}
+                          </span>
                           <span className="text-[11px] text-foreground-700">·</span>
                           <span className="text-[11px] text-foreground-500">{a.requester}</span>
                           <span className="text-[11px] text-foreground-700">·</span>
@@ -222,10 +251,14 @@ export default function TeamPage() {
 
                   <div className="flex items-center gap-4 text-[11px] text-foreground-600">
                     {a.budget && (
-                      <span><i className="ri-money-cny-circle-line mr-1"></i>预算 {a.budget}</span>
+                      <span>
+                        <i className="ri-money-cny-circle-line mr-1"></i>预算 {a.budget}
+                      </span>
                     )}
                     {a.deadline && (
-                      <span><i className="ri-calendar-line mr-1"></i>截止 {a.deadline}</span>
+                      <span>
+                        <i className="ri-calendar-line mr-1"></i>截止 {a.deadline}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -240,15 +273,25 @@ export default function TeamPage() {
             <table className="w-full min-w-[560px]">
               <thead>
                 <tr className="border-b border-primary-500/8">
-                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">操作</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">用户</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">对象</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">时间</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">IP</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">
+                    操作
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">
+                    用户
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">
+                    对象
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">
+                    时间
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500">
+                    IP
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {auditLogs.map(log => (
+                {auditLogs.map((log) => (
                   <tr key={log.id} className="border-b border-primary-500/5 hover:bg-white/[0.02]">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
@@ -266,7 +309,9 @@ export default function TeamPage() {
                     </td>
                     <td className="px-4 py-3 text-xs text-foreground-500">{log.target}</td>
                     <td className="px-4 py-3 text-xs text-foreground-600">{log.timestamp}</td>
-                    <td className="px-4 py-3 text-xs text-foreground-600 font-mono">{log.ip || '-'}</td>
+                    <td className="px-4 py-3 text-xs text-foreground-600 font-mono">
+                      {log.ip || '-'}
+                    </td>
                   </tr>
                 ))}
               </tbody>

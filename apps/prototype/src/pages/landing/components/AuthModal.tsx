@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, type FormEvent } from 'react';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -7,7 +7,12 @@ interface AuthModalProps {
   defaultMode?: 'login' | 'register';
 }
 
-export default function AuthModal({ isOpen, onClose, onSuccess, defaultMode = 'login' }: AuthModalProps) {
+export default function AuthModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  defaultMode = 'login',
+}: AuthModalProps) {
   const [mode, setMode] = useState<'login' | 'register'>(defaultMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,45 +28,54 @@ export default function AuthModal({ isOpen, onClose, onSuccess, defaultMode = 'l
     setIsLoading(false);
   }, []);
 
-  const handleSwitchMode = useCallback((newMode: 'login' | 'register') => {
-    setMode(newMode);
-    resetForm();
-  }, [resetForm]);
-
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (!email.trim()) {
-      setError('请输入邮箱地址');
-      return;
-    }
-    if (!password.trim()) {
-      setError('请输入密码');
-      return;
-    }
-    if (mode === 'register' && !companyName.trim()) {
-      setError('请输入公司名称');
-      return;
-    }
-
-    setIsLoading(true);
-
-    // Simulate API delay
-    setTimeout(() => {
-      // Simulate auth success - store in localStorage
-      localStorage.setItem('growthos_auth_user', JSON.stringify({
-        email: email.trim(),
-        companyName: mode === 'register' ? companyName.trim() : undefined,
-        loggedInAt: new Date().toISOString(),
-      }));
-      localStorage.setItem('growthos_auth_token', 'mock-jwt-token-' + Date.now());
-
-      setIsLoading(false);
+  const handleSwitchMode = useCallback(
+    (newMode: 'login' | 'register') => {
+      setMode(newMode);
       resetForm();
-      onSuccess();
-    }, 1200);
-  }, [email, password, companyName, mode, resetForm, onSuccess]);
+    },
+    [resetForm],
+  );
+
+  const handleSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
+      setError('');
+
+      if (!email.trim()) {
+        setError('请输入邮箱地址');
+        return;
+      }
+      if (!password.trim()) {
+        setError('请输入密码');
+        return;
+      }
+      if (mode === 'register' && !companyName.trim()) {
+        setError('请输入公司名称');
+        return;
+      }
+
+      setIsLoading(true);
+
+      // Simulate API delay
+      setTimeout(() => {
+        // Simulate auth success - store in localStorage
+        localStorage.setItem(
+          'ggw_auth_user',
+          JSON.stringify({
+            email: email.trim(),
+            companyName: mode === 'register' ? companyName.trim() : undefined,
+            loggedInAt: new Date().toISOString(),
+          }),
+        );
+        localStorage.setItem('ggw_auth_token', 'mock-jwt-token-' + Date.now());
+
+        setIsLoading(false);
+        resetForm();
+        onSuccess();
+      }, 1200);
+    },
+    [email, password, companyName, mode, resetForm, onSuccess],
+  );
 
   const handleClose = useCallback(() => {
     resetForm();
@@ -73,10 +87,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, defaultMode = 'l
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={handleClose}
-      />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
 
       {/* Modal */}
       <div className="relative z-10 w-full max-w-sm rounded-2xl border border-white/[0.06] bg-[#0d0d12] shadow-2xl overflow-hidden">
@@ -87,7 +98,9 @@ export default function AuthModal({ isOpen, onClose, onSuccess, defaultMode = 'l
               <span className="w-7 h-7 flex items-center justify-center rounded-lg bg-primary-500/15 text-primary-400">
                 <i className="ri-hexagon-line text-base"></i>
               </span>
-              <span className="text-sm font-bold text-white tracking-wider">GrowthOS</span>
+              <span className="text-sm font-bold text-white tracking-wider">
+                Global Growth Workspace
+              </span>
             </div>
             <button
               onClick={handleClose}
@@ -102,7 +115,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, defaultMode = 'l
           </h3>
           <p className="text-sm text-foreground-500">
             {mode === 'login'
-              ? '登录你的 GrowthOS 工作区'
+              ? '登录你的 Global Growth Workspace 工作区'
               : '注册后开启你的出海增长之旅'}
           </p>
         </div>
@@ -163,7 +176,11 @@ export default function AuthModal({ isOpen, onClose, onSuccess, defaultMode = 'l
               </>
             ) : (
               <>
-                <i className={mode === 'login' ? 'ri-login-box-line text-base' : 'ri-user-add-line text-base'}></i>
+                <i
+                  className={
+                    mode === 'login' ? 'ri-login-box-line text-base' : 'ri-user-add-line text-base'
+                  }
+                ></i>
                 {mode === 'login' ? '登录' : '创建账号'}
               </>
             )}

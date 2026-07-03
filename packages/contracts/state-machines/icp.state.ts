@@ -13,13 +13,7 @@
  * 枚举取值与 json-schema/lead/icp-definition.schema.json 的 status 完全一致。
  */
 
-export type IcpState =
-  | 'DRAFT'
-  | 'HYPOTHESIS'
-  | 'VALIDATING'
-  | 'ACTIVE'
-  | 'SUPERSEDED'
-  | 'ARCHIVED';
+export type IcpState = 'DRAFT' | 'HYPOTHESIS' | 'VALIDATING' | 'ACTIVE' | 'SUPERSEDED' | 'ARCHIVED';
 
 export const ICP_STATES: readonly IcpState[] = [
   'DRAFT',

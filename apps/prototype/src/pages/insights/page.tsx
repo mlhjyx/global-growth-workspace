@@ -10,7 +10,7 @@ import {
   mockKPIs,
   mockTrendData,
   mockAttributionChannels,
-  mockChannelPerformance,
+  mockCostBreakdown,
   mockReportTemplates,
   mockAIInsights,
   mockEventStream,
@@ -22,11 +22,7 @@ export default function InsightsPage() {
   return (
     <div className="flex flex-col md:h-[calc(100vh-3.5rem)]">
       {/* Top bar: KPI overview + time selector */}
-      <KPIBar
-        kpis={mockKPIs}
-        selectedPeriod={selectedPeriod}
-        onPeriodChange={setSelectedPeriod}
-      />
+      <KPIBar kpis={mockKPIs} selectedPeriod={selectedPeriod} onPeriodChange={setSelectedPeriod} />
 
       {/* Main content: full-screen dashboard grid */}
       <div className="flex-1 md:overflow-hidden overflow-y-auto">
@@ -37,9 +33,9 @@ export default function InsightsPage() {
             <div className="h-[280px] md:h-[320px] shrink-0">
               <TrendChart data={mockTrendData} />
             </div>
-            {/* Channel breakdown */}
+            {/* Cost breakdown (五类成本口径) */}
             <div className="flex-1 min-h-[300px]">
-              <ChannelBreakdown channels={mockChannelPerformance} />
+              <ChannelBreakdown items={mockCostBreakdown} />
             </div>
           </div>
 

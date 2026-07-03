@@ -127,9 +127,6 @@
     "updated_at",
     "version"
   ],
-  "anyOf": [
-    { "required": ["approver_roles"] },
-    { "required": ["approver_membership_ids"] }
-  ],
+  "anyOf": [{ "required": ["approver_roles"] }, { "required": ["approver_membership_ids"] }],
   "additionalProperties": false
 }

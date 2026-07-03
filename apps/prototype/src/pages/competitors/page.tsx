@@ -45,9 +45,10 @@ export default function CompetitorsPage() {
     return <i className="ri-close-line text-foreground-700"></i>;
   };
 
-  const filteredAlerts = alertFilter === 'all'
-    ? competitorAlerts
-    : competitorAlerts.filter(a => a.competitor === alertFilter);
+  const filteredAlerts =
+    alertFilter === 'all'
+      ? competitorAlerts
+      : competitorAlerts.filter((a) => a.competitor === alertFilter);
 
   return (
     <div className="flex flex-col h-full">
@@ -74,7 +75,7 @@ export default function CompetitorsPage() {
             { key: 'overview', label: '概览', icon: 'ri-radar-line' },
             { key: 'comparison', label: '功能对比', icon: 'ri-scales-3-line' },
             { key: 'alerts', label: '动态告警', icon: 'ri-alarm-warning-line' },
-          ].map(tab => (
+          ].map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key as typeof activeTab)}
@@ -100,19 +101,29 @@ export default function CompetitorsPage() {
             <div>
               <h2 className="text-sm font-medium text-white mb-3">市场趋势</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {marketTrends.map(trend => (
+                {marketTrends.map((trend) => (
                   <div
                     key={trend.id}
                     className="bg-background-100/30 border border-primary-500/8 rounded-xl p-4 hover:border-primary-500/20 transition-all"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${impactBadge(trend.impact)}`}>
-                        {trend.impact === 'high' ? '高影响' : trend.impact === 'medium' ? '中影响' : '低影响'}
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${impactBadge(trend.impact)}`}
+                      >
+                        {trend.impact === 'high'
+                          ? '高影响'
+                          : trend.impact === 'medium'
+                            ? '中影响'
+                            : '低影响'}
                       </span>
-                      <i className={`${trend.trend === 'up' ? 'ri-arrow-up-line text-green-400' : trend.trend === 'down' ? 'ri-arrow-down-line text-red-400' : 'ri-arrow-right-line text-foreground-500'} text-sm`}></i>
+                      <i
+                        className={`${trend.trend === 'up' ? 'ri-arrow-up-line text-green-400' : trend.trend === 'down' ? 'ri-arrow-down-line text-red-400' : 'ri-arrow-right-line text-foreground-500'} text-sm`}
+                      ></i>
                     </div>
                     <p className="text-sm font-medium text-white mb-1">{trend.title}</p>
-                    <p className="text-xs text-foreground-600 leading-relaxed mb-2">{trend.description}</p>
+                    <p className="text-xs text-foreground-600 leading-relaxed mb-2">
+                      {trend.description}
+                    </p>
                     <div className="flex items-center gap-2 text-[11px] text-foreground-600">
                       <span>{trend.category}</span>
                       <span>·</span>
@@ -142,8 +153,14 @@ export default function CompetitorsPage() {
                           <p className="text-xs text-foreground-500">{comp.industry}</p>
                         </div>
                       </div>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${threatBadge(comp.threatLevel)}`}>
-                        {comp.threatLevel === 'high' ? '高威胁' : comp.threatLevel === 'medium' ? '中威胁' : '低威胁'}
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${threatBadge(comp.threatLevel)}`}
+                      >
+                        {comp.threatLevel === 'high'
+                          ? '高威胁'
+                          : comp.threatLevel === 'medium'
+                            ? '中威胁'
+                            : '低威胁'}
                       </span>
                     </div>
 
@@ -186,16 +203,26 @@ export default function CompetitorsPage() {
                         <div>
                           <p className="text-[11px] font-medium text-green-400 mb-1">核心优势</p>
                           <div className="flex flex-wrap gap-1.5">
-                            {comp.strengths.map(s => (
-                              <span key={s} className="text-[10px] px-2 py-0.5 rounded bg-green-500/10 text-green-400">{s}</span>
+                            {comp.strengths.map((s) => (
+                              <span
+                                key={s}
+                                className="text-[10px] px-2 py-0.5 rounded bg-green-500/10 text-green-400"
+                              >
+                                {s}
+                              </span>
                             ))}
                           </div>
                         </div>
                         <div>
                           <p className="text-[11px] font-medium text-red-400 mb-1">潜在弱点</p>
                           <div className="flex flex-wrap gap-1.5">
-                            {comp.weaknesses.map(w => (
-                              <span key={w} className="text-[10px] px-2 py-0.5 rounded bg-red-500/10 text-red-400">{w}</span>
+                            {comp.weaknesses.map((w) => (
+                              <span
+                                key={w}
+                                className="text-[10px] px-2 py-0.5 rounded bg-red-500/10 text-red-400"
+                              >
+                                {w}
+                              </span>
                             ))}
                           </div>
                         </div>
@@ -218,18 +245,28 @@ export default function CompetitorsPage() {
             <div className="px-4 py-3 border-b border-primary-500/8">
               <h2 className="text-sm font-medium text-white">功能矩阵对比</h2>
               <p className="text-xs text-foreground-500 mt-0.5">
-                GrowthOS vs Demandbase · 6sense · Apollo.io · ZoomInfo
+                Global Growth Workspace vs Demandbase · 6sense · Apollo.io · ZoomInfo
               </p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-primary-500/8">
-                    <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500 w-[260px]">功能</th>
-                    <th className="text-center px-4 py-3 text-xs font-medium text-primary-400">GrowthOS</th>
-                    <th className="text-center px-4 py-3 text-xs font-medium text-foreground-500">Demandbase</th>
-                    <th className="text-center px-4 py-3 text-xs font-medium text-foreground-500">6sense</th>
-                    <th className="text-center px-4 py-3 text-xs font-medium text-foreground-500">Apollo.io</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium text-foreground-500 w-[260px]">
+                      功能
+                    </th>
+                    <th className="text-center px-4 py-3 text-xs font-medium text-primary-400">
+                      Global Growth Workspace
+                    </th>
+                    <th className="text-center px-4 py-3 text-xs font-medium text-foreground-500">
+                      Demandbase
+                    </th>
+                    <th className="text-center px-4 py-3 text-xs font-medium text-foreground-500">
+                      6sense
+                    </th>
+                    <th className="text-center px-4 py-3 text-xs font-medium text-foreground-500">
+                      Apollo.io
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -246,9 +283,15 @@ export default function CompetitorsPage() {
               </table>
             </div>
             <div className="px-4 py-3 border-t border-primary-500/8 flex items-center gap-4 text-[11px] text-foreground-600">
-              <span className="flex items-center gap-1"><i className="ri-check-line text-green-400"></i> 完全支持</span>
-              <span className="flex items-center gap-1"><i className="ri-subtract-line text-amber-400"></i> 部分支持</span>
-              <span className="flex items-center gap-1"><i className="ri-close-line text-foreground-700"></i> 不支持</span>
+              <span className="flex items-center gap-1">
+                <i className="ri-check-line text-green-400"></i> 完全支持
+              </span>
+              <span className="flex items-center gap-1">
+                <i className="ri-subtract-line text-amber-400"></i> 部分支持
+              </span>
+              <span className="flex items-center gap-1">
+                <i className="ri-close-line text-foreground-700"></i> 不支持
+              </span>
             </div>
           </div>
         )}
@@ -262,17 +305,21 @@ export default function CompetitorsPage() {
               <button
                 onClick={() => setAlertFilter('all')}
                 className={`px-2.5 py-1 rounded-full text-xs cursor-pointer whitespace-nowrap ${
-                  alertFilter === 'all' ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30' : 'text-foreground-500 hover:text-foreground-300'
+                  alertFilter === 'all'
+                    ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
+                    : 'text-foreground-500 hover:text-foreground-300'
                 }`}
               >
                 全部
               </button>
-              {competitors.map(c => (
+              {competitors.map((c) => (
                 <button
                   key={c.id}
                   onClick={() => setAlertFilter(c.name)}
                   className={`px-2.5 py-1 rounded-full text-xs cursor-pointer whitespace-nowrap ${
-                    alertFilter === c.name ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30' : 'text-foreground-500 hover:text-foreground-300'
+                    alertFilter === c.name
+                      ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
+                      : 'text-foreground-500 hover:text-foreground-300'
                   }`}
                 >
                   {c.name}
@@ -281,26 +328,40 @@ export default function CompetitorsPage() {
             </div>
 
             <div className="space-y-2">
-              {filteredAlerts.map(alert => (
+              {filteredAlerts.map((alert) => (
                 <div
                   key={alert.id}
                   className="bg-background-100/30 border border-primary-500/8 rounded-xl p-4 hover:border-primary-500/20 transition-all"
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${alertSeverity(alert.severity)}`}>
-                      <i className={`${
-                        alert.type === 'funding' ? 'ri-money-cny-circle-line' :
-                        alert.type === 'product' ? 'ri-product-hunt-line' :
-                        alert.type === 'pricing' ? 'ri-price-tag-3-line' :
-                        alert.type === 'campaign' ? 'ri-megaphone-line' :
-                        'ri-user-add-line'
-                      } text-sm`}></i>
+                    <div
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${alertSeverity(alert.severity)}`}
+                    >
+                      <i
+                        className={`${
+                          alert.type === 'funding'
+                            ? 'ri-money-cny-circle-line'
+                            : alert.type === 'product'
+                              ? 'ri-product-hunt-line'
+                              : alert.type === 'pricing'
+                                ? 'ri-price-tag-3-line'
+                                : alert.type === 'campaign'
+                                  ? 'ri-megaphone-line'
+                                  : 'ri-user-add-line'
+                        } text-sm`}
+                      ></i>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs font-medium text-white">{alert.competitor}</span>
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${alertSeverity(alert.severity)}`}>
-                          {alert.severity === 'critical' ? '关键' : alert.severity === 'warning' ? '警示' : '信息'}
+                        <span
+                          className={`text-[10px] px-1.5 py-0.5 rounded-full ${alertSeverity(alert.severity)}`}
+                        >
+                          {alert.severity === 'critical'
+                            ? '关键'
+                            : alert.severity === 'warning'
+                              ? '警示'
+                              : '信息'}
                         </span>
                       </div>
                       <p className="text-sm text-white mb-1">{alert.title}</p>

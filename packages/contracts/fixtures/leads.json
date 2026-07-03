@@ -5,22 +5,13 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000001",
     "name": "Mekong Solar Trading Co., Ltd.",
-    "trading_names": [
-      "Mekong Solar"
-    ],
-    "domains": [
-      "mekong-solar.example.com"
-    ],
+    "trading_names": ["Mekong Solar"],
+    "domains": ["mekong-solar.example.com"],
     "country": "VN",
-    "industries": [
-      "solar_distribution",
-      "renewable_energy"
-    ],
+    "industries": ["solar_distribution", "renewable_energy"],
     "employee_range": "51-200",
     "revenue_range": "5M-20M USD",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000001"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000001"],
     "quality_score": 0.86,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T03:00:00Z",
@@ -225,10 +216,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.92,
     "license_id": "lic_apex_b2b_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -247,10 +235,7 @@
     "expires_at": "2027-06-19T06:00:00Z",
     "confidence": 0.85,
     "license_id": "lic_tradedata_2026",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -264,21 +249,13 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000002",
     "name": "Saigon Green Energy JSC",
-    "trading_names": [
-      "Saigon Green Energy"
-    ],
-    "domains": [
-      "saigon-greenenergy.example.com"
-    ],
+    "trading_names": ["Saigon Green Energy"],
+    "domains": ["saigon-greenenergy.example.com"],
     "country": "VN",
-    "industries": [
-      "solar_epc"
-    ],
+    "industries": ["solar_epc"],
     "employee_range": "201-500",
     "revenue_range": "20M-100M USD",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000001"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000001"],
     "quality_score": 0.82,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T04:00:00Z",
@@ -472,10 +449,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.92,
     "license_id": "lic_apex_b2b_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -494,10 +468,7 @@
     "expires_at": "2027-06-19T06:00:00Z",
     "confidence": 0.85,
     "license_id": "lic_tradedata_2026",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -511,21 +482,12 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000003",
     "name": "Siam Sunrise Power Co., Ltd.",
-    "trading_names": [
-      "Siam Sunrise"
-    ],
-    "domains": [
-      "siam-sunrise.example.com"
-    ],
+    "trading_names": ["Siam Sunrise"],
+    "domains": ["siam-sunrise.example.com"],
     "country": "TH",
-    "industries": [
-      "solar_epc",
-      "engineering"
-    ],
+    "industries": ["solar_epc", "engineering"],
     "employee_range": "51-200",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000001"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000001"],
     "quality_score": 0.78,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T05:00:00Z",
@@ -719,10 +681,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.92,
     "license_id": "lic_apex_b2b_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -742,10 +701,7 @@
     "expires_at": "2026-09-17T06:00:00Z",
     "confidence": 0.8,
     "license_id": "lic_public_web_tos",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": true,
     "allowed_for_ai": true,
@@ -759,20 +715,12 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000004",
     "name": "Bangkok Solar Import Co., Ltd.",
-    "trading_names": [
-      "BKK Solar Import"
-    ],
-    "domains": [
-      "bkk-solarimport.example.com"
-    ],
+    "trading_names": ["BKK Solar Import"],
+    "domains": ["bkk-solarimport.example.com"],
     "country": "TH",
-    "industries": [
-      "solar_distribution"
-    ],
+    "industries": ["solar_distribution"],
     "employee_range": "11-50",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000001"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000001"],
     "quality_score": 0.61,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T06:00:00Z",
@@ -838,9 +786,7 @@
     },
     "latest_score_id": "lsc_01JZSC0R000000000000000004",
     "latest_priority": 64,
-    "risk_flags": [
-      "unverified_email"
-    ],
+    "risk_flags": ["unverified_email"],
     "last_enriched_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T06:00:00Z",
     "updated_at": "2026-06-20T03:34:00Z",
@@ -963,10 +909,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.7,
     "license_id": "lic_apex_b2b_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -985,10 +928,7 @@
     "expires_at": "2027-06-19T06:00:00Z",
     "confidence": 0.85,
     "license_id": "lic_tradedata_2026",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -1002,22 +942,13 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000005",
     "name": "Penang SolarTech Sdn. Bhd.",
-    "trading_names": [
-      "Penang SolarTech"
-    ],
-    "domains": [
-      "penang-solartech.example.com"
-    ],
+    "trading_names": ["Penang SolarTech"],
+    "domains": ["penang-solartech.example.com"],
     "country": "MY",
-    "industries": [
-      "solar_distribution",
-      "electrical_wholesale"
-    ],
+    "industries": ["solar_distribution", "electrical_wholesale"],
     "employee_range": "51-200",
     "revenue_range": "5M-20M USD",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000001"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000001"],
     "quality_score": 0.8,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T07:00:00Z",
@@ -1222,10 +1153,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.92,
     "license_id": "lic_apex_b2b_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -1244,10 +1172,7 @@
     "expires_at": "2027-06-19T06:00:00Z",
     "confidence": 0.85,
     "license_id": "lic_tradedata_2026",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -1261,20 +1186,12 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000006",
     "name": "Borneo Energy Distribution Sdn. Bhd.",
-    "trading_names": [
-      "Borneo Energy"
-    ],
-    "domains": [
-      "borneo-energy.example.com"
-    ],
+    "trading_names": ["Borneo Energy"],
+    "domains": ["borneo-energy.example.com"],
     "country": "MY",
-    "industries": [
-      "solar_distribution"
-    ],
+    "industries": ["solar_distribution"],
     "employee_range": "11-50",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000001"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000001"],
     "quality_score": 0.55,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T08:00:00Z",
@@ -1340,9 +1257,7 @@
     },
     "latest_score_id": "lsc_01JZSC0R000000000000000006",
     "latest_priority": 61,
-    "risk_flags": [
-      "expired_data"
-    ],
+    "risk_flags": ["expired_data"],
     "last_enriched_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T08:00:00Z",
     "updated_at": "2026-06-20T03:36:00Z",
@@ -1465,10 +1380,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.7,
     "license_id": "lic_apex_b2b_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -1488,10 +1400,7 @@
     "expires_at": "2026-09-17T06:00:00Z",
     "confidence": 0.8,
     "license_id": "lic_public_web_tos",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": true,
     "allowed_for_ai": true,
@@ -1505,20 +1414,12 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000007",
     "name": "Manila Bright Power Corp.",
-    "trading_names": [
-      "Manila Bright Power"
-    ],
-    "domains": [
-      "manila-brightpower.example.com"
-    ],
+    "trading_names": ["Manila Bright Power"],
+    "domains": ["manila-brightpower.example.com"],
     "country": "PH",
-    "industries": [
-      "solar_epc"
-    ],
+    "industries": ["solar_epc"],
     "employee_range": "51-200",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000001"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000001"],
     "quality_score": 0.7,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T09:00:00Z",
@@ -1587,9 +1488,7 @@
     },
     "latest_score_id": "lsc_01JZSC0R000000000000000007",
     "latest_priority": 58,
-    "risk_flags": [
-      "missing_decision_maker"
-    ],
+    "risk_flags": ["missing_decision_maker"],
     "last_enriched_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T09:00:00Z",
     "updated_at": "2026-06-20T03:37:00Z",
@@ -1712,10 +1611,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.92,
     "license_id": "lic_apex_b2b_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -1734,10 +1630,7 @@
     "expires_at": "2027-06-19T06:00:00Z",
     "confidence": 0.85,
     "license_id": "lic_tradedata_2026",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -1751,20 +1644,12 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000008",
     "name": "PT Surya Nusantara Jakarta",
-    "trading_names": [
-      "Surya Nusantara"
-    ],
-    "domains": [
-      "surya-nusantara.example.com"
-    ],
+    "trading_names": ["Surya Nusantara"],
+    "domains": ["surya-nusantara.example.com"],
     "country": "ID",
-    "industries": [
-      "solar_distribution"
-    ],
+    "industries": ["solar_distribution"],
     "employee_range": "11-50",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000001"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000001"],
     "quality_score": 0.74,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T10:00:00Z",
@@ -1958,10 +1843,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.92,
     "license_id": "lic_apex_b2b_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -1980,10 +1862,7 @@
     "expires_at": "2027-06-19T06:00:00Z",
     "confidence": 0.85,
     "license_id": "lic_tradedata_2026",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -1997,16 +1876,10 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000009",
     "name": "PT Bali Solar Manufacturing",
-    "trading_names": [
-      "Bali Solar Mfg"
-    ],
-    "domains": [
-      "bali-solarmfg.example.com"
-    ],
+    "trading_names": ["Bali Solar Mfg"],
+    "domains": ["bali-solarmfg.example.com"],
     "country": "ID",
-    "industries": [
-      "pv_module_manufacturing"
-    ],
+    "industries": ["pv_module_manufacturing"],
     "employee_range": "201-500",
     "matched_icp_ids": [],
     "quality_score": 0.68,
@@ -2077,9 +1950,7 @@
     },
     "latest_score_id": "lsc_01JZSC0R000000000000000009",
     "latest_priority": 0,
-    "risk_flags": [
-      "hard_exclusion:pv_module_manufacturing"
-    ],
+    "risk_flags": ["hard_exclusion:pv_module_manufacturing"],
     "last_enriched_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T11:00:00Z",
     "updated_at": "2026-06-20T03:39:00Z",
@@ -2202,10 +2073,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.92,
     "license_id": "lic_apex_b2b_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -2225,10 +2093,7 @@
     "expires_at": "2026-05-01T00:00:00Z",
     "confidence": 0.5,
     "license_id": "lic_public_web_tos",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": true,
     "allowed_for_ai": true,
@@ -2242,20 +2107,12 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000010",
     "name": "Hanoi PV Components Co., Ltd.",
-    "trading_names": [
-      "Hanoi PV Components"
-    ],
-    "domains": [
-      "hanoi-pvcomponents.example.com"
-    ],
+    "trading_names": ["Hanoi PV Components"],
+    "domains": ["hanoi-pvcomponents.example.com"],
     "country": "VN",
-    "industries": [
-      "solar_distribution"
-    ],
+    "industries": ["solar_distribution"],
     "employee_range": "11-50",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000001"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000001"],
     "quality_score": 0.66,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T12:00:00Z",
@@ -2333,9 +2190,7 @@
     },
     "latest_score_id": "lsc_01JZSC0R000000000000000010",
     "latest_priority": 45,
-    "risk_flags": [
-      "global_suppression"
-    ],
+    "risk_flags": ["global_suppression"],
     "last_enriched_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T12:00:00Z",
     "updated_at": "2026-06-20T03:40:00Z",
@@ -2458,10 +2313,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.92,
     "license_id": "lic_apex_b2b_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -2480,10 +2332,7 @@
     "expires_at": "2027-06-19T06:00:00Z",
     "confidence": 0.85,
     "license_id": "lic_tradedata_2026",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -2497,21 +2346,13 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000011",
     "name": "Lagos BuildMart Distribution Ltd.",
-    "trading_names": [
-      "Lagos BuildMart"
-    ],
-    "domains": [
-      "lagos-buildmart.example.com"
-    ],
+    "trading_names": ["Lagos BuildMart"],
+    "domains": ["lagos-buildmart.example.com"],
     "country": "NG",
-    "industries": [
-      "building_materials_distribution"
-    ],
+    "industries": ["building_materials_distribution"],
     "employee_range": "51-200",
     "revenue_range": "10M-50M USD",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000002"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000002"],
     "quality_score": 0.88,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T13:00:00Z",
@@ -2596,9 +2437,7 @@
     "outreach_summary": {
       "last_contacted_at": "2026-06-24T08:30:00Z",
       "touch_count_30d": 3,
-      "active_campaign_ids": [
-        "cam_01JZCAMP000000000000000001"
-      ],
+      "active_campaign_ids": ["cam_01JZCAMP000000000000000001"],
       "conflict_detected": false
     },
     "owner_user_id": "usr_01JZVSER000000000000000003",
@@ -2728,10 +2567,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.92,
     "license_id": "lic_afritrade_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -2750,10 +2586,7 @@
     "expires_at": "2027-06-19T06:00:00Z",
     "confidence": 0.85,
     "license_id": "lic_tradedata_2026",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -2767,22 +2600,13 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000012",
     "name": "Nairobi Hardware & Ceilings Ltd.",
-    "trading_names": [
-      "Nairobi Hardware"
-    ],
-    "domains": [
-      "nairobi-hardware.example.com"
-    ],
+    "trading_names": ["Nairobi Hardware"],
+    "domains": ["nairobi-hardware.example.com"],
     "country": "KE",
-    "industries": [
-      "building_materials_distribution",
-      "hardware_retail"
-    ],
+    "industries": ["building_materials_distribution", "hardware_retail"],
     "employee_range": "11-50",
     "revenue_range": "1M-5M USD",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000002"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000002"],
     "quality_score": 0.84,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T14:00:00Z",
@@ -2867,9 +2691,7 @@
     "outreach_summary": {
       "last_contacted_at": "2026-06-24T09:00:00Z",
       "touch_count_30d": 3,
-      "active_campaign_ids": [
-        "cam_01JZCAMP000000000000000001"
-      ],
+      "active_campaign_ids": ["cam_01JZCAMP000000000000000001"],
       "conflict_detected": false
     },
     "owner_user_id": "usr_01JZVSER000000000000000003",
@@ -2999,10 +2821,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.92,
     "license_id": "lic_afritrade_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -3022,10 +2841,7 @@
     "expires_at": "2026-09-17T06:00:00Z",
     "confidence": 0.8,
     "license_id": "lic_public_web_tos",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": true,
     "allowed_for_ai": true,
@@ -3039,20 +2855,12 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000013",
     "name": "Abuja Construction Supplies Ltd.",
-    "trading_names": [
-      "Abuja ConSupplies"
-    ],
-    "domains": [
-      "abuja-consupplies.example.com"
-    ],
+    "trading_names": ["Abuja ConSupplies"],
+    "domains": ["abuja-consupplies.example.com"],
     "country": "NG",
-    "industries": [
-      "building_materials_distribution"
-    ],
+    "industries": ["building_materials_distribution"],
     "employee_range": "11-50",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000002"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000002"],
     "quality_score": 0.72,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T15:00:00Z",
@@ -3126,9 +2934,7 @@
     "outreach_summary": {
       "last_contacted_at": "2026-06-25T08:00:00Z",
       "touch_count_30d": 2,
-      "active_campaign_ids": [
-        "cam_01JZCAMP000000000000000001"
-      ],
+      "active_campaign_ids": ["cam_01JZCAMP000000000000000001"],
       "conflict_detected": false
     },
     "owner_user_id": "usr_01JZVSER000000000000000003",
@@ -3256,10 +3062,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.92,
     "license_id": "lic_afritrade_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -3278,10 +3081,7 @@
     "expires_at": "2027-06-19T06:00:00Z",
     "confidence": 0.85,
     "license_id": "lic_tradedata_2026",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -3295,20 +3095,12 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000014",
     "name": "Accra Premier Building Materials Ltd.",
-    "trading_names": [
-      "Accra Premier BM"
-    ],
-    "domains": [
-      "accra-premier-bm.example.com"
-    ],
+    "trading_names": ["Accra Premier BM"],
+    "domains": ["accra-premier-bm.example.com"],
     "country": "GH",
-    "industries": [
-      "building_materials_distribution"
-    ],
+    "industries": ["building_materials_distribution"],
     "employee_range": "51-200",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000002"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000002"],
     "quality_score": 0.76,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T16:00:00Z",
@@ -3502,10 +3294,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.92,
     "license_id": "lic_afritrade_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -3524,10 +3313,7 @@
     "expires_at": "2027-06-19T06:00:00Z",
     "confidence": 0.85,
     "license_id": "lic_tradedata_2026",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -3541,21 +3327,12 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000015",
     "name": "Coastal Piping & Fittings Ltd.",
-    "trading_names": [
-      "Coastal Piping"
-    ],
-    "domains": [
-      "coastal-piping.example.com"
-    ],
+    "trading_names": ["Coastal Piping"],
+    "domains": ["coastal-piping.example.com"],
     "country": "KE",
-    "industries": [
-      "plumbing_wholesale",
-      "building_materials_distribution"
-    ],
+    "industries": ["plumbing_wholesale", "building_materials_distribution"],
     "employee_range": "11-50",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000002"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000002"],
     "quality_score": 0.74,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T17:00:00Z",
@@ -3750,10 +3527,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.92,
     "license_id": "lic_afritrade_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -3773,10 +3547,7 @@
     "expires_at": "2026-09-17T06:00:00Z",
     "confidence": 0.8,
     "license_id": "lic_public_web_tos",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": true,
     "allowed_for_ai": true,
@@ -3790,20 +3561,12 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000016",
     "name": "Kilimanjaro Builders Supplies Ltd.",
-    "trading_names": [
-      "Kilimanjaro Builders"
-    ],
-    "domains": [
-      "kilimanjaro-builders.example.com"
-    ],
+    "trading_names": ["Kilimanjaro Builders"],
+    "domains": ["kilimanjaro-builders.example.com"],
     "country": "TZ",
-    "industries": [
-      "building_materials_distribution"
-    ],
+    "industries": ["building_materials_distribution"],
     "employee_range": "11-50",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000002"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000002"],
     "quality_score": 0.58,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T18:00:00Z",
@@ -3869,9 +3632,7 @@
     },
     "latest_score_id": "lsc_01JZSC0R000000000000000016",
     "latest_priority": 60,
-    "risk_flags": [
-      "unverified_email"
-    ],
+    "risk_flags": ["unverified_email"],
     "last_enriched_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T18:00:00Z",
     "updated_at": "2026-06-20T03:46:00Z",
@@ -3994,10 +3755,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.7,
     "license_id": "lic_afritrade_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -4016,10 +3774,7 @@
     "expires_at": "2027-06-19T06:00:00Z",
     "confidence": 0.85,
     "license_id": "lic_tradedata_2026",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -4033,20 +3788,12 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000017",
     "name": "Nile Delta Building Trade LLC",
-    "trading_names": [
-      "Nile Delta BT"
-    ],
-    "domains": [
-      "niledelta-buildtrade.example.com"
-    ],
+    "trading_names": ["Nile Delta BT"],
+    "domains": ["niledelta-buildtrade.example.com"],
     "country": "EG",
-    "industries": [
-      "building_materials_distribution"
-    ],
+    "industries": ["building_materials_distribution"],
     "employee_range": "51-200",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000002"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000002"],
     "quality_score": 0.63,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T19:00:00Z",
@@ -4115,9 +3862,7 @@
     },
     "latest_score_id": "lsc_01JZSC0R000000000000000017",
     "latest_priority": 63,
-    "risk_flags": [
-      "missing_decision_maker"
-    ],
+    "risk_flags": ["missing_decision_maker"],
     "last_enriched_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T19:00:00Z",
     "updated_at": "2026-06-20T03:47:00Z",
@@ -4240,10 +3985,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.92,
     "license_id": "lic_afritrade_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -4262,10 +4004,7 @@
     "expires_at": "2027-06-19T06:00:00Z",
     "confidence": 0.85,
     "license_id": "lic_tradedata_2026",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -4279,16 +4018,10 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000018",
     "name": "Sahara Site Construction Ltd.",
-    "trading_names": [
-      "Sahara Siteworks"
-    ],
-    "domains": [
-      "sahara-siteworks.example.com"
-    ],
+    "trading_names": ["Sahara Siteworks"],
+    "domains": ["sahara-siteworks.example.com"],
     "country": "NG",
-    "industries": [
-      "construction_contractor"
-    ],
+    "industries": ["construction_contractor"],
     "employee_range": "201-500",
     "matched_icp_ids": [],
     "quality_score": 0.6,
@@ -4359,9 +4092,7 @@
     },
     "latest_score_id": "lsc_01JZSC0R000000000000000018",
     "latest_priority": 0,
-    "risk_flags": [
-      "hard_exclusion:end_contractor"
-    ],
+    "risk_flags": ["hard_exclusion:end_contractor"],
     "last_enriched_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T20:00:00Z",
     "updated_at": "2026-06-20T03:48:00Z",
@@ -4484,10 +4215,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.92,
     "license_id": "lic_afritrade_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -4507,10 +4235,7 @@
     "expires_at": "2026-09-17T06:00:00Z",
     "confidence": 0.8,
     "license_id": "lic_public_web_tos",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": true,
     "allowed_for_ai": true,
@@ -4524,21 +4249,12 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000019",
     "name": "Joburg Interior Systems (Pty) Ltd.",
-    "trading_names": [
-      "Joburg Interiors"
-    ],
-    "domains": [
-      "joburg-interiors.example.com"
-    ],
+    "trading_names": ["Joburg Interiors"],
+    "domains": ["joburg-interiors.example.com"],
     "country": "ZA",
-    "industries": [
-      "building_materials_distribution",
-      "interior_fitout"
-    ],
+    "industries": ["building_materials_distribution", "interior_fitout"],
     "employee_range": "11-50",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000002"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000002"],
     "quality_score": 0.65,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T21:00:00Z",
@@ -4616,10 +4332,7 @@
     },
     "latest_score_id": "lsc_01JZSC0R000000000000000019",
     "latest_priority": 35,
-    "risk_flags": [
-      "data_subject_request",
-      "out_of_market_scope"
-    ],
+    "risk_flags": ["data_subject_request", "out_of_market_scope"],
     "last_enriched_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T21:00:00Z",
     "updated_at": "2026-06-20T03:49:00Z",
@@ -4761,10 +4474,7 @@
     "expires_at": "2027-06-19T06:00:00Z",
     "confidence": 0.85,
     "license_id": "lic_tradedata_2026",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -4778,20 +4488,12 @@
     "workspace_id": "ws_01JZW0RK000000000000000001",
     "canonical_company_id": "cco_01JZCAN0000000000000000020",
     "name": "Delta Coast Distribution Ltd.",
-    "trading_names": [
-      "Delta Coast"
-    ],
-    "domains": [
-      "deltacoast-dist.example.com"
-    ],
+    "trading_names": ["Delta Coast"],
+    "domains": ["deltacoast-dist.example.com"],
     "country": "NG",
-    "industries": [
-      "building_materials_distribution"
-    ],
+    "industries": ["building_materials_distribution"],
     "employee_range": "11-50",
-    "matched_icp_ids": [
-      "icp_01JZ1CPD000000000000000002"
-    ],
+    "matched_icp_ids": ["icp_01JZ1CPD000000000000000002"],
     "quality_score": 0.7,
     "last_verified_at": "2026-06-19T06:00:00Z",
     "created_at": "2026-06-16T22:00:00Z",
@@ -4865,9 +4567,7 @@
     "outreach_summary": {
       "last_contacted_at": "2026-06-25T09:00:00Z",
       "touch_count_30d": 2,
-      "active_campaign_ids": [
-        "cam_01JZCAMP000000000000000001"
-      ],
+      "active_campaign_ids": ["cam_01JZCAMP000000000000000001"],
       "conflict_detected": false
     },
     "owner_user_id": "usr_01JZVSER000000000000000003",
@@ -4997,10 +4697,7 @@
     "expires_at": "2026-12-16T06:00:00Z",
     "confidence": 0.92,
     "license_id": "lic_afritrade_2026",
-    "processing_purpose": [
-      "lead_research",
-      "outreach"
-    ],
+    "processing_purpose": ["lead_research", "outreach"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,
@@ -5019,10 +4716,7 @@
     "expires_at": "2027-06-19T06:00:00Z",
     "confidence": 0.85,
     "license_id": "lic_tradedata_2026",
-    "processing_purpose": [
-      "lead_research",
-      "icp_backtest"
-    ],
+    "processing_purpose": ["lead_research", "icp_backtest"],
     "allowed_to_display": true,
     "allowed_to_export": false,
     "allowed_for_ai": true,

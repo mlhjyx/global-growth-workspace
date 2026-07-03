@@ -52,7 +52,9 @@ export const TRANSITIONS: Record<OpportunityStage, OpportunityStage[]> = {
  * 转移触发事件映射（事件契约见 asyncapi/opportunity.events.yaml，母本 11.11）。
  * 键格式 "<from>-><to>"。
  */
-export const TRANSITION_EVENTS: Partial<Record<`${OpportunityStage}->${OpportunityStage}`, string>> = {
+export const TRANSITION_EVENTS: Partial<
+  Record<`${OpportunityStage}->${OpportunityStage}`, string>
+> = {
   'NEW->QUALIFIED': 'OpportunityStageChanged',
   'NEW->LOST': 'OpportunityStageChanged',
   'NEW->WITHDRAWN': 'SAOWithdrawn',
@@ -87,11 +89,7 @@ export const TRANSITION_EVENTS: Partial<Record<`${OpportunityStage}->${Opportuni
  * ENG-016 三级结果链（北极星）：Qualified Lead -> Sales Accepted Opportunity ->
  * Verified Commercial Outcome（附录 G 术语表；ANA-013 分别统计并展示 7/30/90 天滞后转化）。
  */
-export const QUALIFICATION_STATUSES = [
-  'QUALIFIED_LEAD',
-  'SALES_ACCEPTED',
-  'VERIFIED',
-] as const;
+export const QUALIFICATION_STATUSES = ['QUALIFIED_LEAD', 'SALES_ACCEPTED', 'VERIFIED'] as const;
 
 export type QualificationStatus = (typeof QUALIFICATION_STATUSES)[number];
 

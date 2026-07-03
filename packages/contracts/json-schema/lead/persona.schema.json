@@ -43,9 +43,21 @@
       "description": "该 Persona 通常承担的购买委员会角色（LED-002；取值与 buying-committee-role.schema.json 一致）"
     },
     "goals": { "type": "array", "items": { "type": "string" }, "description": "业务目标" },
-    "pain_points": { "type": "array", "items": { "type": "string" }, "description": "痛点（LED-001）" },
-    "kpis": { "type": "array", "items": { "type": "string" }, "description": "关注 KPI（母本 1616）" },
-    "objections": { "type": "array", "items": { "type": "string" }, "description": "常见异议（母本 1616）" },
+    "pain_points": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "痛点（LED-001）"
+    },
+    "kpis": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "关注 KPI（母本 1616）"
+    },
+    "objections": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "常见异议（母本 1616）"
+    },
     "information_needs": {
       "type": "array",
       "items": { "type": "string" },

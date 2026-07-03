@@ -5,9 +5,24 @@ interface InsightsAIProps {
 }
 
 const typeConfig: Record<string, { icon: string; color: string; bg: string; label: string }> = {
-  discovery: { icon: 'ri-lightbulb-line', color: 'text-primary-400', bg: 'bg-primary-500/10', label: '发现' },
-  warning: { icon: 'ri-error-warning-line', color: 'text-warning', bg: 'bg-warning/10', label: '预警' },
-  opportunity: { icon: 'ri-rocket-line', color: 'text-success', bg: 'bg-success/10', label: '机会' },
+  discovery: {
+    icon: 'ri-lightbulb-line',
+    color: 'text-primary-400',
+    bg: 'bg-primary-500/10',
+    label: '发现',
+  },
+  warning: {
+    icon: 'ri-error-warning-line',
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    label: '预警',
+  },
+  opportunity: {
+    icon: 'ri-rocket-line',
+    color: 'text-success',
+    bg: 'bg-success/10',
+    label: '机会',
+  },
   anomaly: { icon: 'ri-alert-line', color: 'text-error', bg: 'bg-error/10', label: '异常' },
 };
 
@@ -26,7 +41,7 @@ export default function InsightsAI({ insights }: InsightsAIProps) {
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto">
-        {insights.map(insight => {
+        {insights.map((insight) => {
           const config = typeConfig[insight.type];
           return (
             <div
@@ -34,13 +49,17 @@ export default function InsightsAI({ insights }: InsightsAIProps) {
               className="p-3 rounded-lg bg-white/5 border border-white/5 hover:border-primary-500/20 transition-all cursor-pointer group"
             >
               <div className="flex items-start gap-2.5">
-                <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${config.bg}`}>
+                <span
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${config.bg}`}
+                >
                   <i className={`${config.icon} text-xs ${config.color}`}></i>
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`text-xs font-medium ${config.color}`}>{config.label}</span>
-                    <span className="text-foreground-500 text-xs">{insight.confidence}% 置信度</span>
+                    <span className="text-foreground-500 text-xs">
+                      {insight.confidence}% 置信度
+                    </span>
                   </div>
                   <h4 className="text-white text-xs font-medium mb-1">{insight.title}</h4>
                   <p className="text-foreground-500 text-xs leading-relaxed line-clamp-3 group-hover:line-clamp-none transition-all">
@@ -49,7 +68,9 @@ export default function InsightsAI({ insights }: InsightsAIProps) {
                   {insight.relatedMetric && (
                     <div className="flex items-center gap-1.5 mt-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-primary-500"></span>
-                      <span className="text-foreground-500 text-xs">关联指标: {insight.relatedMetric}</span>
+                      <span className="text-foreground-500 text-xs">
+                        关联指标: {insight.relatedMetric}
+                      </span>
                     </div>
                   )}
                 </div>

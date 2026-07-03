@@ -12,7 +12,16 @@
         "contact_point_id": { "type": "string" },
         "type": {
           "type": "string",
-          "enum": ["EMAIL", "PHONE", "LINKEDIN", "WHATSAPP", "WECHAT", "FACEBOOK", "X", "OTHER_SOCIAL"],
+          "enum": [
+            "EMAIL",
+            "PHONE",
+            "LINKEDIN",
+            "WHATSAPP",
+            "WECHAT",
+            "FACEBOOK",
+            "X",
+            "OTHER_SOCIAL"
+          ],
           "description": "联系方式类型（LED-013：邮箱、电话、社交资料）"
         },
         "value": {
@@ -37,7 +46,10 @@
           "enum": ["UNKNOWN", "OPT_IN", "OPT_OUT", "WITHDRAWN"],
           "description": "该联系方式的同意状态（附录 C consent）"
         },
-        "suppressed": { "type": "boolean", "description": "是否被 SuppressionRecord 命中（母本 8.9 全局抑制）" },
+        "suppressed": {
+          "type": "boolean",
+          "description": "是否被 SuppressionRecord 命中（母本 8.9 全局抑制）"
+        },
         "expires_at": {
           "$ref": "ggw://contracts/common/primitives#/$defs/timestamp",
           "description": "TTL：超期自动隐藏/删除（母本 8.9）"
@@ -73,9 +85,15 @@
           "description": "适用渠道"
         },
         "status": { "type": "string", "enum": ["OPT_IN", "OPT_OUT", "WITHDRAWN", "UNKNOWN"] },
-        "legal_basis": { "type": "string", "description": "法律依据，如 legitimate_interest、consent" },
+        "legal_basis": {
+          "type": "string",
+          "description": "法律依据，如 legitimate_interest、consent"
+        },
         "captured_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },
-        "source": { "type": "string", "description": "来源，如 web_form、import、unsubscribe_link" },
+        "source": {
+          "type": "string",
+          "description": "来源，如 web_form、import、unsubscribe_link"
+        },
         "expires_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" }
       },
       "required": ["purpose", "status", "captured_at"],
@@ -102,7 +120,14 @@
         "undo_of_operation_id": { "type": "string" },
         "audit_log_id": { "type": "string" }
       },
-      "required": ["operation_id", "operation", "source_entity_ids", "result_entity_ids", "operated_by", "operated_at"],
+      "required": [
+        "operation_id",
+        "operation",
+        "source_entity_ids",
+        "result_entity_ids",
+        "operated_by",
+        "operated_at"
+      ],
       "additionalProperties": false
     }
   },
@@ -120,7 +145,12 @@
       "$ref": "ggw://contracts/common/primitives#/$defs/entity_id",
       "description": "指向 Data Hub CanonicalPerson（母本 8.8）"
     },
-    "full_name": { "type": "string", "minLength": 1, "maxLength": 300, "description": "附录 C names" },
+    "full_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300,
+      "description": "附录 C names"
+    },
     "given_name": { "type": "string" },
     "family_name": { "type": "string" },
     "alternate_names": { "type": "array", "items": { "type": "string" } },

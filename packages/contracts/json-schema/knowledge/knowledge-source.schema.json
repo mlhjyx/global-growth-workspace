@@ -13,17 +13,7 @@
     "workspace_id": { "$ref": "ggw://contracts/common/primitives#/$defs/workspace_id" },
     "source_type": {
       "type": "string",
-      "enum": [
-        "WEBSITE",
-        "PDF",
-        "DOCX",
-        "PPTX",
-        "XLSX",
-        "IMAGE",
-        "AUDIO",
-        "VIDEO",
-        "MANUAL_INPUT"
-      ],
+      "enum": ["WEBSITE", "PDF", "DOCX", "PPTX", "XLSX", "IMAGE", "AUDIO", "VIDEO", "MANUAL_INPUT"],
       "description": "来源类型枚举（KNW-001 原文列举 9 类：官网、PDF、DOCX、PPTX、XLSX、图片、音频、视频、手工输入）"
     },
     "title": {

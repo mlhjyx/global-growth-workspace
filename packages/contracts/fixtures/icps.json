@@ -168,19 +168,49 @@
       }
     ],
     "trigger_signals": [
-      { "signal_type": "TRADE", "subtype": "pv_module_import_growth", "min_strength": 0.5, "lookback_days": 180, "weight": 0.4 },
-      { "signal_type": "HIRING", "subtype": "solar_project_engineer", "min_strength": 0.4, "lookback_days": 90, "weight": 0.2 },
-      { "signal_type": "EVENT", "subtype": "solar_expo_exhibitor", "min_strength": 0.3, "lookback_days": 365, "weight": 0.2 }
+      {
+        "signal_type": "TRADE",
+        "subtype": "pv_module_import_growth",
+        "min_strength": 0.5,
+        "lookback_days": 180,
+        "weight": 0.4
+      },
+      {
+        "signal_type": "HIRING",
+        "subtype": "solar_project_engineer",
+        "min_strength": 0.4,
+        "lookback_days": 90,
+        "weight": 0.2
+      },
+      {
+        "signal_type": "EVENT",
+        "subtype": "solar_expo_exhibitor",
+        "min_strength": 0.3,
+        "lookback_days": 365,
+        "weight": 0.2
+      }
     ],
     "negative_signals": [
-      { "signal_type": "RELATIONSHIP_CHANGE", "subtype": "exclusive_supply_agreement_signed", "lookback_days": 365, "weight": 0.3 }
+      {
+        "signal_type": "RELATIONSHIP_CHANGE",
+        "subtype": "exclusive_supply_agreement_signed",
+        "lookback_days": 365,
+        "weight": 0.3
+      }
     ],
     "buying_committee_role_ids": [
       "bcr_01JZBCRR000000000000000001",
       "bcr_01JZBCRR000000000000000002",
       "bcr_01JZBCRR000000000000000003"
     ],
-    "weights": { "fit": 0.3, "role": 0.15, "intent": 0.25, "data_quality": 0.1, "reachability": 0.1, "engagement": 0.1 },
+    "weights": {
+      "fit": 0.3,
+      "role": 0.15,
+      "intent": 0.25,
+      "data_quality": 0.1,
+      "reachability": 0.1,
+      "engagement": 0.1
+    },
     "market_scope": ["VN", "TH", "MY", "PH", "ID"],
     "market_overrides": [
       {
@@ -236,7 +266,11 @@
     "status": "ACTIVE",
     "offering_id": "off_01JZ0FFR000000000000000003",
     "business_scenarios": ["建材批发分销", "承包商供货渠道", "五金建材连锁门店供货"],
-    "pain_points": ["货源不稳定且认证文件不全导致清关延误", "外汇获取与信用证成本", "缺少品牌方营销与技术支持"],
+    "pain_points": [
+      "货源不稳定且认证文件不全导致清关延误",
+      "外汇获取与信用证成本",
+      "缺少品牌方营销与技术支持"
+    ],
     "criteria": [
       {
         "criterion_id": "c1_market",
@@ -291,18 +325,48 @@
       }
     ],
     "trigger_signals": [
-      { "signal_type": "TRADE", "subtype": "building_materials_import_recurring", "min_strength": 0.5, "lookback_days": 365, "weight": 0.4 },
-      { "signal_type": "EVENT", "subtype": "construction_expo_exhibitor", "min_strength": 0.3, "lookback_days": 365, "weight": 0.2 },
-      { "signal_type": "WEBSITE", "subtype": "product_category_expansion", "min_strength": 0.3, "lookback_days": 120, "weight": 0.2 }
+      {
+        "signal_type": "TRADE",
+        "subtype": "building_materials_import_recurring",
+        "min_strength": 0.5,
+        "lookback_days": 365,
+        "weight": 0.4
+      },
+      {
+        "signal_type": "EVENT",
+        "subtype": "construction_expo_exhibitor",
+        "min_strength": 0.3,
+        "lookback_days": 365,
+        "weight": 0.2
+      },
+      {
+        "signal_type": "WEBSITE",
+        "subtype": "product_category_expansion",
+        "min_strength": 0.3,
+        "lookback_days": 120,
+        "weight": 0.2
+      }
     ],
     "negative_signals": [
-      { "signal_type": "RELATIONSHIP_CHANGE", "subtype": "competitor_exclusive_agency_signed", "lookback_days": 365, "weight": 0.3 }
+      {
+        "signal_type": "RELATIONSHIP_CHANGE",
+        "subtype": "competitor_exclusive_agency_signed",
+        "lookback_days": 365,
+        "weight": 0.3
+      }
     ],
     "buying_committee_role_ids": [
       "bcr_01JZBCRR000000000000000004",
       "bcr_01JZBCRR000000000000000005"
     ],
-    "weights": { "fit": 0.35, "role": 0.2, "intent": 0.15, "data_quality": 0.1, "reachability": 0.15, "engagement": 0.05 },
+    "weights": {
+      "fit": 0.35,
+      "role": 0.2,
+      "intent": 0.15,
+      "data_quality": 0.1,
+      "reachability": 0.15,
+      "engagement": 0.05
+    },
     "market_scope": ["NG", "KE", "GH", "TZ", "EG"],
     "market_overrides": [
       {

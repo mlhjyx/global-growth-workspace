@@ -15,12 +15,7 @@
  * 负责域：opportunity。schema_version: 1。受保护路径：改动走 plan mode 审批。
  */
 
-export const COMMERCIAL_OUTCOME_STATES = [
-  'PENDING',
-  'VERIFIED',
-  'EXPIRED',
-  'REVOKED',
-] as const;
+export const COMMERCIAL_OUTCOME_STATES = ['PENDING', 'VERIFIED', 'EXPIRED', 'REVOKED'] as const;
 
 export type CommercialOutcomeState = (typeof COMMERCIAL_OUTCOME_STATES)[number];
 

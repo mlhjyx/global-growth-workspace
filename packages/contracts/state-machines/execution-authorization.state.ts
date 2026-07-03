@@ -15,16 +15,12 @@
  * - EXPIRED：到达 valid_until，系统定时器迁移；触发 Campaign 自动暂停（母本 5.10.1）。终态。
  * - REVOKED：人工撤销或 Kill Switch（WSP-007）；未开始任务不再执行。终态。
  * - SUPERSEDED：被新授权替代（CampaignRevision 重新授权，CAM-006）。终态。
- * - 授权对象本身不可变：状态迁移只改 status/revoked_*/superseded_by_id 生命周期字段，
+ * - 授权对象本身不可变：状态迁移只改 status、revoked_x、superseded_by_id 等 生命周期字段，
  *   不修改任何已固化边界（CAM-008）。
  */
 
 export type ExecutionAuthorizationState =
-  | 'ISSUED'
-  | 'ACTIVE'
-  | 'EXPIRED'
-  | 'REVOKED'
-  | 'SUPERSEDED';
+  'ISSUED' | 'ACTIVE' | 'EXPIRED' | 'REVOKED' | 'SUPERSEDED';
 
 export const EXECUTION_AUTHORIZATION_STATES: readonly ExecutionAuthorizationState[] = [
   'ISSUED',
@@ -62,9 +58,7 @@ export const TRANSITIONS: Record<ExecutionAuthorizationState, ExecutionAuthoriza
 
 /** 授权相关领域事件名（asyncapi/campaign.events.yaml；AuthorizationIssued 见母本 11.11，Revoked/Expired 为评审补充）。 */
 export type ExecutionAuthorizationEventType =
-  | 'AuthorizationIssued'
-  | 'AuthorizationRevoked'
-  | 'AuthorizationExpired';
+  'AuthorizationIssued' | 'AuthorizationRevoked' | 'AuthorizationExpired';
 
 /** 进入初始状态（ISSUED）时发布的事件。 */
 export const EXECUTION_AUTHORIZATION_CREATION_EVENT: ExecutionAuthorizationEventType =

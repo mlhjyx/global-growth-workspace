@@ -5,15 +5,15 @@
 @tailwind utilities;
 
 :root {
-  --bg-deep: #0C0A1A;
-  --bg-purple: #1A103C;
-  --primary-500: #6C5CE7;
-  --primary-400: #8B7FF0;
-  --primary-300: #A29BFE;
-  --success: #00D4AA;
-  --warning: #FBBF24;
-  --error: #FF6B6B;
-  --info: #60A5FA;
+  --bg-deep: #0c0a1a;
+  --bg-purple: #1a103c;
+  --primary-500: #6c5ce7;
+  --primary-400: #8b7ff0;
+  --primary-300: #a29bfe;
+  --success: #00d4aa;
+  --warning: #fbbf24;
+  --error: #ff6b6b;
+  --info: #60a5fa;
 }
 
 * {
@@ -27,9 +27,14 @@ html {
 }
 
 body {
-  font-family: 'Sora', 'Noto Sans SC', 'SF Pro Display', -apple-system, sans-serif;
-  background: linear-gradient(135deg, #0C0A1A 0%, #1A103C 100%);
-  color: #FFFFFF;
+  font-family:
+    'Sora',
+    'Noto Sans SC',
+    'SF Pro Display',
+    -apple-system,
+    sans-serif;
+  background: linear-gradient(135deg, #0c0a1a 0%, #1a103c 100%);
+  color: #ffffff;
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -128,8 +133,8 @@ body::before {
 
 /* Gradient button */
 .btn-primary {
-  background: linear-gradient(90deg, #6C5CE7 0%, #A29BFE 100%);
-  color: #FFFFFF;
+  background: linear-gradient(90deg, #6c5ce7 0%, #a29bfe 100%);
+  color: #ffffff;
   border: none;
   border-radius: 8px;
   font-weight: 500;
@@ -150,7 +155,7 @@ body::before {
 /* Secondary button */
 .btn-secondary {
   background: rgba(255, 255, 255, 0.06);
-  color: #B8B0D0;
+  color: #b8b0d0;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   font-weight: 500;
@@ -162,13 +167,13 @@ body::before {
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(108, 92, 231, 0.3);
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 /* Badge styles */
 .badge-success {
   background: rgba(0, 212, 170, 0.15);
-  color: #00D4AA;
+  color: #00d4aa;
   border: 1px solid rgba(0, 212, 170, 0.3);
   border-radius: 9999px;
   font-size: 12px;
@@ -178,7 +183,7 @@ body::before {
 
 .badge-warning {
   background: rgba(251, 191, 36, 0.15);
-  color: #FBBF24;
+  color: #fbbf24;
   border: 1px solid rgba(251, 191, 36, 0.3);
   border-radius: 9999px;
   font-size: 12px;
@@ -188,7 +193,7 @@ body::before {
 
 .badge-error {
   background: rgba(255, 107, 107, 0.15);
-  color: #FF6B6B;
+  color: #ff6b6b;
   border: 1px solid rgba(255, 107, 107, 0.3);
   border-radius: 9999px;
   font-size: 12px;
@@ -198,7 +203,7 @@ body::before {
 
 .badge-info {
   background: rgba(96, 165, 250, 0.15);
-  color: #60A5FA;
+  color: #60a5fa;
   border: 1px solid rgba(96, 165, 250, 0.3);
   border-radius: 9999px;
   font-size: 12px;
@@ -208,7 +213,7 @@ body::before {
 
 .badge-ai {
   background: linear-gradient(135deg, rgba(108, 92, 231, 0.2) 0%, rgba(162, 155, 254, 0.1) 100%);
-  color: #A29BFE;
+  color: #a29bfe;
   border: 1px solid rgba(162, 155, 254, 0.3);
   border-radius: 9999px;
   font-size: 12px;
@@ -217,16 +222,16 @@ body::before {
 }
 
 /* Input styles */
-input[type="text"],
-input[type="email"],
-input[type="search"],
-input[type="password"],
+input[type='text'],
+input[type='email'],
+input[type='search'],
+input[type='password'],
 textarea,
 select {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  color: #FFFFFF;
+  color: #ffffff;
   padding: 10px 14px;
   font-size: 14px;
   font-family: 'Sora', 'Noto Sans SC', sans-serif;
@@ -244,44 +249,79 @@ select:focus {
 
 /* Select dropdown options — dark theme */
 select option {
-  background: #1A103C;
-  color: #FFFFFF;
+  background: #1a103c;
+  color: #ffffff;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #7A6F9E;
+  color: #7a6f9e;
 }
 
 /* Selection */
 ::selection {
   background: rgba(108, 92, 231, 0.4);
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 @keyframes glow {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.05); }
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
 }
 
 @keyframes glow2 {
-  0%, 100% { opacity: 0.3; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.08); }
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.08);
+  }
 }
 
 @keyframes glow3 {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.03); }
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.03);
+  }
 }
 
 @keyframes breathe {
-  0%, 100% { opacity: 0.25; transform: scale(1); }
-  40% { opacity: 0.55; transform: scale(1.04); }
-  70% { opacity: 0.35; transform: scale(1.01); }
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+  40% {
+    opacity: 0.55;
+    transform: scale(1.04);
+  }
+  70% {
+    opacity: 0.35;
+    transform: scale(1.01);
+  }
 }
 
 @keyframes horizonBreatheSlow {
-  0%, 100% { opacity: 0.65; }
-  50% { opacity: 1.0; }
+  0%,
+  100% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 1;
+  }
 }
-

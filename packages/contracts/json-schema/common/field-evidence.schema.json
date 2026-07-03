@@ -8,7 +8,10 @@
     "entity_id": { "$ref": "ggw://contracts/common/primitives#/$defs/entity_id" },
     "field_name": { "type": "string" },
     "value_hash": { "type": "string", "description": "候选值哈希（明文按敏感级别另存）" },
-    "provider_id": { "type": "string", "description": "Provider 标识；公开采集为 source registry ID" },
+    "provider_id": {
+      "type": "string",
+      "description": "Provider 标识；公开采集为 source registry ID"
+    },
     "provider_record_id": { "type": "string" },
     "source_url": { "type": "string", "format": "uri" },
     "fetched_at": { "$ref": "ggw://contracts/common/primitives#/$defs/timestamp" },

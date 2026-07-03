@@ -8,17 +8,20 @@ interface AIGeneratorProps {
 const mockGeneratedContents = [
   {
     title: 'AI 驱动的 B2B 出海获客：2024 年最有效的方法论',
-    content: '在全球化竞争日益激烈的今天，B2B 企业如何通过 AI 技术实现精准获客？\n\n我们分析了 1,200 家出海企业的数据，发现采用 AI 辅助获客的企业平均线索转化率提升了 3.2 倍。核心策略包括：\n\n1. ICP 动态画像：利用 AI 实时分析目标客户的商业信号\n2. 多渠道触点自动化：根据客户旅程自动触发个性化内容\n3. 预测性评分模型：优先跟进高转化概率的潜客\n\n这些方法的组合使用，使得获客成本降低了 47%，而销售周期缩短了 35%。',
+    content:
+      '在全球化竞争日益激烈的今天，B2B 企业如何通过 AI 技术实现精准获客？\n\n我们分析了 1,200 家出海企业的数据，发现采用 AI 辅助获客的企业平均线索转化率提升了 3.2 倍。核心策略包括：\n\n1. ICP 动态画像：利用 AI 实时分析目标客户的商业信号\n2. 多渠道触点自动化：根据客户旅程自动触发个性化内容\n3. 预测性评分模型：优先跟进高转化概率的潜客\n\n这些方法的组合使用，使得获客成本降低了 47%，而销售周期缩短了 35%。',
     tags: ['B2B获客', 'AI营销', '出海增长', '精准营销'],
   },
   {
     title: '为什么你的内容营销没有效果？3 个被忽视的关键点',
-    content: '大多数 B2B 企业的内容营销陷入了一个怪圈：产出大量内容，却看不到实际转化。\n\n问题不在于内容数量，而在于内容策略。我们发现高效的内容营销团队普遍做到了以下三点：\n\n第一，内容与销售漏斗严格对齐。TOFU 内容负责引流，MOFU 内容负责培育，BOFU 内容负责转化。\n\n第二，利用数据反馈实时优化。不再凭感觉创作，而是根据阅读完成率、分享率和转化率来调整内容方向。\n\n第三，建立内容复用体系。一篇深度报告可以拆解成 10+ 条社交媒体内容、3 封邮件和 1 场 webinar。',
+    content:
+      '大多数 B2B 企业的内容营销陷入了一个怪圈：产出大量内容，却看不到实际转化。\n\n问题不在于内容数量，而在于内容策略。我们发现高效的内容营销团队普遍做到了以下三点：\n\n第一，内容与销售漏斗严格对齐。TOFU 内容负责引流，MOFU 内容负责培育，BOFU 内容负责转化。\n\n第二，利用数据反馈实时优化。不再凭感觉创作，而是根据阅读完成率、分享率和转化率来调整内容方向。\n\n第三，建立内容复用体系。一篇深度报告可以拆解成 10+ 条社交媒体内容、3 封邮件和 1 场 webinar。',
     tags: ['内容营销', '转化优化', 'B2B策略'],
   },
   {
     title: '从 0 到 1：东南亚 SaaS 市场进入完全指南',
-    content: '东南亚数字经济正在以年均 20% 的速度增长，SaaS 渗透率仅为北美的 1/5，这意味着巨大的增长空间。\n\n然而，进入东南亚市场需要理解几个关键差异：\n\n首先，支付方式高度本地化。信用卡普及率低，电子钱包（GrabPay、PayNow、DANA）是主流。\n\n其次，决策链条更长。B2B 采购通常需要 5-7 个利益相关者参与，建立信任比展示功能更重要。\n\n最后，内容本地化不能仅停留在翻译层面。印尼、泰国、越南的文化语境差异巨大，需要本土团队深度参与。',
+    content:
+      '东南亚数字经济正在以年均 20% 的速度增长，SaaS 渗透率仅为北美的 1/5，这意味着巨大的增长空间。\n\n然而，进入东南亚市场需要理解几个关键差异：\n\n首先，支付方式高度本地化。信用卡普及率低，电子钱包（GrabPay、PayNow、DANA）是主流。\n\n其次，决策链条更长。B2B 采购通常需要 5-7 个利益相关者参与，建立信任比展示功能更重要。\n\n最后，内容本地化不能仅停留在翻译层面。印尼、泰国、越南的文化语境差异巨大，需要本土团队深度参与。',
     tags: ['东南亚市场', 'SaaS出海', '市场进入'],
   },
 ];
@@ -29,7 +32,7 @@ export default function AIGenerator({ onApply }: AIGeneratorProps) {
   const [tone, setTone] = useState('professional');
   const [audience, setAudience] = useState('');
   const [generating, setGenerating] = useState(false);
-  const [generated, setGenerated] = useState<typeof mockGeneratedContents[0] | null>(null);
+  const [generated, setGenerated] = useState<(typeof mockGeneratedContents)[0] | null>(null);
   const [progress, setProgress] = useState(0);
   const [progressText, setProgressText] = useState('');
 
@@ -58,7 +61,8 @@ export default function AIGenerator({ onApply }: AIGeneratorProps) {
 
     setTimeout(() => {
       clearInterval(interval);
-      const randomContent = mockGeneratedContents[Math.floor(Math.random() * mockGeneratedContents.length)];
+      const randomContent =
+        mockGeneratedContents[Math.floor(Math.random() * mockGeneratedContents.length)];
       setGenerated(randomContent);
       setGenerating(false);
     }, 3000);
@@ -202,7 +206,10 @@ export default function AIGenerator({ onApply }: AIGeneratorProps) {
             <div className="text-foreground-500 text-xs line-clamp-3">{generated.content}</div>
             <div className="flex flex-wrap gap-1">
               {generated.tags.map((tag) => (
-                <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded bg-primary-500/8 text-primary-400">
+                <span
+                  key={tag}
+                  className="text-[10px] px-1.5 py-0.5 rounded bg-primary-500/8 text-primary-400"
+                >
                   #{tag}
                 </span>
               ))}

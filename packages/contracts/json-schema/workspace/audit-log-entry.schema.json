@@ -87,7 +87,10 @@
         "type": "object",
         "properties": {
           "field_name": { "type": "string", "description": "被变更字段" },
-          "old_value_hash": { "type": "string", "description": "旧值哈希（敏感值不存明文，母本 12.11）" },
+          "old_value_hash": {
+            "type": "string",
+            "description": "旧值哈希（敏感值不存明文，母本 12.11）"
+          },
           "new_value_hash": { "type": "string", "description": "新值哈希" }
         },
         "required": ["field_name"],

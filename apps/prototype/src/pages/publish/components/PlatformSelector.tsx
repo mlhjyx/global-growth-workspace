@@ -25,7 +25,7 @@ export default function PlatformSelector({ selected, onChange }: PlatformSelecto
     onChange([]);
   };
 
-  const PlatformCard = ({ platform }: { platform: typeof allPlatforms[0] }) => {
+  const PlatformCard = ({ platform }: { platform: (typeof allPlatforms)[0] }) => {
     const isSelected = selected.includes(platform.id);
     const isConnected = platform.connected;
 
@@ -147,10 +147,14 @@ export default function PlatformSelector({ selected, onChange }: PlatformSelecto
             <i className="ri-check-double-line"></i>
             已选择 {selected.length} 个平台
             <span className="text-foreground-700">
-              （预估覆盖 {selected.reduce((sum, id) => {
-                const p = allPlatforms.find((ap) => ap.id === id);
-                return sum + (p?.followerCount || 0);
-              }, 0).toLocaleString()} 粉丝）
+              （预估覆盖{' '}
+              {selected
+                .reduce((sum, id) => {
+                  const p = allPlatforms.find((ap) => ap.id === id);
+                  return sum + (p?.followerCount || 0);
+                }, 0)
+                .toLocaleString()}{' '}
+              粉丝）
             </span>
           </div>
         </div>

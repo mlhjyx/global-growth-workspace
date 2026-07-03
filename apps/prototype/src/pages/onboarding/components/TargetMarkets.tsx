@@ -9,21 +9,21 @@ interface TargetMarketsProps {
 export default function TargetMarkets({ data, onChange }: TargetMarketsProps) {
   const toggleRegion = (id: string) => {
     const next = data.regions.includes(id)
-      ? data.regions.filter(r => r !== id)
+      ? data.regions.filter((r) => r !== id)
       : [...data.regions, id];
     onChange({ regions: next });
   };
 
   const toggleIndustry = (ind: string) => {
     const next = data.targetIndustries.includes(ind)
-      ? data.targetIndustries.filter(i => i !== ind)
+      ? data.targetIndustries.filter((i) => i !== ind)
       : [...data.targetIndustries, ind];
     onChange({ targetIndustries: next });
   };
 
   const toggleLanguage = (id: string) => {
     const next = data.languages.includes(id)
-      ? data.languages.filter(l => l !== id)
+      ? data.languages.filter((l) => l !== id)
       : [...data.languages, id];
     onChange({ languages: next });
   };
@@ -53,7 +53,7 @@ export default function TargetMarkets({ data, onChange }: TargetMarketsProps) {
             <span className="text-foreground-500 text-xs">（多选）</span>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            {regionOptions.map(region => (
+            {regionOptions.map((region) => (
               <button
                 key={region.id}
                 onClick={() => toggleRegion(region.id)}
@@ -63,7 +63,9 @@ export default function TargetMarkets({ data, onChange }: TargetMarketsProps) {
                     : 'bg-white/5 border-white/5 text-foreground-500 hover:bg-white/8'
                 }`}
               >
-                <span className={`w-5 h-5 flex items-center justify-center ${data.regions.includes(region.id) ? 'text-primary-400' : ''}`}>
+                <span
+                  className={`w-5 h-5 flex items-center justify-center ${data.regions.includes(region.id) ? 'text-primary-400' : ''}`}
+                >
                   <i className={`${region.icon} text-sm`}></i>
                 </span>
                 <span className="truncate">{region.name}</span>
@@ -82,7 +84,7 @@ export default function TargetMarkets({ data, onChange }: TargetMarketsProps) {
             <span className="text-foreground-500 text-xs">（多选）</span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {targetIndustryOptions.map(ind => (
+            {targetIndustryOptions.map((ind) => (
               <button
                 key={ind}
                 onClick={() => toggleIndustry(ind)}
@@ -108,7 +110,7 @@ export default function TargetMarkets({ data, onChange }: TargetMarketsProps) {
             <span className="text-foreground-500 text-xs">（多选）</span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {languageOptions.map(lang => (
+            {languageOptions.map((lang) => (
               <button
                 key={lang.id}
                 onClick={() => toggleLanguage(lang.id)}

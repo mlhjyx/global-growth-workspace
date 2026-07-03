@@ -1,404 +1,799 @@
-export interface ICPProfile {
+// accounts 域视图模型 —— 一律从 @/data/fixtures（packages/contracts/fixtures）派生，
+// 禁止再造与契约冲突的假数据（Demo Gap Analysis 结论 3、C 组 accountData.ts「重做」判定）。
+// 契约对齐：lead/account、lead/contact、lead/lead（8 态 + queue 四类）、lead/lead-score（六维评分）、
+// common/field-evidence（字段级数据权利）、lead/signal（信号类型合法枚举，含 TRADE 贸易信号）。
+import {
+  accounts as fxAccounts,
+  contacts as fxContacts,
+  contactsByAccount,
+  leadByAccountId,
+  scoreByLeadId,
+  evidencesByEntity,
+  fieldEvidences,
+  icpDefinitions,
+  buyingCommitteeRoles,
+  LEAD_STATE_LABELS,
+  SCORE_DIMENSION_LABELS,
+} from '@/data/fixtures';
+
+// ---------------------------------------------------------------------------
+// 契约枚举类型（与 packages/contracts/json-schema/lead/* 保持一致）
+// ---------------------------------------------------------------------------
+
+/** lead.schema.json status 八态 */
+export type LeadStatus =
+  | 'DISCOVERED'
+  | 'ENRICHING'
+  | 'REVIEW'
+  | 'QUALIFIED'
+  | 'REJECTED'
+  | 'SUPPRESSED'
+  | 'CONTACTED'
+  | 'CONVERTED';
+
+/** lead.schema.json queue 四类（LED-008） */
+export type LeadQueue = 'RECOMMENDED' | 'NEEDS_CONFIRMATION' | 'REJECTED' | 'DO_NOT_CONTACT';
+
+/** signal.schema.json signal_type 合法枚举（LED-014；TRADE 对光伏/建材是核心信号源） */
+export type SignalType =
+  'TRADE' | 'HIRING' | 'FUNDING' | 'WEBSITE' | 'CONTENT' | 'RELATIONSHIP_CHANGE' | 'EVENT';
+
+/** signal.schema.json status */
+export type SignalStatus = 'ACTIVE' | 'EXPIRED' | 'REVOKED';
+
+const SCORE_DIMENSION_KEYS = [
+  'fit',
+  'role',
+  'intent',
+  'data_quality',
+  'reachability',
+  'engagement',
+] as const;
+export type ScoreDimensionKey = (typeof SCORE_DIMENSION_KEYS)[number];
+
+// ---------------------------------------------------------------------------
+// 展示词典（契约枚举 → 中文标签；Lead 状态与六维标签用 fixtures 统一词典）
+// ---------------------------------------------------------------------------
+
+export { LEAD_STATE_LABELS, SCORE_DIMENSION_LABELS };
+
+/** queue 四类标签（lead.schema.json：推荐、待确认、拒绝、禁止联系） */
+export const LEAD_QUEUE_LABELS: Record<LeadQueue, string> = {
+  RECOMMENDED: '推荐',
+  NEEDS_CONFIRMATION: '待确认',
+  REJECTED: '已拒绝',
+  DO_NOT_CONTACT: '禁止联系',
+};
+
+export const COUNTRY_LABELS: Record<string, string> = {
+  VN: '越南',
+  TH: '泰国',
+  MY: '马来西亚',
+  PH: '菲律宾',
+  ID: '印度尼西亚',
+  NG: '尼日利亚',
+  KE: '肯尼亚',
+  GH: '加纳',
+  TZ: '坦桑尼亚',
+  EG: '埃及',
+  ZA: '南非',
+};
+
+export const INDUSTRY_LABELS: Record<string, string> = {
+  solar_distribution: '光伏分销',
+  renewable_energy: '可再生能源',
+  solar_epc: '光伏 EPC',
+  engineering: '工程服务',
+  electrical_wholesale: '电气批发',
+  pv_module_manufacturing: '光伏组件制造',
+  building_materials_distribution: '建材分销',
+  hardware_retail: '五金零售',
+  plumbing_wholesale: '管材批发',
+  construction_contractor: '建筑承包',
+  interior_fitout: '室内装修',
+};
+
+export const BUYING_ROLE_LABELS: Record<string, string> = {
+  DECISION_MAKER: '决策人',
+  INFLUENCER: '影响者',
+  USER: '使用者',
+  TECHNICAL: '技术评估',
+  FINANCE: '财务',
+  PROCUREMENT: '采购',
+};
+
+export const SCORE_METHOD_LABELS: Record<string, string> = {
+  RULE: '规则',
+  STATISTICAL: '统计',
+  LLM: 'LLM',
+  HUMAN_FEEDBACK: '人工反馈',
+  COMPOSITE: '组合',
+};
+
+export const VERIFICATION_LABELS: Record<string, string> = {
+  VALID: '已验证',
+  UNVERIFIED: '未验证',
+  EXPIRED: '已过期',
+  INVALID: '无效',
+};
+
+export const ICP_STATUS_LABELS: Record<string, string> = {
+  DRAFT: '草稿',
+  HYPOTHESIS: '假设',
+  VALIDATING: '回测中',
+  ACTIVE: '激活中',
+  SUPERSEDED: '已替代',
+  ARCHIVED: '已归档',
+};
+
+export const SIGNAL_STATUS_LABELS: Record<SignalStatus, string> = {
+  ACTIVE: '有效',
+  EXPIRED: '已过期',
+  REVOKED: '已撤回',
+};
+
+/** 信号类型展示配置（键 = signal.schema.json signal_type 合法枚举） */
+export const signalTypeConfig: Record<SignalType, { icon: string; label: string; color: string }> =
+  {
+    TRADE: { icon: 'ri-ship-line', label: '贸易', color: 'text-success' },
+    HIRING: { icon: 'ri-user-add-line', label: '招聘', color: 'text-primary-400' },
+    FUNDING: { icon: 'ri-money-dollar-circle-line', label: '融资', color: 'text-data-highlight' },
+    WEBSITE: { icon: 'ri-global-line', label: '网站', color: 'text-info' },
+    CONTENT: { icon: 'ri-article-line', label: '内容', color: 'text-foreground-500' },
+    RELATIONSHIP_CHANGE: { icon: 'ri-links-line', label: '关系变化', color: 'text-warning' },
+    EVENT: { icon: 'ri-calendar-event-line', label: '展会活动', color: 'text-info' },
+  };
+
+/**
+ * Lead 状态徽章（8 态，文字取 LEAD_STATE_LABELS）。
+ * REJECTED（业务拒绝，中性灰）与 SUPPRESSED（禁止联系，合规硬约束）必须区分显示：
+ * SUPPRESSED 用醒目警示色 + 禁止图标，模型不得覆盖（LED-007）。
+ */
+export const statusConfig: Record<
+  LeadStatus,
+  { label: string; color: string; bg: string; icon?: string }
+> = {
+  DISCOVERED: {
+    label: LEAD_STATE_LABELS.DISCOVERED,
+    color: 'text-foreground-500',
+    bg: 'bg-foreground-500/10',
+  },
+  ENRICHING: { label: LEAD_STATE_LABELS.ENRICHING, color: 'text-info', bg: 'bg-info/10' },
+  REVIEW: { label: LEAD_STATE_LABELS.REVIEW, color: 'text-warning', bg: 'bg-warning/10' },
+  QUALIFIED: { label: LEAD_STATE_LABELS.QUALIFIED, color: 'text-success', bg: 'bg-success/10' },
+  REJECTED: {
+    label: LEAD_STATE_LABELS.REJECTED,
+    color: 'text-foreground-400',
+    bg: 'bg-foreground-500/10',
+  },
+  SUPPRESSED: {
+    label: LEAD_STATE_LABELS.SUPPRESSED,
+    color: 'text-error',
+    bg: 'bg-error/15 border border-error/40',
+    icon: 'ri-forbid-line',
+  },
+  CONTACTED: {
+    label: LEAD_STATE_LABELS.CONTACTED,
+    color: 'text-primary-400',
+    bg: 'bg-primary-500/10',
+  },
+  CONVERTED: {
+    label: LEAD_STATE_LABELS.CONVERTED,
+    color: 'text-data-highlight',
+    bg: 'bg-data-highlight/10',
+  },
+};
+
+export const queueConfig: Record<
+  LeadQueue,
+  { label: string; color: string; bg: string; icon?: string }
+> = {
+  RECOMMENDED: { label: LEAD_QUEUE_LABELS.RECOMMENDED, color: 'text-success', bg: 'bg-success/10' },
+  NEEDS_CONFIRMATION: {
+    label: LEAD_QUEUE_LABELS.NEEDS_CONFIRMATION,
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+  },
+  REJECTED: {
+    label: LEAD_QUEUE_LABELS.REJECTED,
+    color: 'text-foreground-400',
+    bg: 'bg-foreground-500/10',
+  },
+  DO_NOT_CONTACT: {
+    label: LEAD_QUEUE_LABELS.DO_NOT_CONTACT,
+    color: 'text-error',
+    bg: 'bg-error/15 border border-error/40',
+    icon: 'ri-forbid-line',
+  },
+};
+
+// ---------------------------------------------------------------------------
+// 视图类型（从契约实体派生，字段名保留契约语义）
+// ---------------------------------------------------------------------------
+
+export interface ScoreEvidenceView {
+  evidenceType: string; // lead-score.schema score_evidence.evidence_type
+  description: string;
+  observedAt: string;
+  fieldName?: string;
+  contribution?: number;
+}
+
+export interface ScoreDimensionView {
+  key: ScoreDimensionKey;
+  label: string; // SCORE_DIMENSION_LABELS
+  score: number; // 0-100
+  method: string; // RULE/STATISTICAL/LLM/HUMAN_FEEDBACK/COMPOSITE
+  computedAt: string;
+  expiresAt?: string;
+  evidence: ScoreEvidenceView[];
+}
+
+/** common/field-evidence 字段级数据权利视图（DAT-005：展示/导出/AI/外联分别检查） */
+export interface FieldEvidenceView {
+  entityId: string;
+  entityLabel: string; // 账户 / 联系人
+  fieldName: string;
+  providerId: string;
+  licenseId: string;
+  fetchedAt: string;
+  expiresAt: string;
+  confidence: number; // 0-1
+  allowedToDisplay: boolean;
+  allowedToExport: boolean;
+  allowedForAI: boolean;
+  allowedForOutreach: boolean;
+}
+
+export interface ContactView {
   id: string;
   name: string;
-  description: string;
-  active: boolean;
-  criteria: {
-    companySize: string;
-    industry: string[];
-    geography: string[];
-    revenue: string;
-    techStack: string[];
-    painPoints: string[];
-    buyingSignals: string[];
-  };
-  persona: {
-    title: string[];
-    department: string[];
-    seniority: string;
-  };
-  createdBy: string;
-  createdAt: string;
-  matchCount: number;
-  aiGenerated: boolean;
+  title: string;
+  buyingRole: string; // 契约 buying_role 枚举
+  /** 展示值：allowed_to_display=false 或无明文时为 value_masked（界面遮罩） */
+  email: string;
+  emailMasked: boolean; // true = 已按数据权利遮罩
+  emailVerification: string; // VALID/UNVERIFIED/EXPIRED/INVALID
+  suppressed: boolean;
+  isPrimary: boolean;
 }
 
 export interface Account {
-  id: string;
+  id: string; // acc_ 前缀
+  leadId: string; // led_ 前缀
   company: string;
   domain: string;
-  industry: string;
-  country: string;
-  city: string;
-  revenue: string;
-  employees: string;
-  founded: string;
-  score: number;
-  status: 'new' | 'contacted' | 'engaged' | 'qualified' | 'disqualified';
-  signals: AccountSignal[];
-  contacts: Contact[];
-  techStack: string[];
-  lastActivity: string;
-  notes: string;
-  dataQuality: number; // 0-100
+  industry: string; // 主行业中文标签（TopBar 搜索兼容）
+  industries: string[]; // 全部行业中文标签
+  country: string; // 中文国家名（TopBar 搜索兼容）
+  countryCode: string;
+  employees: string; // employee_range
+  revenue: string; // revenue_range
+  score: number; // lead-score.total_priority（列表可显示；展开处显示六维分项）
+  leadStatus: LeadStatus;
+  queue: LeadQueue;
+  riskFlags: string[];
+  hardExclusionApplied: boolean; // 命中硬性排除，模型不得覆盖（LED-007）
+  suppressionApplied: boolean; // 命中全局 Suppression，禁止进入发送队列
+  dimensions: ScoreDimensionView[]; // 六维评分（不再用单一黑盒分数）
+  weightsSnapshot: Partial<Record<ScoreDimensionKey, number>>;
+  contacts: ContactView[];
+  evidences: FieldEvidenceView[];
+  dataQuality: number; // data_quality 维度分（0-100）
+  lastVerifiedAt: string;
+  icpId: string;
 }
 
-export interface AccountSignal {
-  id: string;
-  type: 'funding' | 'hiring' | 'expansion' | 'tech_change' | 'executive_change' | 'social_activity' | 'partnership' | 'event';
-  title: string;
-  description: string;
-  date: string;
-  source: string;
-  confidence: number;
-  isHot: boolean;
+// ---------------------------------------------------------------------------
+// 账户视图：20 个账户（光伏/建材 × 东南亚/非洲，来自 contracts fixtures）
+// ---------------------------------------------------------------------------
+
+const toDay = (iso?: string) => (iso ? String(iso).slice(0, 10) : '');
+
+const toContactView = (c: any): ContactView => {
+  const emailPoint = (c.contact_points ?? []).find((p: any) => p.type === 'EMAIL');
+  const emailEvidence = evidencesByEntity(c.id).find(
+    (e) => e.field_name === 'contact_points.email',
+  );
+  const displayAllowed = emailEvidence ? emailEvidence.allowed_to_display !== false : true;
+  const masked = !displayAllowed || !emailPoint?.value;
+  return {
+    id: c.id,
+    name: c.full_name,
+    title: c.current_role?.title ?? '',
+    buyingRole: c.buying_role ?? '',
+    email: masked ? (emailPoint?.value_masked ?? '***') : emailPoint.value,
+    emailMasked: masked && !displayAllowed,
+    emailVerification: emailPoint?.verification_status ?? 'UNVERIFIED',
+    suppressed: Boolean(c.suppression?.suppressed || emailPoint?.suppressed),
+    isPrimary: Boolean(emailPoint?.is_primary),
+  };
+};
+
+const toEvidenceView = (e: any, entityLabel: string): FieldEvidenceView => ({
+  entityId: e.entity_id,
+  entityLabel,
+  fieldName: e.field_name,
+  providerId: e.provider_id,
+  licenseId: e.license_id,
+  fetchedAt: toDay(e.fetched_at),
+  expiresAt: toDay(e.expires_at),
+  confidence: e.confidence ?? 0,
+  allowedToDisplay: e.allowed_to_display !== false,
+  allowedToExport: e.allowed_to_export === true,
+  allowedForAI: e.allowed_for_ai === true,
+  allowedForOutreach: e.allowed_for_outreach === true,
+});
+
+export const mockAccounts: Account[] = fxAccounts.map((a) => {
+  const lead = leadByAccountId.get(a.id);
+  const score = lead ? scoreByLeadId.get(lead.id) : undefined;
+  const cts = contactsByAccount(a.id);
+  const dimensions: ScoreDimensionView[] = score
+    ? SCORE_DIMENSION_KEYS.map((key) => {
+        const d = score.dimensions[key];
+        return {
+          key,
+          label: SCORE_DIMENSION_LABELS[key],
+          score: d.score,
+          method: d.method,
+          computedAt: toDay(d.computed_at),
+          expiresAt: toDay(d.expires_at),
+          evidence: (d.evidence ?? []).map((ev: any) => ({
+            evidenceType: ev.evidence_type,
+            description: ev.description,
+            observedAt: toDay(ev.observed_at),
+            fieldName: ev.field_name,
+            contribution: ev.contribution,
+          })),
+        };
+      })
+    : [];
+  const evidences: FieldEvidenceView[] = [
+    ...evidencesByEntity(a.id).map((e) => toEvidenceView(e, '账户')),
+    ...cts.flatMap((c) => evidencesByEntity(c.id).map((e) => toEvidenceView(e, '联系人'))),
+  ];
+  const industries = (a.industries ?? []).map((i: string) => INDUSTRY_LABELS[i] ?? i);
+  return {
+    id: a.id,
+    leadId: lead?.id ?? '',
+    company: a.name,
+    domain: a.domains?.[0] ?? '',
+    industry: industries[0] ?? '',
+    industries,
+    country: COUNTRY_LABELS[a.country] ?? a.country,
+    countryCode: a.country,
+    employees: a.employee_range ?? '',
+    revenue: a.revenue_range ?? '—',
+    score: score?.total_priority ?? lead?.latest_priority ?? 0,
+    leadStatus: (lead?.status ?? 'DISCOVERED') as LeadStatus,
+    queue: (lead?.queue ?? 'NEEDS_CONFIRMATION') as LeadQueue,
+    riskFlags: lead?.risk_flags ?? [],
+    hardExclusionApplied: Boolean(score?.hard_exclusion_applied),
+    suppressionApplied: Boolean(score?.suppression_applied),
+    dimensions,
+    weightsSnapshot: score?.weights_snapshot ?? {},
+    contacts: cts.map(toContactView),
+    evidences,
+    dataQuality: score?.dimensions?.data_quality?.score ?? Math.round((a.quality_score ?? 0) * 100),
+    lastVerifiedAt: toDay(a.last_verified_at),
+    icpId: lead?.icp_id ?? a.matched_icp_ids?.[0] ?? '',
+  };
+});
+
+const accountNameById = new Map(fxAccounts.map((a) => [a.id, a.name]));
+
+// ---------------------------------------------------------------------------
+// ICP 视图：fixtures.icpDefinitions + buyingCommitteeRoles
+// （2 个 ICP：光伏 → 东南亚、建材 → 非洲经销商，PDR-001）
+// ---------------------------------------------------------------------------
+
+export interface ICPCriterionView {
+  criterionId: string;
+  field: string;
+  operator: string;
+  value?: unknown;
+  requirementLevel: string; // MUST_HAVE / NICE_TO_HAVE
+  weight?: number;
+  rationale?: string;
 }
 
-export interface Contact {
+export interface ICPExclusionView {
+  criterionId: string;
+  field: string;
+  value?: unknown;
+  reason: string;
+}
+
+export interface ICPTriggerSignalView {
+  signalType: SignalType;
+  subtype: string;
+  minStrength?: number;
+  lookbackDays?: number;
+  weight?: number;
+}
+
+export interface CommitteeRoleView {
   id: string;
+  roleType: string; // DECISION_MAKER/INFLUENCER/USER/TECHNICAL/FINANCE/PROCUREMENT
   name: string;
-  title: string;
-  department: string;
-  email: string;
-  linkedIn: string;
-  phone: string;
-  isPrimary: boolean;
-  lastInteraction: string;
+  description: string;
+  typicalTitles: string[];
+  weight: number;
+  requiredForQualification: boolean;
+  kpis: string[];
+  objections: string[];
+  informationNeeds: string[];
 }
+
+export interface ICPProfile {
+  id: string; // icp_ 前缀
+  name: string;
+  description: string;
+  status: string; // DRAFT/HYPOTHESIS/VALIDATING/ACTIVE/SUPERSEDED/ARCHIVED
+  active: boolean; // status === 'ACTIVE'
+  version: number;
+  marketScope: string[]; // 国家中文标签
+  businessScenarios: string[];
+  painPoints: string[];
+  criteria: ICPCriterionView[];
+  exclusions: ICPExclusionView[];
+  triggerSignals: ICPTriggerSignalView[];
+  committee: CommitteeRoleView[];
+  weights: Partial<Record<ScoreDimensionKey, number>>;
+  matchCount: number; // 命中账户数（matched_icp_ids 派生）
+  backtestPassed: boolean;
+}
+
+export const mockICPs: ICPProfile[] = icpDefinitions.map((icp) => ({
+  id: icp.id,
+  name: icp.name,
+  description: icp.description,
+  status: icp.status,
+  active: icp.status === 'ACTIVE',
+  version: icp.version,
+  marketScope: (icp.market_scope ?? []).map((c: string) => COUNTRY_LABELS[c] ?? c),
+  businessScenarios: icp.business_scenarios ?? [],
+  painPoints: icp.pain_points ?? [],
+  criteria: (icp.criteria ?? []).map((c: any) => ({
+    criterionId: c.criterion_id,
+    field: c.field,
+    operator: c.operator,
+    value: c.value,
+    requirementLevel: c.requirement_level,
+    weight: c.weight,
+    rationale: c.rationale,
+  })),
+  exclusions: (icp.exclusions ?? []).map((x: any) => ({
+    criterionId: x.criterion_id,
+    field: x.field,
+    value: x.value,
+    reason: x.reason,
+  })),
+  triggerSignals: (icp.trigger_signals ?? []).map((s: any) => ({
+    signalType: s.signal_type as SignalType,
+    subtype: s.subtype,
+    minStrength: s.min_strength,
+    lookbackDays: s.lookback_days,
+    weight: s.weight,
+  })),
+  committee: buyingCommitteeRoles
+    .filter((r) => r.icp_id === icp.id)
+    .map((r) => ({
+      id: r.id,
+      roleType: r.role_type,
+      name: r.name,
+      description: r.description,
+      typicalTitles: r.typical_titles ?? [],
+      weight: r.weight ?? 0,
+      requiredForQualification: Boolean(r.required_for_qualification),
+      kpis: r.kpis ?? [],
+      objections: r.objections ?? [],
+      informationNeeds: r.information_needs ?? [],
+    })),
+  weights: icp.weights ?? {},
+  matchCount: fxAccounts.filter((a) => (a.matched_icp_ids ?? []).includes(icp.id)).length,
+  backtestPassed: (icp.backtests ?? []).some((b: any) => b.passed),
+}));
+
+// ---------------------------------------------------------------------------
+// 信号流：数据为静态编造，但类型/字段名对齐 signal.schema.json
+// （signal_type 合法枚举 + strength/confidence 区分 + status/expires_at + source）
+// ---------------------------------------------------------------------------
 
 export interface SignalEvent {
-  id: string;
-  accountId: string;
+  id: string; // sig_ 前缀
+  workspace_id: string;
+  account_id: string;
+  signal_type: SignalType;
+  subtype: string;
+  title: string;
+  summary: string;
+  strength: number; // 0-1（参与 Intent 评分，LED-006）
+  confidence: number; // 0-1（真实性置信度，与强度区分）
+  status: SignalStatus; // EXPIRED 自动降低 Intent（LED-014）
+  detected_at: string;
+  expires_at: string;
+  source: { provider_id: string; source_url?: string };
+  attributes?: Record<string, unknown>;
+  // —— 以下为原型视图辅助字段（非契约字段）——
   accountName: string;
-  signalType: string;
-  signalTitle: string;
-  time: string;
+  timeLabel: string;
   read: boolean;
 }
 
+const WS_ID = 'ws_01JZW0RK000000000000000001';
+const sig = (
+  n: number,
+  accountId: string,
+  signal_type: SignalType,
+  subtype: string,
+  title: string,
+  summary: string,
+  strength: number,
+  confidence: number,
+  status: SignalStatus,
+  detected_at: string,
+  expires_at: string,
+  provider_id: string,
+  timeLabel: string,
+  read: boolean,
+  attributes?: Record<string, unknown>,
+  source_url?: string,
+): SignalEvent => ({
+  id: `sig_01JZS1GN0000000000000000${String(n).padStart(2, '0')}`,
+  workspace_id: WS_ID,
+  account_id: accountId,
+  signal_type,
+  subtype,
+  title,
+  summary,
+  strength,
+  confidence,
+  status,
+  detected_at,
+  expires_at,
+  source: { provider_id, ...(source_url ? { source_url } : {}) },
+  attributes,
+  accountName: accountNameById.get(accountId) ?? accountId,
+  timeLabel,
+  read,
+});
+
+export const mockSignalEvents: SignalEvent[] = [
+  sig(
+    1,
+    'acc_01JZACCT000000000000000001',
+    'TRADE',
+    'pv_module_import_growth',
+    'HS 854143 组件进口环比 +35%',
+    '近 180 天光伏组件进口量环比增长 35%，进口与清关能力已验证（事实，来源海关贸易数据）',
+    0.8,
+    0.85,
+    'ACTIVE',
+    '2026-07-03T01:00:00Z',
+    '2026-08-04T00:00:00Z',
+    'prv_customs_trade_data',
+    '15 分钟前',
+    false,
+    { hs_code: '854143', direction: 'import', value_range: '2M-5M USD' },
+  ),
+  sig(
+    2,
+    'acc_01JZACCT000000000000000011',
+    'TRADE',
+    'building_materials_import_recurring',
+    'HS 6809 石膏板进口连续 4 个季度',
+    '连续 4 个季度稳定进口石膏制品（HS 6809），具备整柜清关经验（事实，来源海关贸易数据）',
+    0.75,
+    0.85,
+    'ACTIVE',
+    '2026-07-03T00:30:00Z',
+    '2027-01-01T00:00:00Z',
+    'prv_customs_trade_data',
+    '40 分钟前',
+    false,
+    { hs_code: '6809', direction: 'import', counterparty: 'CN' },
+  ),
+  sig(
+    3,
+    'acc_01JZACCT000000000000000003',
+    'HIRING',
+    'solar_project_engineer',
+    '连续 90 天招聘光伏项目工程师',
+    '招聘门户持续发布 solar project engineer 岗位，推断项目管道扩张（推断，命中 ICP trigger_signals.HIRING）',
+    0.6,
+    0.8,
+    'ACTIVE',
+    '2026-07-02T09:00:00Z',
+    '2026-09-30T00:00:00Z',
+    'prv_hiring_signals',
+    '1 小时前',
+    false,
+    { role_category: 'solar_project_engineer', openings_count: 3 },
+  ),
+  sig(
+    4,
+    'acc_01JZACCT000000000000000005',
+    'EVENT',
+    'solar_expo_exhibitor',
+    '参展 2026 东南亚光伏展',
+    '以参展商身份亮相并发布扩品类招商信息（事实，来源公开网页采集）',
+    0.5,
+    0.9,
+    'ACTIVE',
+    '2026-07-01T08:00:00Z',
+    '2027-06-30T00:00:00Z',
+    'prv_public_web_crawl',
+    '2 小时前',
+    true,
+    { event_name: 'Solartech SEA 2026', event_date: '2026-07-15', booth: 'B12' },
+  ),
+  sig(
+    5,
+    'acc_01JZACCT000000000000000002',
+    'CONTENT',
+    'project_pipeline_announcement',
+    '官网公示 120MW 工商业屋顶项目管道',
+    '官网新闻页公示 2026 年 120MW 工商业屋顶项目管道（事实，来源公司官网）',
+    0.65,
+    0.8,
+    'ACTIVE',
+    '2026-07-01T06:00:00Z',
+    '2026-10-01T00:00:00Z',
+    'prv_public_web_crawl',
+    '3 小时前',
+    true,
+    { topic: 'project_pipeline', channel: 'website' },
+    'https://saigon-greenenergy.example.com/news/2026-pipeline',
+  ),
+  sig(
+    6,
+    'acc_01JZACCT000000000000000016',
+    'WEBSITE',
+    'product_category_expansion',
+    '官网新增吊顶系统产品线页面',
+    '网站变更监测发现新增 ceilings 产品目录，推断品类扩张意向（推断）',
+    0.45,
+    0.7,
+    'ACTIVE',
+    '2026-06-30T10:00:00Z',
+    '2026-10-28T00:00:00Z',
+    'prv_public_web_crawl',
+    '5 小时前',
+    true,
+    { page: '/products/ceilings', change_type: 'category_added' },
+  ),
+  sig(
+    7,
+    'acc_01JZACCT000000000000000013',
+    'FUNDING',
+    'working_capital_facility',
+    '获当地银行营运资金授信',
+    '公开报道获得营运资金授信以扩大进口配额（事实，置信度中等，待二次核实）',
+    0.55,
+    0.6,
+    'ACTIVE',
+    '2026-06-29T12:00:00Z',
+    '2026-12-29T00:00:00Z',
+    'prv_public_web_crawl',
+    '昨天',
+    true,
+    { round: 'credit_facility', amount_range: '1M-5M USD' },
+  ),
+  sig(
+    8,
+    'acc_01JZACCT000000000000000017',
+    'RELATIONSHIP_CHANGE',
+    'competitor_exclusive_agency_signed',
+    '与竞品品牌签署区域独家代理',
+    '负向信号：命中 ICP negative_signals，建议下调优先级并复核匹配度（推断）',
+    0.7,
+    0.75,
+    'ACTIVE',
+    '2026-06-28T08:00:00Z',
+    '2027-06-28T00:00:00Z',
+    'prv_public_web_crawl',
+    '2 天前',
+    true,
+    { relationship_type: 'exclusive_agency', change: 'signed' },
+  ),
+  sig(
+    9,
+    'acc_01JZACCT000000000000000006',
+    'TRADE',
+    'pv_module_import_stalled',
+    '组件进口记录已中断 14 个月',
+    '最近一次进口记录在 14 个月前，信号过期自动降低 Intent（LED-014 验收）',
+    0.3,
+    0.85,
+    'EXPIRED',
+    '2025-04-20T00:00:00Z',
+    '2026-04-20T00:00:00Z',
+    'prv_customs_trade_data',
+    '3 天前',
+    true,
+    { hs_code: '854143', direction: 'import' },
+  ),
+  sig(
+    10,
+    'acc_01JZACCT000000000000000014',
+    'EVENT',
+    'construction_expo_exhibitor',
+    '参展 West Africa Building Expo 2026',
+    '以参展商身份出现在展商名录（事实，来源公开网页采集）',
+    0.5,
+    0.8,
+    'ACTIVE',
+    '2026-06-27T09:00:00Z',
+    '2027-06-27T00:00:00Z',
+    'prv_public_web_crawl',
+    '3 天前',
+    true,
+    { event_name: 'West Africa Building Expo 2026', event_date: '2026-09-10' },
+  ),
+];
+
+/** 按账户聚合的信号（列表「信号」列使用） */
+export const signalsByAccount = (accountId: string): SignalEvent[] =>
+  mockSignalEvents.filter((s) => s.account_id === accountId);
+
+// ---------------------------------------------------------------------------
+// 数据质量摘要：从 fixtures 派生（字段级 FieldEvidence 口径，DAT-005）
+// ---------------------------------------------------------------------------
+
 export interface DataQualityReport {
   totalAccounts: number;
-  enrichedAccounts: number;
-  duplicateCount: number;
-  missingEmail: number;
-  missingPhone: number;
-  missingLinkedIn: number;
-  verifiedCount: number;
-  enrichmentRate: number;
-  dedupRate: number;
+  emailVerified: number; // 联系人主邮箱 VALID
+  emailUnverified: number; // UNVERIFIED / EXPIRED
+  maskedFields: number; // allowed_to_display=false（界面遮罩）
+  exportRestricted: number; // allowed_to_export=false
+  outreachRestricted: number; // allowed_for_outreach=false
+  avgQualityScore: number; // 账户 quality_score 均值（0-100）
+  evidenceFresh: number; // 证据在有效期内
+  evidenceTotal: number;
   lastUpdate: string;
 }
 
-export const mockICPs: ICPProfile[] = [
-  {
-    id: 'icp1',
-    name: '北美 SaaS 决策者',
-    description: '北美地区年收入 $10M+ 的 SaaS 企业，技术决策者关注数据分析和 AI 自动化',
-    active: true,
-    criteria: {
-      companySize: '50-500人',
-      industry: ['SaaS', '企业软件', '云计算'],
-      geography: ['美国', '加拿大'],
-      revenue: '$10M - $500M',
-      techStack: ['Salesforce', 'HubSpot', 'AWS', 'Snowflake'],
-      painPoints: ['获客成本上升', '跨团队协作低效', '数据孤岛'],
-      buyingSignals: ['近期融资', '技术栈扩展', '高管招聘'],
-    },
-    persona: {
-      title: ['CTO', 'VP Engineering', 'Head of Growth', 'CPO'],
-      department: ['技术', '产品', '增长'],
-      seniority: 'VP 及以上',
-    },
-    createdBy: 'AI 助手',
-    createdAt: '2026-07-01',
-    matchCount: 127,
-    aiGenerated: true,
-  },
-  {
-    id: 'icp2',
-    name: '欧洲智能制造采购方',
-    description: 'DACH 区域制造业企业，关注供应链数字化和智能生产',
-    active: false,
-    criteria: {
-      companySize: '200-5000人',
-      industry: ['智能制造', '工业自动化', '精密仪器'],
-      geography: ['德国', '奥地利', '瑞士'],
-      revenue: '€20M - €200M',
-      techStack: ['SAP', 'Siemens', 'ABB'],
-      painPoints: ['供应链透明度', '生产效率', '质量控制'],
-      buyingSignals: ['工厂扩建', '数字化转型项目', 'ERP 升级'],
-    },
-    persona: {
-      title: ['COO', 'Plant Manager', 'Supply Chain Director'],
-      department: ['运营', '供应链', 'IT'],
-      seniority: '总监及以上',
-    },
-    createdBy: 'Leo Chen',
-    createdAt: '2026-06-15',
-    matchCount: 83,
-    aiGenerated: false,
-  },
-  {
-    id: 'icp3',
-    name: '东南亚 DTC 品牌创始人',
-    description: '新加坡/印尼地区年营收 $1M+ 的 DTC 品牌，关注增长和获客效率',
-    active: false,
-    criteria: {
-      companySize: '10-100人',
-      industry: ['DTC', '电商', '消费品牌'],
-      geography: ['新加坡', '印尼', '马来西亚'],
-      revenue: '$1M - $20M',
-      techStack: ['Shopify', 'Meta Ads', 'TikTok', 'Klaviyo'],
-      painPoints: ['流量成本上升', '复购率低', '本地化运营'],
-      buyingSignals: ['新市场扩张', 'A轮融资', '团队扩招'],
-    },
-    persona: {
-      title: ['CEO', 'Founder', 'CMO'],
-      department: ['营销', '运营'],
-      seniority: '创始人/高管',
-    },
-    createdBy: 'Mia Wang',
-    createdAt: '2026-06-20',
-    matchCount: 56,
-    aiGenerated: false,
-  },
-];
-
-export const mockAccounts: Account[] = [
-  {
-    id: 'acc1',
-    company: 'TechNova Solutions',
-    domain: 'technova.io',
-    industry: '企业软件',
-    country: '美国',
-    city: 'San Francisco',
-    revenue: '$120M',
-    employees: '320',
-    founded: '2018',
-    score: 92,
-    status: 'engaged',
-    signals: [
-      { id: 's1', type: 'funding', title: 'B 轮 $45M 融资', description: '2026 年 6 月完成 B 轮融资，资金将用于北美市场扩张和产品研发', date: '2026-06-15', source: 'Crunchbase', confidence: 98, isHot: true },
-      { id: 's2', type: 'hiring', title: '招聘销售 VP', description: '在 LinkedIn 发布 Enterprise Sales VP 职位，要求 SaaS 行业经验', date: '2026-07-01', source: 'LinkedIn', confidence: 95, isHot: true },
-      { id: 's3', type: 'tech_change', title: '技术栈变更信号', description: 'CTO 在 Twitter 提到正在评估新的数据分析平台', date: '2026-06-28', source: 'Twitter', confidence: 82, isHot: false },
-    ],
-    contacts: [
-      { id: 'c1', name: 'Sarah Mitchell', title: 'CTO', department: '技术', email: 'sarah@technova.io', linkedIn: 'linkedin.com/in/smitchell', phone: '+1-415-555-0101', isPrimary: true, lastInteraction: '2026-07-01' },
-      { id: 'c2', name: 'James Park', title: 'VP Engineering', department: '技术', email: 'james@technova.io', linkedIn: 'linkedin.com/in/jpark', phone: '', isPrimary: false, lastInteraction: '2026-06-20' },
-    ],
-    techStack: ['AWS', 'Snowflake', 'Salesforce'],
-    lastActivity: '2026-07-01',
-    notes: '高意向客户，近期完成融资，正在扩招销售团队。CTO 对数据分析平台表现出兴趣。',
-    dataQuality: 94,
-  },
-  {
-    id: 'acc2',
-    company: 'GreenBuild GmbH',
-    domain: 'greenbuild.de',
-    industry: '智能制造',
-    country: '德国',
-    city: 'Munich',
-    revenue: '€85M',
-    employees: '450',
-    founded: '2012',
-    score: 87,
-    status: 'new',
-    signals: [
-      { id: 's4', type: 'tech_change', title: 'ERP 升级项目启动', description: '官网招聘 SAP S/4HANA 顾问，推测正在进行 ERP 升级', date: '2026-06-25', source: '公司官网', confidence: 88, isHot: true },
-      { id: 's5', type: 'expansion', title: '波兰工厂扩建', description: '计划在波兰开设第二家工厂，预计投资 €15M', date: '2026-06-18', source: '行业新闻', confidence: 90, isHot: false },
-      { id: 's6', type: 'social_activity', title: 'LinkedIn 互动激增', description: '采购团队近两周在 LinkedIn 活跃，频繁互动制造业内容', date: '2026-06-30', source: 'LinkedIn', confidence: 78, isHot: false },
-    ],
-    contacts: [
-      { id: 'c3', name: 'Klaus Weber', title: 'COO', department: '运营', email: 'k.weber@greenbuild.de', linkedIn: 'linkedin.com/in/kweber', phone: '+49-89-555-0202', isPrimary: true, lastInteraction: '' },
-    ],
-    techStack: ['SAP', 'Siemens', 'Microsoft Azure'],
-    lastActivity: '2026-06-30',
-    notes: '德国智能制造企业，正在进行 ERP 升级，有数字化转型需求。需要德语内容支持。',
-    dataQuality: 78,
-  },
-  {
-    id: 'acc3',
-    company: 'DataVista Analytics',
-    domain: 'datavista.ai',
-    industry: '数据分析',
-    country: '英国',
-    city: 'London',
-    revenue: '£42M',
-    employees: '180',
-    founded: '2019',
-    score: 84,
-    status: 'contacted',
-    signals: [
-      { id: 's7', type: 'executive_change', title: '新任 CTO 上任', description: '新任 CTO 背景为大数据平台架构，LinkedIn 发布技术选型帖', date: '2026-06-22', source: 'LinkedIn', confidence: 92, isHot: true },
-      { id: 's8', type: 'partnership', title: '与 AWS 建立合作关系', description: '成为 AWS Advanced Technology Partner，计划扩展云服务', date: '2026-06-10', source: 'AWS 官网', confidence: 85, isHot: false },
-    ],
-    contacts: [
-      { id: 'c4', name: 'Emma Thompson', title: 'CTO', department: '技术', email: 'emma@datavista.ai', linkedIn: 'linkedin.com/in/ethompson', phone: '+44-20-555-0303', isPrimary: true, lastInteraction: '2026-06-25' },
-      { id: 'c5', name: 'Oliver Brown', title: 'Head of Data', department: '数据', email: 'oliver@datavista.ai', linkedIn: '', phone: '', isPrimary: false, lastInteraction: '' },
-    ],
-    techStack: ['AWS', 'Databricks', 'Python'],
-    lastActivity: '2026-06-25',
-    notes: '英国数据分析公司，新任 CTO 对技术选型持开放态度。已发送产品介绍邮件，等待回复。',
-    dataQuality: 86,
-  },
-  {
-    id: 'acc4',
-    company: 'PacificTrade Corp',
-    domain: 'pacifictrade.sg',
-    industry: '跨境贸易',
-    country: '新加坡',
-    city: 'Singapore',
-    revenue: 'SGD 200M',
-    employees: '120',
-    founded: '2015',
-    score: 78,
-    status: 'new',
-    signals: [
-      { id: 's9', type: 'social_activity', title: 'LinkedIn 采购团队活跃', description: '多位采购经理在 LinkedIn 频繁互动行业内容，讨论供应商管理', date: '2026-06-29', source: 'LinkedIn', confidence: 80, isHot: false },
-      { id: 's10', type: 'hiring', title: '招聘供应链分析师', description: '发布 3 个供应链分析师职位，要求熟悉数字化工具', date: '2026-06-20', source: 'LinkedIn', confidence: 75, isHot: false },
-    ],
-    contacts: [
-      { id: 'c6', name: 'Li Wei Tan', title: 'Supply Chain Director', department: '供应链', email: 'lwtan@pacifictrade.sg', linkedIn: 'linkedin.com/in/lwtan', phone: '+65-9123-4567', isPrimary: true, lastInteraction: '' },
-    ],
-    techStack: ['Oracle', 'SAP'],
-    lastActivity: '2026-06-29',
-    notes: '新加坡贸易公司，正在数字化转型中。供应链团队有数字化工具需求。',
-    dataQuality: 72,
-  },
-  {
-    id: 'acc5',
-    company: 'QuantumLeap AI',
-    domain: 'quantumleap.ai',
-    industry: '人工智能',
-    country: '美国',
-    city: 'New York',
-    revenue: '$65M',
-    employees: '95',
-    founded: '2020',
-    score: 95,
-    status: 'qualified',
-    signals: [
-      { id: 's11', type: 'funding', title: 'A 轮 $30M 融资', description: '2026 年 5 月完成 A 轮融资，投资方包括红杉资本', date: '2026-05-20', source: 'TechCrunch', confidence: 99, isHot: true },
-      { id: 's12', type: 'hiring', title: '扩招增长团队', description: '近 30 天内发布 8 个增长相关职位，包括增长分析师和渠道经理', date: '2026-06-15', source: 'LinkedIn', confidence: 94, isHot: true },
-      { id: 's13', type: 'event', title: '参加 SaaStr 2026', description: 'CEO 将在 SaaStr Annual 2026 演讲，主题为 AI 驱动的增长策略', date: '2026-07-10', source: 'SaaStr', confidence: 91, isHot: true },
-      { id: 's14', type: 'tech_change', title: '评估营销自动化平台', description: '工程团队在技术博客中提到正在评估营销自动化和数据归因工具', date: '2026-06-05', source: '技术博客', confidence: 88, isHot: true },
-    ],
-    contacts: [
-      { id: 'c7', name: 'Alex Chen', title: 'CEO & Founder', department: '执行', email: 'alex@quantumleap.ai', linkedIn: 'linkedin.com/in/alexchen', phone: '+1-212-555-0404', isPrimary: true, lastInteraction: '2026-07-01' },
-      { id: 'c8', name: 'Rachel Kim', title: 'Head of Growth', department: '增长', email: 'rachel@quantumleap.ai', linkedIn: 'linkedin.com/in/rkim', phone: '+1-212-555-0405', isPrimary: false, lastInteraction: '2026-06-28' },
-    ],
-    techStack: ['AWS', 'Kubernetes', 'LangChain'],
-    lastActivity: '2026-07-01',
-    notes: '极高意向客户！AI 初创公司，近期融资，正在大规模扩招增长团队。CEO 和技术团队对我们的产品方向表现出浓厚兴趣。已安排产品演示。',
-    dataQuality: 98,
-  },
-  {
-    id: 'acc6',
-    company: 'NordicFin Tech',
-    domain: 'nordicfin.no',
-    industry: '金融科技',
-    country: '挪威',
-    city: 'Oslo',
-    revenue: 'NOK 450M',
-    employees: '210',
-    founded: '2014',
-    score: 71,
-    status: 'new',
-    signals: [
-      { id: 's15', type: 'expansion', title: '进军英国市场', description: '计划在伦敦设立分部，拓展英国金融科技市场', date: '2026-06-12', source: '行业新闻', confidence: 85, isHot: false },
-      { id: 's16', type: 'tech_change', title: '核心系统升级', description: 'CTO 在公开演讲中提到正在进行核心系统现代化改造', date: '2026-06-08', source: '会议演讲', confidence: 72, isHot: false },
-    ],
-    contacts: [
-      { id: 'c9', name: 'Erik Johansson', title: 'CTO', department: '技术', email: 'erik@nordicfin.no', linkedIn: '', phone: '', isPrimary: true, lastInteraction: '' },
-    ],
-    techStack: ['Microsoft Azure', '.NET'],
-    lastActivity: '2026-06-12',
-    notes: '挪威金融科技公司，正在扩张到英国市场。数据有限，需要进一步调研。',
-    dataQuality: 65,
-  },
-  {
-    id: 'acc7',
-    company: 'CloudBridge Systems',
-    domain: 'cloudbridge.io',
-    industry: '云计算',
-    country: '加拿大',
-    city: 'Toronto',
-    revenue: 'CAD 180M',
-    employees: '520',
-    founded: '2016',
-    score: 89,
-    status: 'engaged',
-    signals: [
-      { id: 's17', type: 'funding', title: 'C 轮 $80M 融资', description: '2026 年 4 月完成 C 轮融资，估值达到 $600M', date: '2026-04-15', source: 'VentureBeat', confidence: 97, isHot: true },
-      { id: 's18', type: 'hiring', title: '全球扩张招聘', description: '在伦敦、新加坡和悉尼开设办事处，招聘当地增长团队', date: '2026-06-01', source: 'LinkedIn', confidence: 93, isHot: true },
-      { id: 's19', type: 'partnership', title: '与 Google Cloud 战略合作', description: '宣布与 Google Cloud 建立多年战略合作伙伴关系', date: '2026-05-25', source: 'Google Cloud Blog', confidence: 96, isHot: false },
-    ],
-    contacts: [
-      { id: 'c10', name: 'Maria Santos', title: 'VP Growth', department: '增长', email: 'maria@cloudbridge.io', linkedIn: 'linkedin.com/in/msantos', phone: '+1-416-555-0505', isPrimary: true, lastInteraction: '2026-06-30' },
-      { id: 'c11', name: 'David Patel', title: 'Head of Partnerships', department: '合作', email: 'david@cloudbridge.io', linkedIn: 'linkedin.com/in/dpatel', phone: '', isPrimary: false, lastInteraction: '2026-06-25' },
-    ],
-    techStack: ['GCP', 'Kubernetes', 'Terraform'],
-    lastActivity: '2026-06-30',
-    notes: '加拿大云计算公司，快速扩张中。VP Growth 是我们的主要联系人，对产品功能匹配度评价很高。',
-    dataQuality: 91,
-  },
-  {
-    id: 'acc8',
-    company: 'MediCare Plus',
-    domain: 'medicareplus.com.au',
-    industry: '医疗健康',
-    country: '澳大利亚',
-    city: 'Sydney',
-    revenue: 'AUD 320M',
-    employees: '1200',
-    founded: '2008',
-    score: 68,
-    status: 'new',
-    signals: [
-      { id: 's20', type: 'executive_change', title: '新任 CMO 上任', description: '新任 CMO 来自制药行业，有丰富的数字化营销经验', date: '2026-05-30', source: 'LinkedIn', confidence: 87, isHot: false },
-      { id: 's21', type: 'event', title: '参加 HIMSS 2026', description: '将在 HIMSS 展示新的患者管理平台', date: '2026-08-15', source: 'HIMSS', confidence: 80, isHot: false },
-    ],
-    contacts: [
-      { id: 'c12', name: 'Lisa Wong', title: 'CMO', department: '营销', email: 'lisa@medicareplus.com.au', linkedIn: 'linkedin.com/in/lwong', phone: '', isPrimary: true, lastInteraction: '' },
-    ],
-    techStack: ['Salesforce Health Cloud', 'AWS'],
-    lastActivity: '2026-05-30',
-    notes: '澳大利亚医疗公司，新任 CMO 对数字化营销持开放态度。评分较低是因为行业匹配度一般，但可尝试建立关系。',
-    dataQuality: 70,
-  },
-];
-
-export const mockSignalEvents: SignalEvent[] = [
-  { id: 'se1', accountId: 'acc1', accountName: 'TechNova Solutions', signalType: 'funding', signalTitle: '完成 B 轮 $45M 融资', time: '15分钟前', read: false },
-  { id: 'se2', accountId: 'acc5', accountName: 'QuantumLeap AI', signalType: 'hiring', signalTitle: '扩招增长团队（8 个职位）', time: '35分钟前', read: false },
-  { id: 'se3', accountId: 'acc2', accountName: 'GreenBuild GmbH', signalType: 'tech_change', signalTitle: '启动 ERP 升级项目', time: '1小时前', read: false },
-  { id: 'se4', accountId: 'acc7', accountName: 'CloudBridge Systems', signalType: 'hiring', signalTitle: '在伦敦/新加坡/悉尼开设办事处', time: '2小时前', read: true },
-  { id: 'se5', accountId: 'acc3', accountName: 'DataVista Analytics', signalType: 'executive_change', signalTitle: '新任 CTO 上任，发布技术选型帖', time: '3小时前', read: true },
-  { id: 'se6', accountId: 'acc1', accountName: 'TechNova Solutions', signalType: 'hiring', signalTitle: '发布 Enterprise Sales VP 职位', time: '4小时前', read: true },
-  { id: 'se7', accountId: 'acc4', accountName: 'PacificTrade Corp', signalType: 'social_activity', signalTitle: '采购团队在 LinkedIn 活跃', time: '5小时前', read: true },
-  { id: 'se8', accountId: 'acc6', accountName: 'NordicFin Tech', signalType: 'expansion', signalTitle: '计划在伦敦设立分部', time: '6小时前', read: true },
-];
+const NOW_ISO = '2026-07-03T00:00:00Z';
+const emailPoints = fxContacts.map((c) =>
+  (c.contact_points ?? []).find((p: any) => p.type === 'EMAIL'),
+);
 
 export const mockDataQuality: DataQualityReport = {
-  totalAccounts: 127,
-  enrichedAccounts: 108,
-  duplicateCount: 3,
-  missingEmail: 12,
-  missingPhone: 45,
-  missingLinkedIn: 18,
-  verifiedCount: 89,
-  enrichmentRate: 85,
-  dedupRate: 97,
-  lastUpdate: '2026-07-02 08:30',
+  totalAccounts: fxAccounts.length,
+  emailVerified: emailPoints.filter((p) => p?.verification_status === 'VALID').length,
+  emailUnverified: emailPoints.filter((p) => p && p.verification_status !== 'VALID').length,
+  maskedFields: fieldEvidences.filter((e) => e.allowed_to_display === false).length,
+  exportRestricted: fieldEvidences.filter((e) => e.allowed_to_export !== true).length,
+  outreachRestricted: fieldEvidences.filter((e) => e.allowed_for_outreach !== true).length,
+  avgQualityScore: Math.round(
+    (fxAccounts.reduce((sum, a) => sum + (a.quality_score ?? 0), 0) /
+      Math.max(fxAccounts.length, 1)) *
+      100,
+  ),
+  evidenceFresh: fieldEvidences.filter((e) => String(e.expires_at ?? '') > NOW_ISO).length,
+  evidenceTotal: fieldEvidences.length,
+  lastUpdate: toDay(
+    fieldEvidences.reduce(
+      (max, e) => (String(e.fetched_at) > max ? String(e.fetched_at) : max),
+      '',
+    ),
+  ),
 };
+
+// ---------------------------------------------------------------------------
+// AI 洞察（AI 只提出建议；动作以「提案 + 审批」表述，硬边界 1）
+// ---------------------------------------------------------------------------
 
 export interface ProspectAIInsight {
   id: string;
   type: 'suggestion' | 'warning' | 'evidence' | 'risk';
   title: string;
   content: string;
-  confidence: number;
-  relatedTo?: string;
+  confidence: number; // 0-100
+  relatedAccountId?: string;
+  relatedTo?: string; // 账户名称（展示用）
   actionable: boolean;
   actionText?: string;
 }
@@ -407,70 +802,72 @@ export const mockAIInsights: ProspectAIInsight[] = [
   {
     id: 'pai1',
     type: 'evidence',
-    title: 'TechNova 招聘信号匹配度极高',
-    content: 'TechNova Solutions 近期发布的 Enterprise Sales VP 职位要求中，明确提到了需要"熟悉数据分析和营销自动化平台"，这与我们的产品功能高度匹配。同时，该公司 B 轮融资资金充裕，正处于快速扩张期。',
-    confidence: 94,
-    relatedTo: 'TechNova Solutions',
+    title: 'Mekong Solar 贸易信号强劲',
+    content:
+      '事实：近 180 天 HS 854143 组件进口量环比增长 35%（来源：海关贸易数据，2026-06-20 观测）。六维评分 Fit 88 / Intent 80，主联系人为采购总监且邮箱已验证（allowed_for_outreach=true）。推断：处于供应商评估窗口期。',
+    confidence: 92,
+    relatedAccountId: 'acc_01JZACCT000000000000000001',
+    relatedTo: 'Mekong Solar Trading Co., Ltd.',
     actionable: true,
-    actionText: '生成个性化 outreach',
+    actionText: '生成外联提案（需审批）',
   },
   {
     id: 'pai2',
     type: 'suggestion',
-    title: '优先触达 QuantumLeap AI',
-    content: 'QuantumLeap AI 是当前评分最高（95分）的潜客。他们有 4 个强信号（融资、扩招、活动、技术评估），且 CEO 和 Head of Growth 都已建立了联系。建议在本周内安排产品演示。',
-    confidence: 92,
-    relatedTo: 'QuantumLeap AI',
+    title: 'Lagos BuildMart 建议推进为 SAO',
+    content:
+      'Lagos BuildMart 已达 CONVERTED（已转化）且综合优先级 88，决策人 Managing Director 直接在联。按三级结果链 Qualified Lead → SAO → Verified Outcome，建议销售确认接受，推进为 SAO（销售接受机会）。',
+    confidence: 88,
+    relatedAccountId: 'acc_01JZACCT000000000000000011',
+    relatedTo: 'Lagos BuildMart Distribution Ltd.',
     actionable: true,
-    actionText: '创建演示任务',
+    actionText: '创建 SAO 确认任务',
   },
   {
     id: 'pai3',
     type: 'warning',
-    title: 'NordicFin Tech 数据不足',
-    content: 'NordicFin Tech 的数据完整度仅 65%，缺失 LinkedIn 和电话信息。虽然该公司有扩张信号，但低质量数据可能导致 outreach 失败。建议先进行数据补全再发起联系。',
-    confidence: 88,
-    relatedTo: 'NordicFin Tech',
+    title: 'Bangkok Solar Import 数据质量不足',
+    content:
+      '风险旗标 unverified_email：主邮箱未通过验证，Reachability 仅 45、Data Quality 52，暂不可进入批量发送（母本 4.5.5）。建议先执行数据补全与邮箱验证，再评估是否移出待确认队列。',
+    confidence: 90,
+    relatedAccountId: 'acc_01JZACCT000000000000000004',
+    relatedTo: 'Bangkok Solar Import Co., Ltd.',
     actionable: true,
-    actionText: '启动数据补全',
+    actionText: '创建数据补全提案',
   },
   {
     id: 'pai4',
     type: 'risk',
-    title: 'GreenBuild 竞品合同即将到期',
-    content: 'GreenBuild 当前使用的竞品合同将在 3 个月后到期。这是绝佳的切换窗口期。但需注意，德国企业对供应商切换通常需要 6-12 个月的评估周期，建议现在就开始建立关系。',
-    confidence: 79,
-    relatedTo: 'GreenBuild GmbH',
-    actionable: true,
-    actionText: '查看竞品情报',
+    title: 'Hanoi PV Components 命中全局禁止联系',
+    content:
+      'suppression_applied=true：该线索命中全局 Suppression（禁止联系），已进入 DO_NOT_CONTACT 队列，不会进入任何发送队列，且任何模型不得覆盖（LED-007 验收）。与 PT Bali（业务拒绝：同业制造商，硬性排除）不同，禁止联系属合规硬约束。',
+    confidence: 99,
+    relatedAccountId: 'acc_01JZACCT000000000000000010',
+    relatedTo: 'Hanoi PV Components Co., Ltd.',
+    actionable: false,
   },
   {
     id: 'pai5',
-    type: 'suggestion',
-    title: 'CloudBridge 多触点策略',
-    content: 'CloudBridge Systems 同时在伦敦、新加坡和悉尼扩张，这意味着他们可能需要多区域增长策略支持。建议同时联系 VP Growth 和 Head of Partnerships，分别从不同角度切入。',
-    confidence: 86,
-    relatedTo: 'CloudBridge Systems',
+    type: 'warning',
+    title: 'Nile Delta 命中负向信号',
+    content:
+      '关系变化信号：与竞品品牌签署区域独家代理，命中 ICP negative_signals（competitor_exclusive_agency_signed）。推断短期合作空间受限，建议复核匹配度并下调优先级，暂缓外联。',
+    confidence: 78,
+    relatedAccountId: 'acc_01JZACCT000000000000000017',
+    relatedTo: 'Nile Delta Building Trade LLC',
     actionable: true,
-    actionText: '创建多触点任务',
+    actionText: '发起重评提案',
+  },
+  {
+    id: 'pai6',
+    type: 'evidence',
+    title: 'Borneo Energy 信号过期自动降分',
+    content:
+      '事实：最近一次组件进口记录在 14 个月前，贸易信号已过期（status=EXPIRED），Intent 维度自动降至 40（LED-014：信号过期自动降低 Intent）。关键字段超 12 个月未刷新已进入刷新队列（母本 4.5.5）。',
+    confidence: 85,
+    relatedAccountId: 'acc_01JZACCT000000000000000006',
+    relatedTo: 'Borneo Energy Distribution Sdn. Bhd.',
+    actionable: true,
+    actionText: '创建数据刷新提案',
   },
 ];
-
-export const signalTypeConfig: Record<string, { icon: string; label: string; color: string }> = {
-  funding: { icon: 'ri-money-cny-circle-line', label: '融资', color: 'text-success' },
-  hiring: { icon: 'ri-user-add-line', label: '招聘', color: 'text-primary-400' },
-  expansion: { icon: 'ri-global-line', label: '扩张', color: 'text-info' },
-  tech_change: { icon: 'ri-code-box-line', label: '技术变更', color: 'text-warning' },
-  executive_change: { icon: 'ri-user-star-line', label: '高管变动', color: 'text-data-highlight' },
-  social_activity: { icon: 'ri-share-circle-line', label: '社交活跃', color: 'text-foreground-500' },
-  partnership: { icon: 'ri-briefcase-line', label: '合作', color: 'text-primary-400' },
-  event: { icon: 'ri-calendar-event-line', label: '活动', color: 'text-foreground-500' },
-};
-
-export const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
-  new: { label: '新潜客', color: 'text-foreground-500', bg: 'bg-foreground-500/10' },
-  contacted: { label: '已联系', color: 'text-info', bg: 'bg-info/10' },
-  engaged: { label: '互动中', color: 'text-primary-400', bg: 'bg-primary-500/10' },
-  qualified: { label: '已认证', color: 'text-success', bg: 'bg-success/10' },
-  disqualified: { label: '已排除', color: 'text-error', bg: 'bg-error/10' },
-};

@@ -21,7 +21,7 @@ export default function PlanBuilder({ goal, plan, onBack }: PlanBuilderProps) {
 
   const handleSaveEdit = () => {
     if (!editingId) return;
-    setSections(sections.map(s => s.id === editingId ? { ...s, content: editContent } : s));
+    setSections(sections.map((s) => (s.id === editingId ? { ...s, content: editContent } : s)));
     setEditingId(null);
     setEditContent('');
   };
@@ -32,8 +32,9 @@ export default function PlanBuilder({ goal, plan, onBack }: PlanBuilderProps) {
   };
 
   const handleEnterWorkspace = useCallback(() => {
-    localStorage.setItem('growthos_onboarding_completed', 'true');
-    localStorage.setItem('growthos_goal_completed', 'true');
+    // localStorage key 迁移：growthos_* → ggw_*
+    localStorage.setItem('ggw_onboarding_completed', 'true');
+    localStorage.setItem('ggw_goal_completed', 'true');
     navigate('/dashboard');
   }, [navigate]);
 
@@ -54,9 +55,7 @@ export default function PlanBuilder({ goal, plan, onBack }: PlanBuilderProps) {
           <span className="text-primary-300 text-sm font-medium">{goal.title}</span>
         </div>
 
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-          你的专属增长计划
-        </h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">你的专属增长计划</h2>
         <p className="text-foreground-400 text-sm md:text-base max-w-lg">
           AI 已根据你的信息生成结构化计划。你可以编辑每个阶段的内容，确认后进入工作台执行。
         </p>
@@ -84,16 +83,10 @@ export default function PlanBuilder({ goal, plan, onBack }: PlanBuilderProps) {
                   autoFocus
                 />
                 <div className="flex items-center gap-2 justify-end">
-                  <button
-                    onClick={handleCancelEdit}
-                    className="btn-secondary px-4 py-2 text-sm"
-                  >
+                  <button onClick={handleCancelEdit} className="btn-secondary px-4 py-2 text-sm">
                     取消
                   </button>
-                  <button
-                    onClick={handleSaveEdit}
-                    className="btn-primary px-4 py-2 text-sm"
-                  >
+                  <button onClick={handleSaveEdit} className="btn-primary px-4 py-2 text-sm">
                     保存修改
                   </button>
                 </div>

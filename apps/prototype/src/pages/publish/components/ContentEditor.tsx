@@ -24,9 +24,10 @@ export default function ContentEditor({
   const [newTag, setNewTag] = useState('');
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
 
-  const minCharLimit = selectedPlatforms.length > 0
-    ? Math.min(...selectedPlatforms.map((id) => platformCharLimits[id] || 99999))
-    : 99999;
+  const minCharLimit =
+    selectedPlatforms.length > 0
+      ? Math.min(...selectedPlatforms.map((id) => platformCharLimits[id] || 99999))
+      : 99999;
   const contentLength = content.length;
   const isOverLimit = minCharLimit !== 99999 && contentLength > minCharLimit;
 
@@ -38,9 +39,12 @@ export default function ContentEditor({
     }
   }, [newTag, tags, onTagsChange]);
 
-  const handleRemoveTag = useCallback((tag: string) => {
-    onTagsChange(tags.filter((t) => t !== tag));
-  }, [tags, onTagsChange]);
+  const handleRemoveTag = useCallback(
+    (tag: string) => {
+      onTagsChange(tags.filter((t) => t !== tag));
+    },
+    [tags, onTagsChange],
+  );
 
   const getPlatformPreview = (platformId: string) => {
     const limit = platformCharLimits[platformId] || 99999;
@@ -87,7 +91,9 @@ export default function ContentEditor({
           <div>
             <label className="text-foreground-500 text-xs mb-1.5 flex items-center gap-2">
               标题
-              <span className={`text-[10px] ${title.length > 100 ? 'text-red-400' : 'text-foreground-700'}`}>
+              <span
+                className={`text-[10px] ${title.length > 100 ? 'text-red-400' : 'text-foreground-700'}`}
+              >
                 {title.length}/100
               </span>
             </label>
@@ -105,7 +111,9 @@ export default function ContentEditor({
             <label className="text-foreground-500 text-xs mb-1.5 flex items-center gap-2">
               正文内容
               {selectedPlatforms.length > 0 && (
-                <span className={`text-[10px] ${isOverLimit ? 'text-red-400' : 'text-foreground-700'}`}>
+                <span
+                  className={`text-[10px] ${isOverLimit ? 'text-red-400' : 'text-foreground-700'}`}
+                >
                   {contentLength} / 最短限制 {minCharLimit}
                   {isOverLimit && ' (超出)'}
                 </span>
@@ -197,7 +205,9 @@ export default function ContentEditor({
                 <div key={pid} className="rounded-lg bg-white/[0.02] p-3">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs text-white font-medium capitalize">{pid}</span>
-                    <span className={`text-[10px] ${over ? 'text-red-400' : 'text-foreground-700'}`}>
+                    <span
+                      className={`text-[10px] ${over ? 'text-red-400' : 'text-foreground-700'}`}
+                    >
                       {contentLength}/{limit} 字符
                     </span>
                   </div>

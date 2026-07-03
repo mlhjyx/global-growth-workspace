@@ -33,7 +33,22 @@
         "field": { "type": "string" },
         "operator": {
           "type": "string",
-          "enum": ["EQ", "NEQ", "IN", "NOT_IN", "GT", "GTE", "LT", "LTE", "RANGE", "CONTAINS", "NOT_CONTAINS", "EXISTS", "NOT_EXISTS", "MATCHES"]
+          "enum": [
+            "EQ",
+            "NEQ",
+            "IN",
+            "NOT_IN",
+            "GT",
+            "GTE",
+            "LT",
+            "LTE",
+            "RANGE",
+            "CONTAINS",
+            "NOT_CONTAINS",
+            "EXISTS",
+            "NOT_EXISTS",
+            "MATCHES"
+          ]
         },
         "value": { "description": "比较值；类型随 field 而定" }
       },

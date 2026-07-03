@@ -781,7 +781,8 @@ paths:
                           type: string
                         type:
                           type: string
-                          enum: [EMAIL, PHONE, LINKEDIN, WHATSAPP, WECHAT, FACEBOOK, X, OTHER_SOCIAL]
+                          enum:
+                            [EMAIL, PHONE, LINKEDIN, WHATSAPP, WECHAT, FACEBOOK, X, OTHER_SOCIAL]
                         value:
                           type: string
                         verification_status:
@@ -867,7 +868,8 @@ paths:
           in: query
           schema:
             type: string
-            enum: [DISCOVERED, ENRICHING, REVIEW, QUALIFIED, REJECTED, SUPPRESSED, CONTACTED, CONVERTED]
+            enum:
+              [DISCOVERED, ENRICHING, REVIEW, QUALIFIED, REJECTED, SUPPRESSED, CONTACTED, CONVERTED]
         - name: queue
           in: query
           schema:
@@ -1100,7 +1102,18 @@ paths:
                   type: array
                   items:
                     type: string
-                    enum: [NOT_ICP_FIT, WRONG_ROLE, BAD_DATA, ALREADY_CUSTOMER, COMPETITOR, BAD_TIMING, DUPLICATE, COMPLIANCE_RISK, OTHER]
+                    enum:
+                      [
+                        NOT_ICP_FIT,
+                        WRONG_ROLE,
+                        BAD_DATA,
+                        ALREADY_CUSTOMER,
+                        COMPETITOR,
+                        BAD_TIMING,
+                        DUPLICATE,
+                        COMPLIANCE_RISK,
+                        OTHER,
+                      ]
                   description: decision=REJECTED 时必填
                 reason_note:
                   type: string
@@ -1130,7 +1143,17 @@ paths:
                           type: string
                         current_status:
                           type: string
-                          enum: [DISCOVERED, ENRICHING, REVIEW, QUALIFIED, REJECTED, SUPPRESSED, CONTACTED, CONVERTED]
+                          enum:
+                            [
+                              DISCOVERED,
+                              ENRICHING,
+                              REVIEW,
+                              QUALIFIED,
+                              REJECTED,
+                              SUPPRESSED,
+                              CONTACTED,
+                              CONVERTED,
+                            ]
                         current_queue:
                           type: string
                           enum: [RECOMMENDED, NEEDS_CONFIRMATION, REJECTED, DO_NOT_CONTACT]

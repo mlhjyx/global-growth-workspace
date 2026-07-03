@@ -18,7 +18,10 @@ export default function Layout() {
 
       {/* Main content area */}
       <div className="flex-1 md:ml-[220px] flex flex-col min-h-screen relative z-10">
-        <TopBar onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)} mobileMenuOpen={mobileMenuOpen} />
+        <TopBar
+          onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
+          mobileMenuOpen={mobileMenuOpen}
+        />
         <main className="flex-1 overflow-auto">
           <Outlet />
         </main>

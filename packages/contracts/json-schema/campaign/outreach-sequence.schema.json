@@ -54,7 +54,14 @@
           },
           "entry_condition": {
             "type": "string",
-            "enum": ["ALWAYS", "NO_REPLY", "NO_OPEN", "CLICKED", "REPLIED_POSITIVE", "REPLIED_NEGATIVE"],
+            "enum": [
+              "ALWAYS",
+              "NO_REPLY",
+              "NO_OPEN",
+              "CLICKED",
+              "REPLIED_POSITIVE",
+              "REPLIED_NEGATIVE"
+            ],
             "default": "ALWAYS",
             "description": "进入本步骤的前置条件（基于上一步的互动结果，母本 5.11 意向识别）"
           }

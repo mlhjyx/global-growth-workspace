@@ -51,7 +51,11 @@ export default function ApprovalsCard({ approvals }: ApprovalsCardProps) {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <span className="badge-info text-[11px]">{typeLabel[item.type] || item.type}</span>
-                <span className={`${urgency.color} ${urgency.bg} text-[11px] px-2 py-0.5 rounded-full`}>{urgency.label}</span>
+                <span
+                  className={`${urgency.color} ${urgency.bg} text-[11px] px-2 py-0.5 rounded-full`}
+                >
+                  {urgency.label}
+                </span>
               </div>
             </button>
           );

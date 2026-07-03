@@ -144,7 +144,8 @@ export const marketTrends: MarketTrend[] = [
     impact: 'high',
     trend: 'up',
     category: '技术趋势',
-    description: '超过 73% 的 B2B 企业计划在 2026 年前部署 AI 个性化触达工具，市场渗透率将提升 40%。',
+    description:
+      '超过 73% 的 B2B 企业计划在 2026 年前部署 AI 个性化触达工具，市场渗透率将提升 40%。',
     date: '2025-06-30',
   },
   {
@@ -195,18 +196,78 @@ export const marketTrends: MarketTrend[] = [
 ];
 
 export const featureComparisons: FeatureComparison[] = [
-  { feature: '跨平台统一 Inbox', us: 'yes', competitorA: 'yes', competitorB: 'partial', competitorC: 'no' },
-  { feature: 'AI 跟进话术生成', us: 'yes', competitorA: 'no', competitorB: 'no', competitorC: 'no' },
-  { feature: '多语言内容合规检查', us: 'yes', competitorA: 'no', competitorB: 'no', competitorC: 'partial' },
-  { feature: '动态 ICP 画像构建', us: 'yes', competitorA: 'yes', competitorB: 'partial', competitorC: 'no' },
-  { feature: '战役归因模型可视化', us: 'yes', competitorA: 'partial', competitorB: 'no', competitorC: 'no' },
+  {
+    feature: '跨平台统一 Inbox',
+    us: 'yes',
+    competitorA: 'yes',
+    competitorB: 'partial',
+    competitorC: 'no',
+  },
+  {
+    feature: 'AI 跟进话术生成',
+    us: 'yes',
+    competitorA: 'no',
+    competitorB: 'no',
+    competitorC: 'no',
+  },
+  {
+    feature: '多语言内容合规检查',
+    us: 'yes',
+    competitorA: 'no',
+    competitorB: 'no',
+    competitorC: 'partial',
+  },
+  {
+    feature: '动态 ICP 画像构建',
+    us: 'yes',
+    competitorA: 'yes',
+    competitorB: 'partial',
+    competitorC: 'no',
+  },
+  {
+    feature: '战役归因模型可视化',
+    us: 'yes',
+    competitorA: 'partial',
+    competitorB: 'no',
+    competitorC: 'no',
+  },
   { feature: '周报自动生成', us: 'yes', competitorA: 'no', competitorB: 'no', competitorC: 'no' },
-  { feature: 'LinkedIn 自动化序列', us: 'yes', competitorA: 'yes', competitorB: 'yes', competitorC: 'yes' },
-  { feature: '邮件 A/B 测试', us: 'yes', competitorA: 'yes', competitorB: 'yes', competitorC: 'yes' },
-  { feature: 'CRM 双向同步', us: 'yes', competitorA: 'yes', competitorB: 'yes', competitorC: 'yes' },
+  {
+    feature: 'LinkedIn 自动化序列',
+    us: 'yes',
+    competitorA: 'yes',
+    competitorB: 'yes',
+    competitorC: 'yes',
+  },
+  {
+    feature: '邮件 A/B 测试',
+    us: 'yes',
+    competitorA: 'yes',
+    competitorB: 'yes',
+    competitorC: 'yes',
+  },
+  {
+    feature: 'CRM 双向同步',
+    us: 'yes',
+    competitorA: 'yes',
+    competitorB: 'yes',
+    competitorC: 'yes',
+  },
   { feature: '竞品监控与告警', us: 'yes', competitorA: 'no', competitorB: 'no', competitorC: 'no' },
-  { feature: '意图数据集成', us: 'partial', competitorA: 'yes', competitorB: 'yes', competitorC: 'no' },
-  { feature: '广告投放管理', us: 'partial', competitorA: 'yes', competitorB: 'yes', competitorC: 'partial' },
+  {
+    feature: '意图数据集成',
+    us: 'partial',
+    competitorA: 'yes',
+    competitorB: 'yes',
+    competitorC: 'no',
+  },
+  {
+    feature: '广告投放管理',
+    us: 'partial',
+    competitorA: 'yes',
+    competitorB: 'yes',
+    competitorC: 'partial',
+  },
 ];
 
 export const competitorAlerts: CompetitorAlert[] = [

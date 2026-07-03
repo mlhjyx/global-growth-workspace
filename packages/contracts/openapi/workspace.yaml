@@ -47,7 +47,7 @@ paths:
       operationId: listOrganizations
       tags: [organizations]
       summary: 列出当前用户可见的组织
-      description: "WSP-001/WSP-004。代理商可见其全部客户组织。policy: organization.read"
+      description: 'WSP-001/WSP-004。代理商可见其全部客户组织。policy: organization.read'
       parameters:
         - $ref: '#/components/parameters/Cursor'
         - $ref: '#/components/parameters/Limit'
@@ -73,7 +73,7 @@ paths:
       operationId: createOrganization
       tags: [organizations]
       summary: 创建组织
-      description: "WSP-001。创建企业或代理商顶层账户，发布 OrganizationCreated。policy: organization.create"
+      description: 'WSP-001。创建企业或代理商顶层账户，发布 OrganizationCreated。policy: organization.create'
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -101,7 +101,7 @@ paths:
       operationId: getOrganization
       tags: [organizations]
       summary: 获取组织
-      description: "WSP-001。policy: organization.read"
+      description: 'WSP-001。policy: organization.read'
       responses:
         '200':
           description: 组织详情
@@ -117,7 +117,7 @@ paths:
       operationId: updateOrganization
       tags: [organizations]
       summary: 更新组织
-      description: "WSP-001。乐观锁 If-Match=version（母本 11.16）。policy: organization.configure"
+      description: 'WSP-001。乐观锁 If-Match=version（母本 11.16）。policy: organization.configure'
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
         - $ref: '#/components/parameters/IfMatch'
@@ -144,7 +144,7 @@ paths:
       operationId: listWorkspaces
       tags: [workspaces]
       summary: 列出当前用户可访问的 Workspace
-      description: "WSP-001/WSP-004。切换 Workspace 后缓存、搜索和任务上下文不泄漏（WSP-004 验收）。policy: workspace.read"
+      description: 'WSP-001/WSP-004。切换 Workspace 后缓存、搜索和任务上下文不泄漏（WSP-004 验收）。policy: workspace.read'
       parameters:
         - $ref: '#/components/parameters/Cursor'
         - $ref: '#/components/parameters/Limit'
@@ -176,7 +176,7 @@ paths:
       operationId: createWorkspace
       tags: [workspaces]
       summary: 创建 Workspace
-      description: "WSP-001。创建后所有对象自动带 workspace_id；发布 WorkspaceCreated。policy: workspace.create"
+      description: 'WSP-001。创建后所有对象自动带 workspace_id；发布 WorkspaceCreated。policy: workspace.create'
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -204,7 +204,7 @@ paths:
       operationId: getWorkspace
       tags: [workspaces]
       summary: 获取 Workspace
-      description: "WSP-001。policy: workspace.read"
+      description: 'WSP-001。policy: workspace.read'
       responses:
         '200':
           description: Workspace 详情
@@ -220,7 +220,7 @@ paths:
       operationId: updateWorkspace
       tags: [workspaces]
       summary: 更新 Workspace 设置
-      description: "WSP-001/WSP-008（保留期设置）。乐观锁 If-Match=version。设置变更记审计 WORKSPACE_SETTINGS_CHANGE（WSP-010）。policy: workspace.configure"
+      description: 'WSP-001/WSP-008（保留期设置）。乐观锁 If-Match=version。设置变更记审计 WORKSPACE_SETTINGS_CHANGE（WSP-010）。policy: workspace.configure'
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
         - $ref: '#/components/parameters/IfMatch'
@@ -281,7 +281,7 @@ paths:
       operationId: listBrands
       tags: [brands]
       summary: 列出品牌
-      description: "WSP-001。policy: brand.read"
+      description: 'WSP-001。policy: brand.read'
       parameters:
         - $ref: '#/components/parameters/Cursor'
         - $ref: '#/components/parameters/Limit'
@@ -307,7 +307,7 @@ paths:
       operationId: createBrand
       tags: [brands]
       summary: 创建品牌
-      description: "WSP-001。发布 BrandCreated。policy: brand.create"
+      description: 'WSP-001。发布 BrandCreated。policy: brand.create'
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -341,7 +341,7 @@ paths:
       operationId: getBrand
       tags: [brands]
       summary: 获取品牌
-      description: "WSP-001。policy: brand.read"
+      description: 'WSP-001。policy: brand.read'
       responses:
         '200':
           description: 品牌详情
@@ -357,7 +357,7 @@ paths:
       operationId: updateBrand
       tags: [brands]
       summary: 更新品牌
-      description: "WSP-001。乐观锁 If-Match=version。policy: brand.update"
+      description: 'WSP-001。乐观锁 If-Match=version。policy: brand.update'
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
         - $ref: '#/components/parameters/IfMatch'
@@ -386,7 +386,7 @@ paths:
       operationId: listMemberships
       tags: [memberships]
       summary: 列出成员
-      description: "WSP-002。policy: membership.read"
+      description: 'WSP-002。policy: membership.read'
       parameters:
         - $ref: '#/components/parameters/Cursor'
         - $ref: '#/components/parameters/Limit'
@@ -423,7 +423,7 @@ paths:
       operationId: inviteMembership
       tags: [memberships]
       summary: 邀请成员（创建 INVITED 状态的 Membership）
-      description: "WSP-002/WSP-004。发布 MembershipChanged(change_type=INVITED)；记审计 MEMBER_INVITED（WSP-010）。policy: membership.manage"
+      description: 'WSP-002/WSP-004。发布 MembershipChanged(change_type=INVITED)；记审计 MEMBER_INVITED（WSP-010）。policy: membership.manage'
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -457,7 +457,7 @@ paths:
       operationId: getMembership
       tags: [memberships]
       summary: 获取成员
-      description: "WSP-002。policy: membership.read"
+      description: 'WSP-002。policy: membership.read'
       responses:
         '200':
           description: 成员详情
@@ -501,7 +501,7 @@ paths:
       operationId: removeMembership
       tags: [memberships]
       summary: 移除成员（状态转 REMOVED）
-      description: "WSP-002/WSP-009。发布 MembershipChanged(change_type=REMOVED)；记审计 MEMBER_REMOVED。policy: membership.manage"
+      description: 'WSP-002/WSP-009。发布 MembershipChanged(change_type=REMOVED)；记审计 MEMBER_REMOVED。policy: membership.manage'
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
         - $ref: '#/components/parameters/IfMatch'
@@ -520,7 +520,7 @@ paths:
       operationId: listPermissionGrants
       tags: [permission-grants]
       summary: 列出权限授予
-      description: "WSP-003。policy: permission_grant.read"
+      description: 'WSP-003。policy: permission_grant.read'
       parameters:
         - $ref: '#/components/parameters/Cursor'
         - $ref: '#/components/parameters/Limit'
@@ -560,7 +560,7 @@ paths:
       operationId: createPermissionGrant
       tags: [permission-grants]
       summary: 创建权限授予
-      description: "WSP-003。发布 PermissionGrantChanged(CREATED)；记审计 PERMISSION_CHANGE（WSP-010）。policy: permission_grant.manage"
+      description: 'WSP-003。发布 PermissionGrantChanged(CREATED)；记审计 PERMISSION_CHANGE（WSP-010）。policy: permission_grant.manage'
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -594,7 +594,7 @@ paths:
       operationId: getPermissionGrant
       tags: [permission-grants]
       summary: 获取权限授予
-      description: "WSP-003。policy: permission_grant.read"
+      description: 'WSP-003。policy: permission_grant.read'
       responses:
         '200':
           description: 授权详情
@@ -610,7 +610,7 @@ paths:
       operationId: updatePermissionGrant
       tags: [permission-grants]
       summary: 更新权限授予
-      description: "WSP-003。发布 PermissionGrantChanged(UPDATED)。乐观锁 If-Match=version。policy: permission_grant.manage"
+      description: 'WSP-003。发布 PermissionGrantChanged(UPDATED)。乐观锁 If-Match=version。policy: permission_grant.manage'
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
         - $ref: '#/components/parameters/IfMatch'
@@ -635,7 +635,7 @@ paths:
       operationId: revokePermissionGrant
       tags: [permission-grants]
       summary: 撤销权限授予（status 转 REVOKED）
-      description: "WSP-003。发布 PermissionGrantChanged(REVOKED)；立即影响新请求（母本 7.1.4）。policy: permission_grant.manage"
+      description: 'WSP-003。发布 PermissionGrantChanged(REVOKED)；立即影响新请求（母本 7.1.4）。policy: permission_grant.manage'
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
         - $ref: '#/components/parameters/IfMatch'
@@ -654,7 +654,7 @@ paths:
       operationId: listPolicies
       tags: [policies]
       summary: 列出 Workspace 策略
-      description: "WSP-003。policy: policy.read"
+      description: 'WSP-003。policy: policy.read'
       parameters:
         - $ref: '#/components/parameters/Cursor'
         - $ref: '#/components/parameters/Limit'
@@ -662,7 +662,19 @@ paths:
           in: query
           schema:
             type: string
-            enum: [DATA_RIGHTS, PRIVACY_COMPLIANCE, MODEL_ROUTING, CONTENT_GOVERNANCE, CHANNEL_GOVERNANCE, OUTREACH_LIMIT, EXPORT_CONTROL, RETENTION, APPROVAL_GOVERNANCE, BUDGET_ENFORCEMENT]
+            enum:
+              [
+                DATA_RIGHTS,
+                PRIVACY_COMPLIANCE,
+                MODEL_ROUTING,
+                CONTENT_GOVERNANCE,
+                CHANNEL_GOVERNANCE,
+                OUTREACH_LIMIT,
+                EXPORT_CONTROL,
+                RETENTION,
+                APPROVAL_GOVERNANCE,
+                BUDGET_ENFORCEMENT,
+              ]
         - name: status
           in: query
           schema:
@@ -690,7 +702,7 @@ paths:
       operationId: createPolicy
       tags: [policies]
       summary: 创建策略
-      description: "WSP-003。发布 PolicyUpdated(CREATED)；记审计 POLICY_CHANGE（WSP-010）。高风险变更可命中审批规则（WSP-006 POLICY_CHANGE）。policy: policy.manage"
+      description: 'WSP-003。发布 PolicyUpdated(CREATED)；记审计 POLICY_CHANGE（WSP-010）。高风险变更可命中审批规则（WSP-006 POLICY_CHANGE）。policy: policy.manage'
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -726,7 +738,7 @@ paths:
       operationId: getPolicy
       tags: [policies]
       summary: 获取策略
-      description: "WSP-003。policy: policy.read"
+      description: 'WSP-003。policy: policy.read'
       responses:
         '200':
           description: 策略详情
@@ -742,7 +754,7 @@ paths:
       operationId: updatePolicy
       tags: [policies]
       summary: 更新策略
-      description: "WSP-003。发布 PolicyUpdated(UPDATED)；策略引擎缓存失效。乐观锁 If-Match=version。policy: policy.manage"
+      description: 'WSP-003。发布 PolicyUpdated(UPDATED)；策略引擎缓存失效。乐观锁 If-Match=version。policy: policy.manage'
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
         - $ref: '#/components/parameters/IfMatch'
@@ -773,7 +785,7 @@ paths:
       operationId: listBudgets
       tags: [budgets]
       summary: 列出预算
-      description: "WSP-005。policy: budget.read"
+      description: 'WSP-005。policy: budget.read'
       parameters:
         - $ref: '#/components/parameters/Cursor'
         - $ref: '#/components/parameters/Limit'
@@ -810,7 +822,7 @@ paths:
       operationId: createBudget
       tags: [budgets]
       summary: 创建预算
-      description: "WSP-005。五类预算（MODEL/DATA/MEDIA/EMAIL/EXPERT）；记审计 BUDGET_CHANGE（WSP-010）。policy: budget.manage"
+      description: 'WSP-005。五类预算（MODEL/DATA/MEDIA/EMAIL/EXPERT）；记审计 BUDGET_CHANGE（WSP-010）。policy: budget.manage'
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -844,7 +856,7 @@ paths:
       operationId: getBudget
       tags: [budgets]
       summary: 获取预算（含用量投影）
-      description: "WSP-005。policy: budget.read"
+      description: 'WSP-005。policy: budget.read'
       responses:
         '200':
           description: 预算详情
@@ -893,7 +905,7 @@ paths:
       operationId: listApprovalRules
       tags: [approval-rules]
       summary: 列出审批规则
-      description: "WSP-006。policy: approval_rule.read"
+      description: 'WSP-006。policy: approval_rule.read'
       parameters:
         - $ref: '#/components/parameters/Cursor'
         - $ref: '#/components/parameters/Limit'
@@ -924,7 +936,7 @@ paths:
       operationId: createApprovalRule
       tags: [approval-rules]
       summary: 创建审批规则
-      description: "WSP-006。审批人/替代审批人/金额与风险阈值/有效期；发布 ApprovalRuleUpdated(CREATED)。policy: approval_rule.manage"
+      description: 'WSP-006。审批人/替代审批人/金额与风险阈值/有效期；发布 ApprovalRuleUpdated(CREATED)。policy: approval_rule.manage'
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -958,7 +970,7 @@ paths:
       operationId: getApprovalRule
       tags: [approval-rules]
       summary: 获取审批规则
-      description: "WSP-006。policy: approval_rule.read"
+      description: 'WSP-006。policy: approval_rule.read'
       responses:
         '200':
           description: 审批规则详情
@@ -974,7 +986,7 @@ paths:
       operationId: updateApprovalRule
       tags: [approval-rules]
       summary: 更新审批规则
-      description: "WSP-006。发布 ApprovalRuleUpdated(UPDATED/SUSPENDED/ARCHIVED)。乐观锁 If-Match=version。policy: approval_rule.manage"
+      description: 'WSP-006。发布 ApprovalRuleUpdated(UPDATED/SUSPENDED/ARCHIVED)。乐观锁 If-Match=version。policy: approval_rule.manage'
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
         - $ref: '#/components/parameters/IfMatch'
@@ -1072,7 +1084,7 @@ paths:
       operationId: listControlSwitches
       tags: [control-switches]
       summary: 列出控制开关
-      description: "WSP-007。policy: control_switch.read"
+      description: 'WSP-007。policy: control_switch.read'
       parameters:
         - $ref: '#/components/parameters/Cursor'
         - $ref: '#/components/parameters/Limit'
@@ -1276,7 +1288,14 @@ components:
         error_code:
           type: string
           description: 机器码（母本 11.15），如 INVALID_SCHEMA、TOKEN_EXPIRED、ACTION_DENIED、AUTHORIZATION_REQUIRED、PROVIDER_RATE_LIMIT、BUDGET_EXCEEDED、PROVIDER_UNAVAILABLE、UNSUPPORTED_OPERATION、LICENSE_RESTRICTED、COMPLIANCE_REVIEW_REQUIRED、CIRCUIT_BREAKER_OPEN、VERSION_CONFLICT
-          examples: [ACTION_DENIED, AUTHORIZATION_REQUIRED, BUDGET_EXCEEDED, VERSION_CONFLICT, LICENSE_RESTRICTED]
+          examples:
+            [
+              ACTION_DENIED,
+              AUTHORIZATION_REQUIRED,
+              BUDGET_EXCEEDED,
+              VERSION_CONFLICT,
+              LICENSE_RESTRICTED,
+            ]
         message:
           type: string
           description: 人类可读错误信息（中文/按 locale）
@@ -1322,7 +1341,16 @@ components:
           enum: [CN, SG, US, EU]
         business_type:
           type: string
-          enum: [MANUFACTURER, TRADER, SAAS, PROFESSIONAL_SERVICE, BRAND_ECOMMERCE, AGENCY_SERVICE, OTHER]
+          enum:
+            [
+              MANUFACTURER,
+              TRADER,
+              SAAS,
+              PROFESSIONAL_SERVICE,
+              BRAND_ECOMMERCE,
+              AGENCY_SERVICE,
+              OTHER,
+            ]
         billing_email:
           type: string
           format: email
@@ -1350,7 +1378,16 @@ components:
           pattern: '^[A-Za-z0-9_+\-]+(/[A-Za-z0-9_+\-]+)*$'
         business_type:
           type: string
-          enum: [MANUFACTURER, TRADER, SAAS, PROFESSIONAL_SERVICE, BRAND_ECOMMERCE, AGENCY_SERVICE, OTHER]
+          enum:
+            [
+              MANUFACTURER,
+              TRADER,
+              SAAS,
+              PROFESSIONAL_SERVICE,
+              BRAND_ECOMMERCE,
+              AGENCY_SERVICE,
+              OTHER,
+            ]
         billing_email:
           type: string
           format: email
@@ -1384,11 +1421,21 @@ components:
           enum: [CN, SG, US, EU]
         business_type:
           type: string
-          enum: [MANUFACTURER, TRADER, SAAS, PROFESSIONAL_SERVICE, BRAND_ECOMMERCE, AGENCY_SERVICE, OTHER]
+          enum:
+            [
+              MANUFACTURER,
+              TRADER,
+              SAAS,
+              PROFESSIONAL_SERVICE,
+              BRAND_ECOMMERCE,
+              AGENCY_SERVICE,
+              OTHER,
+            ]
         default_currency:
           type: string
           pattern: '^[A-Z]{3}$'
-      required: [organization_id, name, default_locale, default_timezone, data_region, business_type]
+      required:
+        [organization_id, name, default_locale, default_timezone, data_region, business_type]
       additionalProperties: false
 
     WorkspaceUpdate:
@@ -1412,7 +1459,16 @@ components:
           pattern: '^[A-Za-z0-9_+\-]+(/[A-Za-z0-9_+\-]+)*$'
         business_type:
           type: string
-          enum: [MANUFACTURER, TRADER, SAAS, PROFESSIONAL_SERVICE, BRAND_ECOMMERCE, AGENCY_SERVICE, OTHER]
+          enum:
+            [
+              MANUFACTURER,
+              TRADER,
+              SAAS,
+              PROFESSIONAL_SERVICE,
+              BRAND_ECOMMERCE,
+              AGENCY_SERVICE,
+              OTHER,
+            ]
         default_currency:
           type: string
           pattern: '^[A-Z]{3}$'
@@ -1678,7 +1734,19 @@ components:
       properties:
         policy_type:
           type: string
-          enum: [DATA_RIGHTS, PRIVACY_COMPLIANCE, MODEL_ROUTING, CONTENT_GOVERNANCE, CHANNEL_GOVERNANCE, OUTREACH_LIMIT, EXPORT_CONTROL, RETENTION, APPROVAL_GOVERNANCE, BUDGET_ENFORCEMENT]
+          enum:
+            [
+              DATA_RIGHTS,
+              PRIVACY_COMPLIANCE,
+              MODEL_ROUTING,
+              CONTENT_GOVERNANCE,
+              CHANNEL_GOVERNANCE,
+              OUTREACH_LIMIT,
+              EXPORT_CONTROL,
+              RETENTION,
+              APPROVAL_GOVERNANCE,
+              BUDGET_ENFORCEMENT,
+            ]
         name:
           type: string
           minLength: 1
@@ -1846,7 +1914,20 @@ components:
           type: array
           items:
             type: string
-            enum: [CAMPAIGN_LAUNCH, CONTENT_PUBLISH, OUTBOUND_SEND, DATA_EXPORT, DATA_PURCHASE, CROSS_BORDER_MODEL_CALL, BUDGET_CHANGE, POLICY_CHANGE, MEMBER_ROLE_CHANGE, EXPERT_ENGAGEMENT, HIGH_RISK_REPLY]
+            enum:
+              [
+                CAMPAIGN_LAUNCH,
+                CONTENT_PUBLISH,
+                OUTBOUND_SEND,
+                DATA_EXPORT,
+                DATA_PURCHASE,
+                CROSS_BORDER_MODEL_CALL,
+                BUDGET_CHANGE,
+                POLICY_CHANGE,
+                MEMBER_ROLE_CHANGE,
+                EXPERT_ENGAGEMENT,
+                HIGH_RISK_REPLY,
+              ]
           minItems: 1
           uniqueItems: true
         approver_roles:
@@ -1913,7 +1994,20 @@ components:
           type: array
           items:
             type: string
-            enum: [CAMPAIGN_LAUNCH, CONTENT_PUBLISH, OUTBOUND_SEND, DATA_EXPORT, DATA_PURCHASE, CROSS_BORDER_MODEL_CALL, BUDGET_CHANGE, POLICY_CHANGE, MEMBER_ROLE_CHANGE, EXPERT_ENGAGEMENT, HIGH_RISK_REPLY]
+            enum:
+              [
+                CAMPAIGN_LAUNCH,
+                CONTENT_PUBLISH,
+                OUTBOUND_SEND,
+                DATA_EXPORT,
+                DATA_PURCHASE,
+                CROSS_BORDER_MODEL_CALL,
+                BUDGET_CHANGE,
+                POLICY_CHANGE,
+                MEMBER_ROLE_CHANGE,
+                EXPERT_ENGAGEMENT,
+                HIGH_RISK_REPLY,
+              ]
           minItems: 1
           uniqueItems: true
         approver_roles:

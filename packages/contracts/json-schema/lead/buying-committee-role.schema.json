@@ -45,8 +45,16 @@
       "type": "boolean",
       "description": "委员会中是否必须覆盖该角色才可判定合格"
     },
-    "kpis": { "type": "array", "items": { "type": "string" }, "description": "该角色关注的 KPI（母本 1616）" },
-    "objections": { "type": "array", "items": { "type": "string" }, "description": "该角色常见异议（母本 1616）" },
+    "kpis": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "该角色关注的 KPI（母本 1616）"
+    },
+    "objections": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "该角色常见异议（母本 1616）"
+    },
     "information_needs": {
       "type": "array",
       "items": { "type": "string" },

@@ -40,7 +40,7 @@ paths:
       operationId: listCampaigns
       tags: [campaigns]
       summary: 列出 Campaign
-      description: "按 workspace 列出 Campaign，cursor 分页（CAM-005）。policy: campaign.read"
+      description: '按 workspace 列出 Campaign，cursor 分页（CAM-005）。policy: campaign.read'
       x-policy: campaign.read
       parameters:
         - $ref: '#/components/parameters/Cursor'
@@ -50,7 +50,20 @@ paths:
           description: 按状态过滤（取值与 state-machines/campaign.state.ts 一致）
           schema:
             type: string
-            enum: [DRAFT, RESEARCHING, READY_FOR_REVIEW, APPROVED, SCHEDULED, RUNNING, PAUSED, BLOCKED, COMPLETED, LEARNED, ARCHIVED]
+            enum:
+              [
+                DRAFT,
+                RESEARCHING,
+                READY_FOR_REVIEW,
+                APPROVED,
+                SCHEDULED,
+                RUNNING,
+                PAUSED,
+                BLOCKED,
+                COMPLETED,
+                LEARNED,
+                ARCHIVED,
+              ]
         - name: owner_id
           in: query
           schema:
@@ -111,7 +124,7 @@ paths:
       operationId: getCampaign
       tags: [campaigns]
       summary: 获取 Campaign
-      description: "获取单个 Campaign 全量对象（CAM-002）。policy: campaign.read"
+      description: '获取单个 Campaign 全量对象（CAM-002）。policy: campaign.read'
       x-policy: campaign.read
       responses:
         '200':
@@ -288,7 +301,7 @@ paths:
       operationId: completeCampaign
       tags: [campaigns]
       summary: 结束 Campaign
-      description: "RUNNING/PAUSED/BLOCKED→COMPLETED（CAM-009）。发布 CampaignCompleted 事件。policy: campaign.complete"
+      description: 'RUNNING/PAUSED/BLOCKED→COMPLETED（CAM-009）。发布 CampaignCompleted 事件。policy: campaign.complete'
       x-policy: campaign.complete
       parameters:
         - $ref: '#/components/parameters/CampaignId'
@@ -323,7 +336,7 @@ paths:
       operationId: archiveCampaign
       tags: [campaigns]
       summary: 归档 Campaign
-      description: "DRAFT/RESEARCHING/LEARNED→ARCHIVED（CAM-009；state-machines/campaign.state.ts）。policy: campaign.archive"
+      description: 'DRAFT/RESEARCHING/LEARNED→ARCHIVED（CAM-009；state-machines/campaign.state.ts）。policy: campaign.archive'
       x-policy: campaign.archive
       parameters:
         - $ref: '#/components/parameters/CampaignId'
@@ -383,7 +396,7 @@ paths:
       operationId: listCampaignRevisions
       tags: [revisions]
       summary: 列出 Campaign 修订
-      description: "修订历史不覆盖历史配置和归因（CAM-006、7.6.4）。policy: campaign.read"
+      description: '修订历史不覆盖历史配置和归因（CAM-006、7.6.4）。policy: campaign.read'
       x-policy: campaign.read
       parameters:
         - $ref: '#/components/parameters/Cursor'
@@ -439,7 +452,7 @@ paths:
       operationId: listStopConditions
       tags: [stop-conditions]
       summary: 列出停止条件
-      description: "CAM-010。policy: campaign.read"
+      description: 'CAM-010。policy: campaign.read'
       x-policy: campaign.read
       parameters:
         - $ref: '#/components/parameters/Cursor'
@@ -491,7 +504,7 @@ paths:
       operationId: listAudiences
       tags: [audiences]
       summary: 列出受众
-      description: "CAM-003。policy: audience.read"
+      description: 'CAM-003。policy: audience.read'
       x-policy: audience.read
       parameters:
         - $ref: '#/components/parameters/Cursor'
@@ -549,7 +562,7 @@ paths:
       operationId: getAudience
       tags: [audiences]
       summary: 获取受众
-      description: "CAM-003。policy: audience.read"
+      description: 'CAM-003。policy: audience.read'
       x-policy: audience.read
       responses:
         '200':
@@ -700,7 +713,7 @@ paths:
       operationId: listExperiments
       tags: [experiments]
       summary: 列出实验
-      description: "CAM-011。policy: experiment.read"
+      description: 'CAM-011。policy: experiment.read'
       x-policy: experiment.read
       parameters:
         - $ref: '#/components/parameters/Cursor'
@@ -761,7 +774,7 @@ paths:
       operationId: getExperiment
       tags: [experiments]
       summary: 获取实验
-      description: "结果可回溯到资产和受众（CAM-011 验收）。policy: experiment.read"
+      description: '结果可回溯到资产和受众（CAM-011 验收）。policy: experiment.read'
       x-policy: experiment.read
       responses:
         '200':
@@ -832,7 +845,7 @@ paths:
       operationId: listAuthorizations
       tags: [authorizations]
       summary: 列出执行授权
-      description: "执行服务/审计用（CAM-008、7.6.4）。policy: authorization.read"
+      description: '执行服务/审计用（CAM-008、7.6.4）。policy: authorization.read'
       x-policy: authorization.read
       parameters:
         - $ref: '#/components/parameters/Cursor'
@@ -1321,7 +1334,20 @@ components:
           type: array
           items:
             type: string
-            enum: [EMAIL, LINKEDIN, X, TIKTOK, YOUTUBE, FACEBOOK, INSTAGRAM, WECHAT, WEBSITE, WEBINAR, OTHER]
+            enum:
+              [
+                EMAIL,
+                LINKEDIN,
+                X,
+                TIKTOK,
+                YOUTUBE,
+                FACEBOOK,
+                INSTAGRAM,
+                WECHAT,
+                WEBSITE,
+                WEBINAR,
+                OTHER,
+              ]
         notify_roles:
           type: array
           items: { type: string }
@@ -1540,7 +1566,20 @@ components:
               minItems: 1
               items:
                 type: string
-                enum: [EMAIL, LINKEDIN, X, TIKTOK, YOUTUBE, FACEBOOK, INSTAGRAM, WECHAT, WEBSITE, WEBINAR, OTHER]
+                enum:
+                  [
+                    EMAIL,
+                    LINKEDIN,
+                    X,
+                    TIKTOK,
+                    YOUTUBE,
+                    FACEBOOK,
+                    INSTAGRAM,
+                    WECHAT,
+                    WEBSITE,
+                    WEBINAR,
+                    OTHER,
+                  ]
             allowed_action_types:
               type: array
               minItems: 1
@@ -1606,7 +1645,17 @@ components:
         valid_until:
           type: string
           format: date-time
-      required: [campaign_id, scope, templates, frequency_caps, budget_cap, thresholds, valid_from, valid_until]
+      required:
+        [
+          campaign_id,
+          scope,
+          templates,
+          frequency_caps,
+          budget_cap,
+          thresholds,
+          valid_from,
+          valid_until,
+        ]
       additionalProperties: false
 
     MoneyInput:
@@ -1726,7 +1775,18 @@ components:
                   properties:
                     check:
                       type: string
-                      enum: [FACT_CONSISTENCY, LOCALIZATION, BRAND_TONE, SENSITIVE_WORDS, CHANNEL_LENGTH, DUPLICATION, CTA, UNSUBSCRIBE_INFO, FORBIDDEN_PROMISES]
+                      enum:
+                        [
+                          FACT_CONSISTENCY,
+                          LOCALIZATION,
+                          BRAND_TONE,
+                          SENSITIVE_WORDS,
+                          CHANNEL_LENGTH,
+                          DUPLICATION,
+                          CTA,
+                          UNSUBSCRIBE_INFO,
+                          FORBIDDEN_PROMISES,
+                        ]
                     passed: { type: boolean }
                     note: { type: string }
                   required: [check, passed]
@@ -1814,7 +1874,8 @@ components:
                 properties:
                   condition_type:
                     type: string
-                    enum: [BOUNCE_RATE, COMPLAINT_RATE, FAILURE_RATE, COST_OVERRUN, NEGATIVE_SENTIMENT]
+                    enum:
+                      [BOUNCE_RATE, COMPLAINT_RATE, FAILURE_RATE, COST_OVERRUN, NEGATIVE_SENTIMENT]
                   threshold_value: { type: number }
                   action:
                     type: string

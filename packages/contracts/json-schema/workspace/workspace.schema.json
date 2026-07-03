@@ -51,7 +51,15 @@
     },
     "business_type": {
       "type": "string",
-      "enum": ["MANUFACTURER", "TRADER", "SAAS", "PROFESSIONAL_SERVICE", "BRAND_ECOMMERCE", "AGENCY_SERVICE", "OTHER"],
+      "enum": [
+        "MANUFACTURER",
+        "TRADER",
+        "SAAS",
+        "PROFESSIONAL_SERVICE",
+        "BRAND_ECOMMERCE",
+        "AGENCY_SERVICE",
+        "OTHER"
+      ],
       "description": "业务类型（WSP-001；影响默认 Pack 推荐，母本 4.1）"
     },
     "default_currency": {

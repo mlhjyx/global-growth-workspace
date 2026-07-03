@@ -12,7 +12,7 @@ export default function ReportGenerator({ templates }: ReportGeneratorProps) {
   const [includeCompetitor, setIncludeCompetitor] = useState(false);
   const [includeForecast, setIncludeForecast] = useState(true);
 
-  const activeTemplate = templates.find(t => t.id === selectedTemplate);
+  const activeTemplate = templates.find((t) => t.id === selectedTemplate);
 
   const handleGenerate = () => {
     setGenerating(true);
@@ -30,17 +30,18 @@ export default function ReportGenerator({ templates }: ReportGeneratorProps) {
           <h3 className="text-white text-sm font-semibold">周报生成器</h3>
           <p className="text-foreground-500 text-xs mt-0.5">AI 自动生成数据分析报告</p>
         </div>
-        {generated && (
-          <span className="badge-success text-xs">已生成</span>
-        )}
+        {generated && <span className="badge-success text-xs">已生成</span>}
       </div>
 
       {/* Template selection */}
       <div className="space-y-2 mb-4">
-        {templates.map(t => (
+        {templates.map((t) => (
           <button
             key={t.id}
-            onClick={() => { setSelectedTemplate(t.id); setGenerated(false); }}
+            onClick={() => {
+              setSelectedTemplate(t.id);
+              setGenerated(false);
+            }}
             className={`w-full text-left p-3 rounded-lg transition-all border ${
               selectedTemplate === t.id
                 ? 'bg-primary-500/10 border-primary-500/30'
@@ -48,21 +49,32 @@ export default function ReportGenerator({ templates }: ReportGeneratorProps) {
             }`}
           >
             <div className="flex items-center gap-2">
-              <span className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                selectedTemplate === t.id ? 'bg-primary-500/20' : 'bg-white/10'
-              }`}>
-                <i className={`${t.icon} text-xs ${selectedTemplate === t.id ? 'text-primary-400' : 'text-foreground-500'}`}></i>
+              <span
+                className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                  selectedTemplate === t.id ? 'bg-primary-500/20' : 'bg-white/10'
+                }`}
+              >
+                <i
+                  className={`${t.icon} text-xs ${selectedTemplate === t.id ? 'text-primary-400' : 'text-foreground-500'}`}
+                ></i>
               </span>
               <div className="flex-1 min-w-0">
-                <span className={`text-xs font-medium block truncate ${selectedTemplate === t.id ? 'text-white' : 'text-foreground-300'}`}>
+                <span
+                  className={`text-xs font-medium block truncate ${selectedTemplate === t.id ? 'text-white' : 'text-foreground-300'}`}
+                >
                   {t.name}
                 </span>
                 <span className="text-foreground-500 text-xs truncate block">{t.description}</span>
               </div>
             </div>
             <div className="flex flex-wrap gap-1 mt-2">
-              {t.sections.map(s => (
-                <span key={s} className="text-foreground-500 text-xs bg-white/5 px-1.5 py-0.5 rounded">{s}</span>
+              {t.sections.map((s) => (
+                <span
+                  key={s}
+                  className="text-foreground-500 text-xs bg-white/5 px-1.5 py-0.5 rounded"
+                >
+                  {s}
+                </span>
               ))}
             </div>
             {t.lastGenerated && (
@@ -78,7 +90,7 @@ export default function ReportGenerator({ templates }: ReportGeneratorProps) {
           <input
             type="checkbox"
             checked={includeForecast}
-            onChange={e => setIncludeForecast(e.target.checked)}
+            onChange={(e) => setIncludeForecast(e.target.checked)}
             className="w-3.5 h-3.5 rounded accent-primary-500"
           />
           <span className="text-foreground-500 text-xs">包含下周预测</span>
@@ -87,7 +99,7 @@ export default function ReportGenerator({ templates }: ReportGeneratorProps) {
           <input
             type="checkbox"
             checked={includeCompetitor}
-            onChange={e => setIncludeCompetitor(e.target.checked)}
+            onChange={(e) => setIncludeCompetitor(e.target.checked)}
             className="w-3.5 h-3.5 rounded accent-primary-500"
           />
           <span className="text-foreground-500 text-xs">包含竞品动态</span>
@@ -134,7 +146,8 @@ export default function ReportGenerator({ templates }: ReportGeneratorProps) {
             <span className="text-white text-xs font-medium">报告已生成</span>
           </div>
           <p className="text-foreground-500 text-xs mb-2">
-            {activeTemplate?.name} · {new Date().toLocaleDateString('zh-CN')} · 含 {activeTemplate?.sections.length} 个板块
+            {activeTemplate?.name} · {new Date().toLocaleDateString('zh-CN')} · 含{' '}
+            {activeTemplate?.sections.length} 个板块
           </p>
           <div className="flex items-center gap-2">
             <button className="btn-secondary flex-1 flex items-center justify-center gap-1 py-1.5 text-xs whitespace-nowrap">
