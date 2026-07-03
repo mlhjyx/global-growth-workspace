@@ -14,18 +14,18 @@
 | Dependabot | .github/dependabot.yml（npm + actions 每周） |
 | CI Required 候选 | verify（format/type-check/build/contracts） |
 
-## ⛔ 分支保护：不启用（PDR-003 已拍板不升级 Pro）——以下仅存档，若未来升级/转公开再执行
+## ✅ 分支保护：已启用（PDR-004，2026-07-04 仓库转公开后免费可用）
 
+Ruleset `main-protection`（id 18488074，enforcement=active，作用于默认分支）：
 
+| 规则 | 值 |
+|---|---|
+| pull_request | 仅 PR 可合入；必需审查人 0（单人模式，自审依赖 Codex + 自查协议）；评论 thread 必须解决；仅允许 squash |
+| required_status_checks | verify 必须通过（strict=false：不强制与 main 同步，dependabot 串行合并靠协议） |
+| non_fast_forward | 禁 force push |
+| deletion | 禁删除 main |
 
-升级后由 Claude Code 立即执行（命令已备）：
-
-```bash
-# main 分支 Ruleset：PR 必经 + Required Check(verify) + 禁 force push/删除 + 会话必须解决 + 与 main 同步
-gh api -X POST repos/mlhjyx/global-growth-workspace/rulesets --input ruleset-main.json
-```
-
-规则内容：deletion 禁止、non_fast_forward 禁止、pull_request（required_review_thread_resolution=true）、required_status_checks（verify，strict=true）。
+效果：直推 main、检查未绿合并、未解决评论合并，均被服务端拒绝；CLAUDE.md 合并纪律降为第二道防线（PDR-004）。
 
 ## ⬜ 待做（不阻塞，按需）
 
