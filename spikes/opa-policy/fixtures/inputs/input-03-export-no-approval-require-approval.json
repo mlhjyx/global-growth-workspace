@@ -1,0 +1,20 @@
+{
+  "_meta": {
+    "case": "DATA_EXPORT 无 Approval Token → 默认审批集要求 require_approval（WSP-006）",
+    "derived_from": "packages/contracts/fixtures/workspace.json → ws_01JZW0RK000000000000000001",
+    "expected_decision": {
+      "allow": false,
+      "require_approval": true,
+      "reason_codes": [
+        "AUTHORIZATION_REQUIRED",
+        "NO_APPROVAL_TOKEN"
+      ]
+    }
+  },
+  "action": {
+    "type": "DATA_EXPORT",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "resource_id": "exp_job_20260701_001",
+    "requested_at": "2026-07-01T08:00:00Z"
+  }
+}

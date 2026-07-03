@@ -1,0 +1,95 @@
+{
+  "_meta": {
+    "case": "OUTBOUND_SEND 范围外：渠道不在白名单 + 已达 max_total_actions + 授权已过期",
+    "derived_from": "packages/contracts/fixtures/campaign.json → auth_01JZAVTH000000000000000001",
+    "expected_decision": {
+      "allow": false,
+      "require_approval": false,
+      "reason_codes": [
+        "AUTHORIZATION_EXPIRED",
+        "CHANNEL_NOT_AUTHORIZED",
+        "MAX_TOTAL_ACTIONS_EXCEEDED"
+      ]
+    }
+  },
+  "action": {
+    "type": "OUTBOUND_SEND",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "campaign_id": "cam_01JZCAMP000000000000000001",
+    "authorization_id": "auth_01JZAVTH000000000000000001",
+    "channel": "X",
+    "action_type": "OUTBOUND_EMAIL",
+    "template_ref": "cnt_dealer_intro_en_v2",
+    "content_hash": "sha256:tpl1a3c5e7092b4d6f8a0c2e4d6f8a0b2",
+    "audience_id": "aud_01JZAVDN000000000000000001",
+    "actions_executed_total": 900,
+    "requested_at": "2026-09-21T00:00:00Z"
+  },
+  "authorization": {
+    "id": "auth_01JZAVTH000000000000000001",
+    "workspace_id": "ws_01JZW0RK000000000000000001",
+    "campaign_id": "cam_01JZCAMP000000000000000001",
+    "status": "ACTIVE",
+    "issued_by": "mem_01JZMEMB000000000000000001",
+    "issued_at": "2026-06-20T10:00:00Z",
+    "strategy_snapshot_hash": "sha256:strat9f2c4e6a8b0d2f4a6c8e0b1d3f57",
+    "scope": {
+      "audience_refs": [
+        {
+          "audience_id": "aud_01JZAVDN000000000000000001",
+          "audience_version": 3,
+          "snapshot_hash": "sha256:audq7d1e3f5a9c2b4d6f8a0c2e4b6d80"
+        }
+      ],
+      "channels": [
+        "EMAIL",
+        "LINKEDIN"
+      ],
+      "allowed_action_types": [
+        "OUTBOUND_EMAIL",
+        "FOLLOW_UP",
+        "DM"
+      ],
+      "max_total_actions": 900
+    },
+    "templates": [
+      {
+        "template_ref": "cnt_dealer_intro_en_v2",
+        "content_hash": "sha256:tpl1a3c5e7092b4d6f8a0c2e4d6f8a0b2"
+      },
+      {
+        "template_ref": "cnt_dealer_case_follow_en_v1",
+        "content_hash": "sha256:tpl2b4d6f80a1c3e5f7092b4d6e8f0a1c3"
+      },
+      {
+        "template_ref": "cnt_dealer_dm_en_v1",
+        "content_hash": "sha256:tpl3c5e7a90b2d4f60a1c3e5d7f90b2d4e"
+      }
+    ],
+    "frequency_caps": {
+      "max_actions_per_day": 60,
+      "max_actions_per_contact_per_day": 1,
+      "max_actions_per_contact_per_week": 2,
+      "min_interval_minutes": 60
+    },
+    "budget_cap": {
+      "amount": 8000,
+      "currency": "USD"
+    },
+    "thresholds": {
+      "max_bounce_rate": 0.05,
+      "max_complaint_rate": 0.002,
+      "max_failure_rate": 0.1,
+      "stop_condition_ids": [
+        "stp_01JZST0P000000000000000001",
+        "stp_01JZST0P000000000000000002"
+      ]
+    },
+    "valid_from": "2026-06-23T00:00:00Z",
+    "valid_until": "2026-09-21T00:00:00Z",
+    "authorization_hash": "sha256:auth5f7a9c1e3b5d70f92a4c6e8b0d2f46",
+    "created_at": "2026-06-20T10:00:00Z",
+    "updated_at": "2026-06-23T02:00:00Z",
+    "version": 2
+  }
+}

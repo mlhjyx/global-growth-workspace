@@ -1,0 +1,29 @@
+{
+  "name": "spk-tmp-temporal-runtime",
+  "version": "0.0.1",
+  "private": true,
+  "description": "SPK-TMP Temporal Runtime Spike — CampaignDryRunApproval workflow skeleton (all activities mocked)",
+  "type": "commonjs",
+  "scripts": {
+    "worker": "tsx src/worker.ts",
+    "health": "tsx src/cli/health.ts",
+    "start-wf": "tsx src/cli/start.ts",
+    "signal": "tsx src/cli/signal.ts",
+    "query": "tsx src/cli/query.ts",
+    "describe": "tsx src/cli/describe.ts",
+    "result": "tsx src/cli/result.ts",
+    "replay": "tsx src/cli/replay.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@temporalio/activity": "^1.11.0",
+    "@temporalio/client": "^1.11.0",
+    "@temporalio/worker": "^1.11.0",
+    "@temporalio/workflow": "^1.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

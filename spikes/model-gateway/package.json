@@ -1,0 +1,20 @@
+{
+  "name": "@spike/model-gateway",
+  "version": "0.0.1",
+  "private": true,
+  "description": "SPK-MGW Model Gateway Spike — 自有 ModelGateway Contract 形状验证（Mock Provider，纯 TS/vitest，不接真实模型 API）",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.2.0"
+  }
+}

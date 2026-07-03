@@ -12,3 +12,6 @@ apps/prototype/auto-imports.d.ts
 # 文档人工排版（母本、ADR、README），不由 prettier 重排
 docs/
 *.md
+
+# Spike 试验产物：独立工具链，不参与仓库格式检查
+spikes/
