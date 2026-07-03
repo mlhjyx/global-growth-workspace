@@ -6,3 +6,4 @@ export { default as EvidenceDrawer } from './EvidenceDrawer';
 export { default as ApprovalCard } from './ApprovalCard';
 export { default as PageState } from './PageState';
 export { default as DryRunModal } from './DryRunModal';
+export type { DryRunReport } from './DryRunModal';
