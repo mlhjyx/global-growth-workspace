@@ -1,3 +1,12 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+
+# 供应链基线（BE-02 DoD，docs/security/SUPPLY_CHAIN_SECURITY.md）
+# 新发布包冷静期：发布不满 24h 的版本拒绝安装（防投毒；dependabot 撞窗口属预期，满时限 rebase 即过）
+minimumReleaseAge: 1440
+
+# 安装脚本显式白名单：未列出的依赖一律禁跑 postinstall
+allowBuilds:
+  esbuild: true # vitest/tsx 构建内核，平台二进制检查脚本
+  '@scarf/scarf': false # 纯遥测包，禁止执行
