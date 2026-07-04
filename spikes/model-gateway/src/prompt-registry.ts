@@ -41,7 +41,11 @@ export class PromptRegistry {
     this.order.get(entry.promptId)!.push(entry.version);
   }
 
-  /** 取指定版本；不传 version 取最新注册版本 */
+  /**
+   * 取指定版本（任意 releaseStatus——显式钉住即显式负责）；
+   * 不传 version 取**最新 released 版本**（CompleteOptions 文档语义；draft/rolled_back
+   * 不得默认服务生产流量，Codex 3521756913）；无任何 released 版本 → 抛错 fail-closed。
+   */
   resolve(promptId: string, version?: string): PromptEntry {
     const versions = this.prompts.get(promptId);
     if (!versions) throw new UnknownPromptError(promptId, version);
@@ -51,8 +55,19 @@ export class PromptRegistry {
       return entry;
     }
     const order = this.order.get(promptId)!;
-    const latest = order[order.length - 1]!;
-    return versions.get(latest)!;
+    for (let i = order.length - 1; i >= 0; i--) {
+      const entry = versions.get(order[i]!)!;
+      if (entry.releaseStatus === 'released') return entry;
+    }
+    throw new UnknownPromptError(promptId, '(无 released 版本，draft 需显式钉住)');
+  }
+
+  /** 发布动作：draft → released（母本 9.6 release 流程的最小形状） */
+  release(promptId: string, version: string): PromptEntry {
+    const entry = this.prompts.get(promptId)?.get(version);
+    if (!entry) throw new UnknownPromptError(promptId, version);
+    entry.releaseStatus = 'released';
+    return entry;
   }
 }
 

@@ -68,7 +68,7 @@ describe('GatewayTrace', () => {
     expect(new Set(traces.map((t) => t.traceId)).size).toBe(3);
   });
 
-  it('钉住 prompt 版本：opts.promptVersion 覆盖默认最新版并记入 Trace', async () => {
+  it('钉住 prompt 版本：opts.promptVersion 显式取 draft；缺省解析只落最新 released', async () => {
     const stable = new MockStableProvider();
     const { gateway, prompts } = buildGateway({ primary: stable });
     prompts.register({
@@ -85,8 +85,29 @@ describe('GatewayTrace', () => {
     });
     expect(pinned.trace.promptVersion).toBe('v1');
 
-    const latest = await gateway.complete(TASK_REF, makeValidInput(), { workspaceId: WS_A });
-    expect(latest.trace.promptVersion).toBe('v2');
-    expect(stable.requests[1]!.system).toBe('v2 系统指令（演示）');
+    // draft v2 不服务未钉版本的调用（Codex 3521756913）；发布后缺省解析切到 v2
+    const beforeRelease = await gateway.complete(TASK_REF, makeValidInput(), { workspaceId: WS_A });
+    expect(beforeRelease.trace.promptVersion).toBe('v1');
+    prompts.release('company-understanding/prompt', 'v2');
+    const afterRelease = await gateway.complete(TASK_REF, makeValidInput(), { workspaceId: WS_A });
+    expect(afterRelease.trace.promptVersion).toBe('v2');
+    expect(stable.requests[2]!.system).toBe('v2 系统指令（演示）');
+  });
+
+  it('钉住不存在的 prompt 版本：失败同样产出恰好一条 Trace（Codex 3521756902）', async () => {
+    const stable = new MockStableProvider();
+    const { gateway, traces } = buildGateway({ primary: stable });
+
+    const err = await gateway
+      .complete(TASK_REF, makeValidInput(), { workspaceId: WS_A, promptVersion: 'v9' })
+      .catch((e) => e);
+
+    expect(err.code).toBe('UNKNOWN_PROMPT');
+    expect(err.trace).toBeDefined();
+    expect(err.trace.status).toBe('UNKNOWN_PROMPT');
+    expect(err.trace.promptVersion).toBe('v9'); // 记请求的版本，供审计归因
+    expect(err.trace.attempts).toHaveLength(0);
+    expect(traces).toHaveLength(1);
+    expect(stable.requests).toHaveLength(0); // 未触达 Provider
   });
 });

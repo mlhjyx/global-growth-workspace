@@ -39,6 +39,23 @@ describe('结构化输出校验与重试', () => {
     expect(res.trace.validation).toEqual({ attempts: 2, valid: true });
   });
 
+  it('输出 workspace_id 与请求不符：Schema 合法也拒收，禁止跨租户归因/泄漏（Codex 3521756898）', async () => {
+    const stable = new MockStableProvider(); // 回显输入中的 workspace_id
+    const { gateway, traces } = buildGateway({ primary: stable });
+
+    // 输入体携带 WS_B（Provider 将回显 WS_B），请求方 workspace 是 WS_A → 输出必须被拒
+    const err = await gateway
+      .complete(TASK_REF, makeValidInput('ws_01JZW0RK000000000000000002'), { workspaceId: WS_A })
+      .catch((e) => e);
+
+    expect(err).toBeInstanceOf(StructuredOutputError);
+    expect(err.errors.join(';')).toContain('workspace');
+    expect(err.trace.status).toBe('INVALID_OUTPUT');
+    expect(err.trace.validation.valid).toBe(false);
+    expect(stable.requests).toHaveLength(2); // 走一次修复重试后终止，串扰输出从未被返回
+    expect(traces).toHaveLength(1);
+  });
+
   it('重试一次后仍违例 → STRUCTURED_OUTPUT_INVALID，恰好 2 次 Provider 调用，不做故障切换', async () => {
     const faulty = new MockFaultyProvider(['SCHEMA_VIOLATION', 'SCHEMA_VIOLATION']);
     const stable = new MockStableProvider(); // fallback 存在但不得被用于兜接输出质量问题

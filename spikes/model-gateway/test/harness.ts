@@ -34,6 +34,9 @@ export function buildGateway(opts: HarnessOptions) {
 
   const prompts = new PromptRegistry();
   registerCompanyUnderstandingPromptV1(prompts);
+  // 模拟母本 9.6 发布动作：默认解析只落在 released 版本，draft 不服务未钉版本的调用
+  //（Codex 3521756913；真实 v1 在 prompt.v1.md 中为 draft，Gate 3 前发布是测试装配假设）
+  prompts.release('company-understanding/prompt', 'v1');
 
   const routing = new RoutingPolicy();
   const fallbacks = opts.fallbacks ?? [];

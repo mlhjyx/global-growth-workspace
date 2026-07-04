@@ -84,6 +84,10 @@ violations contains "DATA_CLASS_NOT_AUTHORIZED" if not input.action.model.data_c
 violations contains "MODEL_TASK_NOT_AUTHORIZED" if not input.action.model.task in grant.boundaries.tasks
 
 # —— 预算边界（§5-C：预算属授权边界之一）——
+# 预算是授权的必备边界：缺 budget_cap 的授权 = 无预算上限的跨境调用，显式拒绝
+# （Codex 3521756906；schema 侧 budget_cap 已同步入 required）
+
+violations contains "BUDGET_CAP_MISSING" if not grant.budget_cap
 
 violations contains "CROSS_BORDER_BUDGET_EXCEEDED" if {
 	grant.budget_cap

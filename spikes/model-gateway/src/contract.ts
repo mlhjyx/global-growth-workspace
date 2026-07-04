@@ -97,7 +97,7 @@ export interface GatewayTrace {
   redactions: RedactionSummary[];
   /** 结构化输出校验：尝试次数与最终结果 */
   validation: { attempts: number; valid: boolean };
-  status: 'OK' | 'BUDGET_EXCEEDED' | 'INVALID_INPUT' | 'PROVIDER_EXHAUSTED' | 'INVALID_OUTPUT';
+  status: 'OK' | 'BUDGET_EXCEEDED' | 'INVALID_INPUT' | 'PROVIDER_EXHAUSTED' | 'INVALID_OUTPUT' | 'UNKNOWN_PROMPT';
   createdAt: string;
 }
 

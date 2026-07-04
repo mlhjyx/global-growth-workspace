@@ -21,8 +21,9 @@ import {
   type ProviderAttempt,
   type GatewayError,
 } from './contract.js';
+import { UnknownPromptError } from './contract.js';
 import type { BudgetGuard } from './budget-guard.js';
-import type { PromptRegistry } from './prompt-registry.js';
+import type { PromptEntry, PromptRegistry } from './prompt-registry.js';
 import { actualCostUsd, estimateCostUsd, type RoutingPolicy, type ProviderTarget } from './routing-policy.js';
 import type { RedactionHook } from './redaction.js';
 import { defaultRedactionHook } from './redaction.js';
@@ -58,7 +59,6 @@ export class ModelGatewayImpl implements ModelGateway {
 
   async complete(taskRef: string, input: unknown, opts: CompleteOptions): Promise<CompleteResult> {
     const task = this.deps.tasks.get(taskRef); // UnknownTaskError（无 Trace：任务未注册即无归因目标）
-    const prompt = this.deps.prompts.resolve(task.defaultPromptId, opts.promptVersion);
     const startedAt = Date.now();
 
     const attempts: ProviderAttempt[] = [];
@@ -69,8 +69,8 @@ export class ModelGatewayImpl implements ModelGateway {
       workspaceId: opts.workspaceId,
       correlationId: opts.correlationId,
       modelPolicy: task.modelPolicy,
-      promptId: prompt.promptId,
-      promptVersion: prompt.version,
+      promptId: task.defaultPromptId,
+      promptVersion: opts.promptVersion ?? '(unresolved)',
       inputSchemaId: task.inputSchemaId,
       outputSchemaId: task.outputSchemaId,
       attempts,
@@ -92,6 +92,17 @@ export class ModelGatewayImpl implements ModelGateway {
       throw err;
     };
 
+    // 0) Prompt 解析在 Trace 化失败路径内：钉住不存在的版本/无 released 版本同样要可审计
+    //    ——「每次 complete 恰好一条 Trace」的保证不豁免此路径（Codex 3521756902）
+    let prompt: PromptEntry;
+    try {
+      prompt = this.deps.prompts.resolve(task.defaultPromptId, opts.promptVersion);
+    } catch (e) {
+      if (e instanceof UnknownPromptError) return fail(e, 'UNKNOWN_PROMPT');
+      throw e;
+    }
+    trace.promptVersion = prompt.version;
+
     // 1) 输入校验（INVALID_SCHEMA 不重试，母本 11.15）
     const inputCheck = this.validator.validateInput(task, input);
     if (!inputCheck.valid) {
@@ -105,22 +116,39 @@ export class ModelGatewayImpl implements ModelGateway {
     const redacted = this.redact(JSON.stringify(input));
     trace.redactions = redacted.redactions;
 
-    // 3) 路由 + 预算预检（超限即熔断，不触达 Provider）
+    // 3) 路由：成本/预算预检按目标逐一执行（见循环内）——fallback 单价可能高于 primary，
+    //    只按 primary 估算一次会击穿预算熔断承诺（Codex 3521756900）
     const targets = this.deps.routing.targets(task.modelPolicy);
-    const primary = targets[0]!;
-    const estimate = Math.min(estimateCostUsd(primary, redacted.text.length), task.maxCostPerRunUsd);
-    try {
-      this.deps.budget.assertWithinBudget(opts.workspaceId, estimate);
-    } catch (e) {
-      if (e instanceof BudgetExceededError) return fail(e, 'BUDGET_EXCEEDED');
-      throw e;
-    }
 
     // 4) 逐目标尝试：Provider 故障 → 切换下一目标；输出校验失败 → 同一目标重试一次后终止
     let lastValidationErrors: string[] = [];
     for (const target of targets) {
       const provider = this.deps.providers.get(target.provider);
       if (!provider) throw new Error(`RoutingPolicy 指向未注册 Provider：${target.provider}`);
+
+      // 4a) 单次成本上限：估算超过任务契约 maxCostPerRunUsd 直接拒绝，
+      //     禁止 clamp 掩盖后照常触达 Provider（Codex 3521756909）
+      const estimate = estimateCostUsd(target, redacted.text.length);
+      if (estimate > task.maxCostPerRunUsd) {
+        trace.costUsd = attempts.reduce((s, a) => s + (a.costUsd ?? 0), 0);
+        return fail(
+          new BudgetExceededError(
+            `目标 ${target.provider}/${target.model} 估算成本 $${estimate.toFixed(4)} ` +
+              `超过任务单次上限 $${task.maxCostPerRunUsd.toFixed(4)}（task-contract 第 3 节）`,
+          ),
+          'BUDGET_EXCEEDED',
+        );
+      }
+      // 4b) 日预算预检对将尝试的每个目标执行（含 fallback），超限即熔断、不触达 Provider
+      try {
+        this.deps.budget.assertWithinBudget(opts.workspaceId, estimate);
+      } catch (e) {
+        if (e instanceof BudgetExceededError) {
+          trace.costUsd = attempts.reduce((s, a) => s + (a.costUsd ?? 0), 0);
+          return fail(e, 'BUDGET_EXCEEDED');
+        }
+        throw e;
+      }
 
       let repairFeedback = '';
       for (let attempt = 1; attempt <= MAX_VALIDATION_ATTEMPTS; attempt++) {
@@ -160,6 +188,18 @@ export class ModelGatewayImpl implements ModelGateway {
           outcome = this.validator.validateOutput(task, parsed);
         } catch {
           outcome = { valid: false, errors: ['输出不是合法 JSON'] };
+        }
+
+        // 输出租户归属校验：Schema 只校验 ID 形状，不校验归属——Provider 缺陷/串扰重试
+        // 返回他租户 workspace_id 时必须拒收，禁止跨租户归因与泄漏（Codex 3521756898）
+        if (outcome.valid) {
+          const outWs = (parsed as Record<string, unknown>)['workspace_id'];
+          if (typeof outWs === 'string' && outWs !== opts.workspaceId) {
+            outcome = {
+              valid: false,
+              errors: [`输出 workspace_id（${outWs}）与请求 workspace（${opts.workspaceId}）不符`],
+            };
+          }
         }
 
         if (outcome.valid) {

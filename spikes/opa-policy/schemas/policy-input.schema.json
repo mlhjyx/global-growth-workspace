@@ -160,6 +160,7 @@
         "status",
         "granted_by",
         "boundaries",
+        "budget_cap",
         "valid_from",
         "valid_until"
       ],
