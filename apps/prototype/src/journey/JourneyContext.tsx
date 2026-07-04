@@ -1,8 +1,9 @@
 // 旅程状态层（EPIC-M0-06 T1）：跨页状态传递的唯一事实源，localStorage 持久化（ggw_journey）。
 // 埋点在此集中触发（journey_start / journey_step_complete / journey_complete），页面不重复上报。
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { track } from '@/analytics/analytics';
-import { JOURNEYS, type JourneyDef, type JourneyId, type JourneyStep } from './journeys';
+import { JourneyContext, type JourneyContextValue } from './journey-context';
+import { JOURNEYS, type JourneyId, type JourneyStep } from './journeys';
 
 const STORE_KEY = 'ggw_journey';
 
@@ -10,16 +11,6 @@ interface JourneyState {
   id: JourneyId;
   completed: string[]; // 已完成 step id（有序）
   startedAt: string;
-}
-
-interface JourneyContextValue {
-  journey: JourneyDef | null;
-  completed: string[];
-  /** 第一个未完成步骤；旅程走完时为 null */
-  currentStep: JourneyStep | null;
-  startJourney: (id: JourneyId) => JourneyStep;
-  completeStep: (stepId: string) => void;
-  resetJourney: () => void;
 }
 
 function readState(): JourneyState | null {
@@ -39,8 +30,6 @@ function writeState(state: JourneyState | null): void {
     /* 存储不可用不阻断（隐私模式）；旅程退化为单页体验 */
   }
 }
-
-const JourneyContext = createContext<JourneyContextValue | null>(null);
 
 export function JourneyProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<JourneyState | null>(() => readState());
@@ -93,10 +82,4 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
   }, [state, startJourney, completeStep, resetJourney]);
 
   return <JourneyContext.Provider value={value}>{children}</JourneyContext.Provider>;
-}
-
-export function useJourney(): JourneyContextValue {
-  const ctx = useContext(JourneyContext);
-  if (!ctx) throw new Error('useJourney 必须在 JourneyProvider 内使用');
-  return ctx;
 }

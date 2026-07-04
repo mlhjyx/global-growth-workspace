@@ -1,5 +1,7 @@
 // PageState —— 母本 6.10 通用页面状态骨架（M0 原型子集）
 // Empty：价值+样例+最短下一步；Error：发生了什么/系统做了什么/用户能做什么；Partial：保留成功、单独重试。
+// M0-06 T2：恢复动作与单独重试记 error_recover（Gate 1 错误恢复探针）
+import { track } from '@/analytics/analytics';
 import type { PageStateKind } from './types';
 
 interface PageStateProps {
@@ -48,7 +50,10 @@ export default function PageState({ kind, title, description, action, failures }
               </div>
               {f.onRetry && (
                 <button
-                  onClick={f.onRetry}
+                  onClick={() => {
+                    track('error_recover', { kind, item: f.item });
+                    f.onRetry?.();
+                  }}
                   className="text-primary-400 hover:text-primary-300 cursor-pointer shrink-0"
                 >
                   单独重试
@@ -60,7 +65,12 @@ export default function PageState({ kind, title, description, action, failures }
       )}
       {action && (
         <button
-          onClick={action.onClick}
+          onClick={() => {
+            if (kind === 'ERROR' || kind === 'PARTIAL_SUCCESS') {
+              track('error_recover', { kind, action: action.label });
+            }
+            action.onClick();
+          }}
           className="mt-4 px-4 py-2 rounded-lg text-xs bg-primary-500/15 text-primary-300 border border-primary-500/30 hover:bg-primary-500/25 cursor-pointer"
         >
           {action.label}

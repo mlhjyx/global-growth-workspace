@@ -1,6 +1,8 @@
 // ApprovalCard —— 硬边界 1 的界面载体：外部动作 = ActionProposal → Policy → 人工审批 → ExecutionAuthorization
 // 母本 6.12.1 审批区规定操作：批准 / 退回 / 限制范围 / 查看差异；审批人必须看到变更差异、风险与成本。
+// M0-06 T2：每次决策记 approval_decision（Gate 1 审批理解探针——决策分布与差异查看率进采集表）
 import { useState } from 'react';
+import { track } from '@/analytics/analytics';
 import type { ApprovalProposal } from './types';
 import { GOVERNED_ACTION_LABELS } from './types';
 import { CostBadge, PolicyBadge } from './Badges';
@@ -28,6 +30,12 @@ export default function ApprovalCard({ proposal: p, onDecide, onShowEvidence }: 
 
   const decide = (d: 'APPROVED' | 'RETURNED' | 'SCOPE_LIMITED') => {
     setDecided(d);
+    track('approval_decision', {
+      action: p.action,
+      decision: d,
+      risk: p.risk_level,
+      viewed_diff: showDiff,
+    });
     onDecide?.(p.id, d, note || undefined);
   };
 

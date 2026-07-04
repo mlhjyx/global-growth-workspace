@@ -1,7 +1,7 @@
 // 旅程导航条（EPIC-M0-06 T1）：激活旅程时挂在 TopBar 下方，跨页可见。
 // 步骤态：✓ 已完成 / 高亮 当前 / 灰 待做；点击步骤跳承载页；「完成本步」推进并自动前往下一步。
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useJourney } from './JourneyContext';
+import { useJourney } from './journey-context';
 
 export default function JourneyRail() {
   const { journey, completed, currentStep, completeStep, resetJourney } = useJourney();
