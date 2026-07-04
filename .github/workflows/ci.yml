@@ -32,6 +32,18 @@ jobs:
       - run: pnpm -w run test
       - run: pnpm -w run contracts:validate
 
+  # 秘密扫描（BE-02 供应链基线；SPK-MGW 接真实模型 API 的前置，docs/security/SECRET_MANAGEMENT.md）
+  # 注：暂不入 ruleset Required Checks（ruleset 变更属业务负责人红线），失败在 PR 检查区可见
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   # 合并前置人工/半自动检查（母本 14.1）：
   #   /code-review    接口与实现
   #   /security-review 多租户隔离、数据权利、SSRF、Prompt Injection、导出与 Secret
