@@ -307,6 +307,12 @@ test_export_token_without_resource_ids_denied if {
 	d == {"allow": false, "require_approval": false, "reason_codes": ["APPROVAL_RESOURCE_IDS_MISSING"]}
 }
 
+test_export_token_malformed_resource_ids_denied if {
+	appr := object.union(approval_fixture, {"resource_ids": "not-an-array"})
+	d := data.ggw.policy.decision with input as {"action": export_ok, "approval": appr}
+	d == {"allow": false, "require_approval": false, "reason_codes": ["APPROVAL_RESOURCE_IDS_INVALID"]}
+}
+
 # ============================== CROSS_BORDER_MODEL_CALL ==============================
 
 test_crossborder_without_grant_requires_approval if {
@@ -375,6 +381,20 @@ test_crossborder_grant_without_budget_cap_denied if {
 	grant := object.remove(grant_fixture, ["budget_cap"])
 	d := data.ggw.policy.decision with input as {"action": model_call_ok, "workspace_model_authorization": grant}
 	d == {"allow": false, "require_approval": false, "reason_codes": ["BUDGET_CAP_MISSING"]}
+}
+
+# 负向：budget_cap 形状不可用同样显式拒绝——amount 缺失与 amount 非数值两个变体
+# （Codex 3522746091；缺失变体曾复现 term-hoisting 陷阱，见 model.rego 注释）
+test_crossborder_grant_budget_cap_without_amount_denied if {
+	grant := object.union(object.remove(grant_fixture, ["budget_cap"]), {"budget_cap": {"currency": "USD"}})
+	d := data.ggw.policy.decision with input as {"action": model_call_ok, "workspace_model_authorization": grant}
+	d == {"allow": false, "require_approval": false, "reason_codes": ["BUDGET_CAP_INVALID"]}
+}
+
+test_crossborder_grant_non_numeric_budget_cap_denied if {
+	grant := object.union(object.remove(grant_fixture, ["budget_cap"]), {"budget_cap": {"amount": "500", "currency": "USD"}})
+	d := data.ggw.policy.decision with input as {"action": model_call_ok, "workspace_model_authorization": grant}
+	d == {"allow": false, "require_approval": false, "reason_codes": ["BUDGET_CAP_INVALID"]}
 }
 
 # 负向：model 属性整体缺失 → 完整性违规 + 预算计数缺失（不得静默放行）

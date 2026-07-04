@@ -89,8 +89,21 @@ violations contains "MODEL_TASK_NOT_AUTHORIZED" if not input.action.model.task i
 
 violations contains "BUDGET_CAP_MISSING" if not grant.budget_cap
 
-violations contains "CROSS_BORDER_BUDGET_EXCEEDED" if {
+# budget_cap 存在但形状不可用（amount 缺失或非数值）= 无可执行上限，同样显式拒绝。
+# 两条体规避 term-hoisting 陷阱：`not is_number(缺失引用)` 会因提升求值直接失败而不触发——
+# 缺失用裸引用否定（不受提升影响），类型错先绑定已定义值再判型。
+violations contains "BUDGET_CAP_INVALID" if {
 	grant.budget_cap
+	not grant.budget_cap.amount
+}
+
+violations contains "BUDGET_CAP_INVALID" if {
+	amount := grant.budget_cap.amount
+	not is_number(amount)
+}
+
+violations contains "CROSS_BORDER_BUDGET_EXCEEDED" if {
+	is_number(grant.budget_cap.amount)
 	input.action.model.consumed_amount >= grant.budget_cap.amount
 }
 

@@ -97,6 +97,11 @@ violations contains "ACTION_NOT_COVERED_BY_APPROVAL" if {
 # 资源级绑定：审批与被操作资源一一对应，防止 token 复用到其他导出/删除对象
 violations contains "APPROVAL_RESOURCE_IDS_MISSING" if not appr.resource_ids
 
+violations contains "APPROVAL_RESOURCE_IDS_INVALID" if {
+	appr.resource_ids
+	not is_array(appr.resource_ids)
+}
+
 violations contains "RESOURCE_NOT_COVERED_BY_APPROVAL" if {
 	input.action.resource_id
 	is_array(appr.resource_ids)

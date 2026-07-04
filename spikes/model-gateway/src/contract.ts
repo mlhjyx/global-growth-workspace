@@ -42,7 +42,7 @@ export interface CompleteResult {
 // Trace（每次调用必产出，成功与失败都产出）
 // ---------------------------------------------------------------------------
 
-export type AttemptStatus = 'OK' | 'PROVIDER_ERROR' | 'INVALID_OUTPUT';
+export type AttemptStatus = 'OK' | 'PROVIDER_ERROR' | 'INVALID_OUTPUT' | 'COST_CAP_EXCEEDED';
 
 export interface ProviderAttempt {
   /** Provider 名（如 mock-stable / mock-faulty；未来为 anthropic/openai/litellm 等） */
