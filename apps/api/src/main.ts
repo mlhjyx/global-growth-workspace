@@ -7,10 +7,13 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/http/http-exception.filter';
 import { requestContextMiddleware } from './common/http/request-context.middleware';
+import { ConfigValidationError, loadConfig } from './infrastructure/config/config';
+import { JsonLogger } from './infrastructure/logging/json-logger';
+import { initOtel } from './infrastructure/otel/otel';
 
 export async function createApp(): Promise<INestApplication> {
   const app = await NestFactory.create(AppModule, {
-    logger: ['log', 'warn', 'error'],
+    logger: new JsonLogger(),
   });
   app.setGlobalPrefix('api/v1');
   app.use(requestContextMiddleware);
@@ -36,11 +39,24 @@ export async function createApp(): Promise<INestApplication> {
 }
 
 async function bootstrap(): Promise<void> {
+  let config;
+  try {
+    config = loadConfig();
+  } catch (e) {
+    if (e instanceof ConfigValidationError) {
+      // 冒烟 #8：配置无效 → 打出缺失项清单，非 0 退出
+      console.error(
+        JSON.stringify({ level: 'fatal', msg: 'config validation failed', issues: e.issues }),
+      );
+      process.exit(1);
+    }
+    throw e;
+  }
+  await initOtel(config);
   const app = await createApp();
-  const port = Number(process.env.PORT ?? 3001);
-  await app.listen(port, '127.0.0.1');
+  await app.listen(config.PORT, '127.0.0.1');
   // eslint-disable-next-line no-console
-  console.log(JSON.stringify({ level: 'info', msg: 'api started', port }));
+  console.log(JSON.stringify({ level: 'info', msg: 'api started', port: config.PORT }));
 }
 
 if (require.main === module) {
