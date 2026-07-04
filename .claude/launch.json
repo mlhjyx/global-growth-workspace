@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "prototype",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@ggw/prototype", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "api",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@ggw/api", "dev"],
+      "port": 3001
+    }
+  ]
+}
