@@ -12,7 +12,7 @@ function emit(level: Level, message: unknown, context?: string, extra?: unknown)
     msg: typeof message === 'string' ? message : JSON.stringify(message),
     ...(extra !== undefined ? { extra } : {}),
   });
-  // eslint-disable-next-line no-console
+
   (level === 'error' || level === 'fatal' ? console.error : console.log)(line);
 }
 

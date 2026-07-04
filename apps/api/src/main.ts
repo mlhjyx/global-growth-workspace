@@ -55,7 +55,7 @@ async function bootstrap(): Promise<void> {
   await initOtel(config);
   const app = await createApp();
   await app.listen(config.PORT, '127.0.0.1');
-  // eslint-disable-next-line no-console
+
   console.log(JSON.stringify({ level: 'info', msg: 'api started', port: config.PORT }));
 }
 
