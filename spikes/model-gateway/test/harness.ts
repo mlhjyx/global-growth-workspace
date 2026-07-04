@@ -2,7 +2,7 @@
  * 测试装配：TaskRegistry + PromptRegistry + RoutingPolicy + BudgetGuard + Providers → Gateway。
  */
 import type { GatewayTrace, ModelProvider } from '../src/contract.js';
-import { InMemoryBudgetGuard } from '../src/budget-guard.js';
+import { InMemoryBudgetGuard, type BudgetGuard } from '../src/budget-guard.js';
 import { ModelGatewayImpl } from '../src/gateway.js';
 import { PromptRegistry, registerCompanyUnderstandingPromptV1 } from '../src/prompt-registry.js';
 import { RoutingPolicy, type ProviderTarget } from '../src/routing-policy.js';
@@ -25,6 +25,8 @@ export interface HarnessOptions {
   /** workspace -> 日预算（USD） */
   budgets?: Record<string, number>;
   defaultDailyLimitUsd?: number;
+  /** 覆盖预算卫兵（测试观测预检参数用）；缺省 InMemoryBudgetGuard */
+  budgetGuard?: BudgetGuard;
   clock?: () => Date;
 }
 
@@ -46,7 +48,9 @@ export function buildGateway(opts: HarnessOptions) {
     fallbacks: fallbacks.map((p) => target(p.name, 'mock-small-v1', true)),
   });
 
-  const budget = new InMemoryBudgetGuard(opts.budgets ?? {}, opts.defaultDailyLimitUsd ?? 10, opts.clock);
+  const budget =
+    opts.budgetGuard ??
+    new InMemoryBudgetGuard(opts.budgets ?? {}, opts.defaultDailyLimitUsd ?? 10, opts.clock);
 
   const providers = new Map<string, ModelProvider>();
   providers.set(opts.primary.name, opts.primary);
