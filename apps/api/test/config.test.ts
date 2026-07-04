@@ -29,7 +29,8 @@ describe('Config 启动校验', () => {
   });
 
   it('合法密钥通过', () => {
-    const cfg = loadConfig({ ...base, JWT_SECRET: 'k9f2m8x1q7w4e6r3t5y0' });
+    // 测试值刻意可读非真密钥（gitleaks 低熵不误报），且不落占位前缀 denylist
+    const cfg = loadConfig({ ...base, JWT_SECRET: 'unit-test-value-not-real-0001' });
     expect(cfg.JWT_SECRET).toBeTruthy();
   });
 
