@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { BudgetExceededError } from '../src/contract.js';
 import { MockFaultyProvider } from '../src/providers/mock-faulty.js';
 import { MockStableProvider } from '../src/providers/mock-stable.js';
-import { makeValidInput, WS_A, WS_B } from '../src/providers/fixtures.js';
+import { makeValidInput, makeValidOutput, WS_A, WS_B } from '../src/providers/fixtures.js';
 import { buildGateway, target, POLICY_ID, TASK_REF } from './harness.js';
 
 // 稳定 Provider 单次成本：1200/1000*0.003 + 900/1000*0.015 = 0.0171 USD
@@ -95,6 +95,35 @@ describe('预算熔断（BUDGET_EXCEEDED）', () => {
     expect(err.message).toContain('单次上限');
     expect(err.trace.status).toBe('BUDGET_EXCEEDED');
     expect(stable.requests).toHaveLength(0);
+  });
+
+  it('Provider 实报用量超预估：实际累计成本越过单次上限即终止，已发生费用照常记账（Codex 3522746088）', async () => {
+    // 估算基于输入字符数（很小，过预检），但 Provider 实报 40 万 input tokens
+    // → 实际成本 400 * 0.003 = $1.2 > maxCostPerRunUsd $0.8
+    const blowout = {
+      name: 'mock-usage-blowout',
+      requests: [] as unknown[],
+      async invoke(req: unknown) {
+        (this.requests as unknown[]).push(req);
+        return {
+          text: JSON.stringify(makeValidOutput()),
+          usage: { inputTokens: 400_000, outputTokens: 0 },
+        };
+      },
+    };
+    const { gateway, budget, traces } = buildGateway({ primary: blowout, budgets: { [WS_A]: 100 } });
+
+    const err = await gateway
+      .complete(TASK_REF, makeValidInput(), { workspaceId: WS_A })
+      .catch((e) => e);
+
+    expect(err).toBeInstanceOf(BudgetExceededError);
+    expect(err.message).toContain('实际累计成本');
+    expect(err.trace.status).toBe('BUDGET_EXCEEDED');
+    expect(err.trace.attempts[0]!.status).toBe('COST_CAP_EXCEEDED');
+    expect(err.trace.costUsd).toBeCloseTo(1.2, 4);
+    expect(budget.spentToday(WS_A)).toBeCloseTo(1.2, 4); // 钱已实际花出，照常记账
+    expect(traces).toHaveLength(1);
   });
 
   it('UTC 跨日后预算重置（clock 注入）', async () => {

@@ -112,6 +112,21 @@ export class ModelGatewayImpl implements ModelGateway {
       );
     }
 
+    // 1a) 入参租户归属校验：跨租户载荷在触达 Provider **之前**拒绝——仅靠输出校验时，
+    //     他租户数据已被发出（Codex 3522746089；输出侧校验保留，防 Provider 串扰）
+    if (input !== null && typeof input === 'object') {
+      const inWs = (input as Record<string, unknown>)['workspace_id'];
+      if (typeof inWs === 'string' && inWs !== opts.workspaceId) {
+        return fail(
+          new InvalidInputError(
+            `输入 workspace_id（${inWs}）与请求 workspace（${opts.workspaceId}）不符`,
+            [],
+          ),
+          'INVALID_INPUT',
+        );
+      }
+    }
+
     // 2) 脱敏：发给 Provider 前对序列化入参做脱敏（母本 9.10）
     const redacted = this.redact(JSON.stringify(input));
     trace.redactions = redacted.redactions;
@@ -181,6 +196,32 @@ export class ModelGatewayImpl implements ModelGateway {
         // 结构化输出：解析 + Schema 校验
         trace.validation.attempts += 1;
         const cost = actualCostUsd(target, usage);
+
+        // 4c) 单次运行**实际累计**成本上限：预检估算挡不住 Provider 实报用量超预估、
+        //     或修复重试的第二次计费——累计越过 cap 即终止；已发生费用照常记账（钱已花出）
+        //     （Codex 3522746088）
+        const aggregateCost = attempts.reduce((s, a) => s + (a.costUsd ?? 0), 0) + cost;
+        if (aggregateCost > task.maxCostPerRunUsd) {
+          attempts.push({
+            provider: target.provider,
+            model: target.model,
+            attempt,
+            status: 'COST_CAP_EXCEEDED',
+            latencyMs: Date.now() - t0,
+            errorCode: 'BUDGET_EXCEEDED',
+            errorMessage: `实际累计成本 $${aggregateCost.toFixed(4)} 超过单次上限 $${task.maxCostPerRunUsd.toFixed(4)}`,
+            usage,
+            costUsd: cost,
+          });
+          this.deps.budget.charge(opts.workspaceId, cost);
+          trace.costUsd = aggregateCost;
+          return fail(
+            new BudgetExceededError(
+              `单次运行实际累计成本 $${aggregateCost.toFixed(4)} 超过任务上限 $${task.maxCostPerRunUsd.toFixed(4)}（task-contract 第 3 节）`,
+            ),
+            'BUDGET_EXCEEDED',
+          );
+        }
         let parsed: unknown;
         let outcome: { valid: boolean; errors: string[] };
         try {

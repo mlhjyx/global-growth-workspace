@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { StructuredOutputError } from '../src/contract.js';
 import { MockFaultyProvider } from '../src/providers/mock-faulty.js';
 import { MockStableProvider } from '../src/providers/mock-stable.js';
-import { makeValidInput, WS_A } from '../src/providers/fixtures.js';
+import { makeValidInput, makeValidOutput, WS_A } from '../src/providers/fixtures.js';
 import { buildGateway, TASK_REF } from './harness.js';
 
 describe('结构化输出校验与重试', () => {
@@ -39,20 +39,44 @@ describe('结构化输出校验与重试', () => {
     expect(res.trace.validation).toEqual({ attempts: 2, valid: true });
   });
 
-  it('输出 workspace_id 与请求不符：Schema 合法也拒收，禁止跨租户归因/泄漏（Codex 3521756898）', async () => {
-    const stable = new MockStableProvider(); // 回显输入中的 workspace_id
+  it('入参 workspace_id 与请求不符：触达 Provider 之前即拒绝，跨租户载荷不外发（Codex 3522746089）', async () => {
+    const stable = new MockStableProvider();
     const { gateway, traces } = buildGateway({ primary: stable });
 
-    // 输入体携带 WS_B（Provider 将回显 WS_B），请求方 workspace 是 WS_A → 输出必须被拒
     const err = await gateway
       .complete(TASK_REF, makeValidInput('ws_01JZW0RK000000000000000002'), { workspaceId: WS_A })
+      .catch((e) => e);
+
+    expect(err.code).toBe('INVALID_SCHEMA'); // InvalidInputError 机器码（母本 11.15）
+    expect(err.trace.status).toBe('INVALID_INPUT');
+    expect(stable.requests).toHaveLength(0); // 载荷从未发往 Provider
+    expect(traces).toHaveLength(1);
+  });
+
+  it('输出 workspace_id 与请求不符（Provider 串扰）：Schema 合法也拒收（Codex 3521756898）', async () => {
+    // 输入是 WS_A，但 Provider 返回他租户的输出（串扰/陈旧重试响应）
+    const crossTenant = {
+      name: 'mock-cross-tenant',
+      requests: [] as unknown[],
+      async invoke(req: unknown) {
+        (this.requests as unknown[]).push(req);
+        return {
+          text: JSON.stringify(makeValidOutput('ws_01JZW0RK000000000000000002')),
+          usage: { inputTokens: 100, outputTokens: 100 },
+        };
+      },
+    };
+    const { gateway, traces } = buildGateway({ primary: crossTenant });
+
+    const err = await gateway
+      .complete(TASK_REF, makeValidInput(), { workspaceId: WS_A })
       .catch((e) => e);
 
     expect(err).toBeInstanceOf(StructuredOutputError);
     expect(err.errors.join(';')).toContain('workspace');
     expect(err.trace.status).toBe('INVALID_OUTPUT');
     expect(err.trace.validation.valid).toBe(false);
-    expect(stable.requests).toHaveLength(2); // 走一次修复重试后终止，串扰输出从未被返回
+    expect(crossTenant.requests).toHaveLength(2); // 修复重试一次后终止，串扰输出从未被返回
     expect(traces).toHaveLength(1);
   });
 
