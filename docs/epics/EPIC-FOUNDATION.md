@@ -285,7 +285,7 @@ GUC 未设置时 `current_setting(..., true)` 返回 NULL → 读零行、写全
 | 适用范围 | 全部写操作（POST/PATCH/DELETE）必带 `Idempotency-Key` 头（1..128 字符，contracts `parameters.IdempotencyKey` required:true）；缺失 → 400 `INVALID_SCHEMA` |
 | 去重作用域 | 唯一键 `(scope_id, operation_id, idempotency_key)`；`scope_id` = workspace_id；平台/组织级端点（如 `POST /organizations`）用 organization_id 或 user_id（对齐 BE-03「所有权不一刀切」规则） |
 | 存储 | **拆两个存储面（安全评审 #2/架构评审 #1，与 §4.1 对齐）**：租户级 `idempotency_record`（`workspace_id NOT NULL` + RLS 同 §4.4）服务 Workspace 内写端点；平台级 `idempotency_record_platform`（无 RLS、应用层守卫）服务 `POST /organizations` 等平台/组织级写端点。列：`workspace_id`（仅租户级表）、`scope_id, operation_id, idempotency_key, request_hash（规范化 body 的 SHA-256）, status(PENDING/COMPLETED), response_status, response_body(jsonb), created_at, expires_at`；唯一索引在 `(scope_id, operation_id, idempotency_key)`。**迁移均随 BE-03**（裁决 #6） |
-| 流程 | ① **预占**：处理前 INSERT PENDING（独立事务，先于业务事务，用于并发互斥）；唯一冲突 → 读已有记录：COMPLETED 且 hash 相同 → 原样重放存储响应（BE-09E 断言：重放返回相同状态码与 body，不重复执行副作用）；hash 不同 → 409 `IDEMPOTENCY_KEY_REUSED`；PENDING 且未超在途阈值（并发在途）→ 409 `retryable:true`。② **完成置位（PR #22 评论处置 #2，BE-03 落库硬口径）**：COMPLETED 置位与响应快照**必须与业务写在同一 PG 事务提交**（并入 §5.4「版本递增、业务写、审计写、outbox INSERT 同事务」清单）——由此「业务已提交但记录停在 PENDING」在崩溃下不可能出现。③ **崩溃恢复**：PENDING 超在途阈值（≥ 请求超时上限，阈值进 Config）视为执行中断——中断时业务效果必随事务回滚，重试请求以条件更新（`WHERE status='PENDING' AND created_at < 阈值`）接管并安全重执行；无业务事务的确定性 4xx 快照单独写入，中断后重执行得到相同 4xx。TTL 清理仅作用于 COMPLETED 与中断记录，**不构成重执行窗口** |
+| 流程 | ① **预占**：处理前 INSERT PENDING（独立事务，先于业务事务，用于并发互斥）；唯一冲突 → 读已有记录：COMPLETED 且 hash 相同 → 原样重放存储响应（BE-09E 断言：重放返回相同状态码与 body，不重复执行副作用）；hash 不同 → 409 `IDEMPOTENCY_KEY_REUSED`；PENDING 且未超在途阈值（并发在途）→ 409 `retryable:true`。② **完成置位（PR #22 评论处置 #2，BE-03 落库硬口径）**：COMPLETED 置位与响应快照**必须与业务写在同一 PG 事务提交**（并入 §5.4「版本递增、业务写、审计写、outbox INSERT 同事务」清单）——由此「业务已提交但记录停在 PENDING」在崩溃下不可能出现。③ **崩溃恢复（接管必须有栅栏——PR #27 评论处置 #3）**：PENDING 超在途阈值视为执行中断，重试请求以条件更新（`WHERE status='PENDING' AND created_at < 阈值`）接管并安全重执行。「原请求已不可能提交」不得凭客户端超时假设——客户端/网关超时不取消服务端在跑的事务；BE-03 硬口径：**PG 侧 `statement_timeout` 与 `idle_in_transaction_session_timeout` 必须设置且低于接管阈值**（保证阈值过后原业务事务不可能再提交），接管本身经单条原子条件更新（同一行同刻只有一个赢家），由此杜绝「原请求晚提交 + 接管重执行」双写；无业务事务的确定性 4xx 快照单独写入，中断后重执行得到相同 4xx。TTL 清理仅作用于 COMPLETED 与中断记录，**不构成重执行窗口** |
 | 快照与 TTL | 2xx 与确定性 4xx 快照均存；5xx 不存（允许重试重执行）。TTL 24h，到期清理 Job |
 | 与 Outbox 关系 | 幂等记录只挡 API 重放；**事件侧幂等与它无关**（envelope 不含 idempotency_key，见 §5.6/§5.7） |
 
@@ -434,8 +434,8 @@ IdentityProviderAdapter（BE-04）
 
 §6.2 评估顺序与 §6.3「Tenant Context 仅源自 JWT `ws`」默认要求调用者已持有 ACTIVE Membership；但建组织/建 Workspace/接受邀请发生在该前提成立**之前**。以下自举路径为显式冻结的受控例外——每条有独立、可验证的上下文来源，且各配负向测试（BE-04）：
 
-1. **无 `ws` 声明的已认证会话**：首次登录后 JWT 可不含 `ws`/`mem`/`roles`（用户尚无任何 ACTIVE Membership）。该形态仅允许平台/组织级端点（`POST /organizations`、`POST /workspaces`、我的工作区列表/切换、邀请接受）；一切租户级端点一律 403 `ACTION_DENIED`（负向测试覆盖）。
-2. **Workspace 创建自举**：`POST /workspaces` 在创建事务内以**服务端新生成的 `ws_` ID** 显式设置 Tenant Context（与 §4.4 Worker 显式设置同一机制），使 workspace 行与创建者 OWNER Membership 行通过 RLS `WITH CHECK`；事务提交后重签发含新 `ws` 的 access token。上下文来源=服务端自生成 ID，**绝非请求输入**。
+1. **无 `ws` 声明的已认证会话**：首次登录后 JWT 可不含 `ws`/`mem`/`roles`，**亦可不含 `org`**（真正的首登用户连 Organization 都尚无；§6.3 的 `org` 声明仅在用户已有组织后签发，BE-04 不得为自举铸造不存在的 `org_`——PR #27 评论处置 #1）。该形态仅允许平台/组织级端点（`POST /organizations`、`POST /workspaces`、我的工作区列表/切换、邀请接受）；一切租户级端点一律 403 `ACTION_DENIED`（负向测试覆盖）。
+2. **Workspace 创建自举**：`POST /workspaces` 在创建事务内以**服务端新生成的 `ws_` ID** 显式设置 Tenant Context（与 §4.4 Worker 显式设置同一机制），使 workspace 行与创建者 OWNER Membership 行通过 RLS `WITH CHECK`；事务提交后重签发含新 `ws` 的 access token。上下文来源=服务端自生成 ID，**绝非请求输入**。**组织归属硬校验（PR #27 评论处置 #2）**：请求体 `organization_id` 来自客户端，且此路径尚无 Membership 可供 RBAC 判定——服务端必须先做**平台级归属校验**（调用者是该 Organization 的 owner/创建者，与 §4.1「organization 仅 owner/成员经 Membership 推导可读」同一口径），不通过一律 404（防组织存在性探测）；负向测试：持他人 `org_id` 建 workspace 被拒。
 3. **邀请接受**：受邀者不能经租户查询面读到自己的 INVITED Membership（RLS 边界不为此放开）。邀请创建时生成**一次性签名邀请令牌**（绑定 workspace_id/membership_id/受邀身份，带 TTL、单次使用）；accept 端点以**已验证邀请令牌**作为该事务 Tenant Context 的第二受控来源（仅限此端点），校验受邀身份匹配后置 `ACTIVE` 并落审计。
 4. **认证域受控查询面**：「我的工作区列表」与「切换目标 Membership `ACTIVE` 校验」（§6.3）需按 user_id 跨 Workspace 读 membership——不经通用租户查询面，由平台 AuthService 经**显式受控通道**（专用 DB 角色的显式 RLS Policy，或 SECURITY DEFINER 函数，仅按已验证 JWT `sub` 过滤、禁任意谓词）执行，与 §4.4 `ggw_system` 同一「显式授权、不授 BYPASSRLS」原则；负向测试：该通道以他人 user_id 查询被拒。
 5. **连带登记（平台作用域缺口，与处置 #1 同批）**：organization 级动作的审计（`audit_log_entry` 为租户级表，无法承接无 Workspace 的动作）与 OrganizationCreated 事件（§5.6 处置注）同属平台作用域缺口，随 contracts 缺口 R2 PR 与 BE-04 设计一并处置；过渡期 org 创建以结构化日志留痕，缺口显式后置、不消失。
@@ -597,6 +597,8 @@ NOTE——安全#6 JWT `kid` 密钥轮换（§6.3）；安全#7 PUBLISHED 行保
 | 5 | permission-grants/budgets 端点无 PR 归属（3521773915） | 属实（冻结契约已含四组路径） | BE-04 实现序列补 ⑨ + 契约测试 | §11 BE-04 行 |
 | 6 | 建组织/建 Workspace/邀请接受无自举路径（3521773918） | 属实（§6.2/§6.3 前提在自举时不成立） | 新增 §6.7：四条受控例外（无 ws 会话、创建自举 GUC、一次性邀请令牌、认证域受控查询面）+ 平台审计连带登记 | §6.7（新增） |
 | 7 | auth 端点绕过 contracts 单一事实源（3521773919） | 属实（违反 §5.1 diff 断言前提） | 契约先行：auth/session 契约并入 contracts 缺口 R2 PR，最晚 BE-04 开工前 | §6.3、§5.9 |
+
+**追加批次（PR #27 合并后 Codex 4 条，2026-07-04）**：#1 自举会话可不含 `org` 声明（3522703317→§6.7-1）；#2 workspace 创建前平台级组织归属校验（3522703321→§6.7-2）；#3 PENDING 接管栅栏——PG statement/idle 事务超时必须低于接管阈值 + 原子条件更新（3522703319→§5.3-③）；#4 探针路径代码未随规格迁移（3522703322）——已由 PR #28 落地（create-app exclude + 测试同步），无需本批修订。
 
 ## 附：本次组装输入
 
