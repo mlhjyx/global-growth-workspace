@@ -5,15 +5,19 @@ import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { GlobalExceptionFilter } from './common/http/http-exception.filter';
+import { requestContextMiddleware } from './common/http/request-context.middleware';
 
 export async function createApp(): Promise<INestApplication> {
   const app = await NestFactory.create(AppModule, {
     logger: ['log', 'warn', 'error'],
   });
   app.setGlobalPrefix('api/v1');
+  app.use(requestContextMiddleware);
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
   );
+  app.useGlobalFilters(new GlobalExceptionFilter());
   app.enableShutdownHooks();
 
   const openapi = SwaggerModule.createDocument(
