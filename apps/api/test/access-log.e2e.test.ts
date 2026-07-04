@@ -42,4 +42,14 @@ describe('访问日志（结构化 JSON）', () => {
     expect(lines).toHaveLength(1);
     expect(lines[0]!.status).toBe(404);
   });
+
+  it('query string 不落日志（敏感检索参数不进集中采集，3522684842）', async () => {
+    lines.length = 0;
+    await request(app.getHttpServer())
+      .get('/api/v1/health?filter=secret-email@example.com&cursor=abc')
+      .expect(200);
+    expect(lines).toHaveLength(1);
+    expect(lines[0]!.route).toBe('/api/v1/health');
+    expect(JSON.stringify(lines[0])).not.toContain('secret-email');
+  });
 });
