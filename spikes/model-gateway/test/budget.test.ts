@@ -126,6 +126,33 @@ describe('预算熔断（BUDGET_EXCEEDED）', () => {
     expect(traces).toHaveLength(1);
   });
 
+  it('修复重试前计入已耗成本：首次已花 $0.792、上限 $0.8 时第二次调用不再发出（Codex 3522772079）', async () => {
+    // 首次返回违反 Schema 的输出且实报大用量（262k in + 0.4k out = $0.792 ≤ $0.8，照常计费）；
+    // 修复重试预检：已耗 0.792 + 估算 ~0.016 > 0.8 → 在触达 Provider 之前终止
+    const nearCap = {
+      name: 'mock-near-cap',
+      requests: [] as unknown[],
+      async invoke(req: unknown) {
+        (this.requests as unknown[]).push(req);
+        return {
+          text: JSON.stringify({ ...makeValidOutput(), company_profile_candidate: { legal_name: 'X' } }),
+          usage: { inputTokens: 262_000, outputTokens: 400 },
+        };
+      },
+    };
+    const { gateway, budget } = buildGateway({ primary: nearCap, budgets: { [WS_A]: 100 } });
+
+    const err = await gateway
+      .complete(TASK_REF, makeValidInput(), { workspaceId: WS_A })
+      .catch((e) => e);
+
+    expect(err).toBeInstanceOf(BudgetExceededError);
+    expect(err.message).toContain('已耗');
+    expect(err.trace.status).toBe('BUDGET_EXCEEDED');
+    expect(nearCap.requests).toHaveLength(1); // 第二次调用从未发出
+    expect(budget.spentToday(WS_A)).toBeCloseTo(0.792, 4); // 首次真实费用照常记账
+  });
+
   it('UTC 跨日后预算重置（clock 注入）', async () => {
     const stable = new MockStableProvider();
     let now = new Date('2026-07-04T23:50:00Z');
