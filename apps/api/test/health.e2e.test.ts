@@ -2,7 +2,7 @@
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { createApp } from '../src/main';
+import { createApp } from '../src/create-app';
 
 describe('BE-02 骨架冒烟', () => {
   let app: INestApplication;
@@ -16,14 +16,14 @@ describe('BE-02 骨架冒烟', () => {
     await app.close();
   });
 
-  it('GET /api/v1/health → 200 ok', async () => {
-    const res = await request(app.getHttpServer()).get('/api/v1/health').expect(200);
+  it('GET /health → 200 ok', async () => {
+    const res = await request(app.getHttpServer()).get('/health').expect(200);
     expect(res.body.status).toBe('ok');
     expect(typeof res.body.uptime_s).toBe('number');
   });
 
-  it('GET /api/v1/readiness → 200 ready', async () => {
-    const res = await request(app.getHttpServer()).get('/api/v1/readiness').expect(200);
+  it('GET /readiness → 200 ready', async () => {
+    const res = await request(app.getHttpServer()).get('/readiness').expect(200);
     expect(res.body.status).toBe('ready');
     expect(res.body.checks).toBeTypeOf('object');
   });

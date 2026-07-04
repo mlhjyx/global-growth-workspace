@@ -2,6 +2,7 @@
 import {
   type BeginResult,
   IDEMPOTENCY_TTL_MS,
+  type IdempotencyKeySpec,
   type IdempotencyStore,
   type StoredResponse,
 } from './idempotency.types';
@@ -13,16 +14,22 @@ interface Entry {
   storedAt: number;
 }
 
+// NUL 字符作复合键分隔符：HTTP 头与路由中不可能出现，无拼接碰撞风险
+const SEP = String.fromCharCode(0);
+const composite = (spec: IdempotencyKeySpec): string =>
+  `${spec.scopeId}${SEP}${spec.operationId}${SEP}${spec.idempotencyKey}`;
+
 export class MemoryIdempotencyStore implements IdempotencyStore {
   private readonly entries = new Map<string, Entry>();
 
   constructor(private readonly now: () => number = () => Date.now()) {}
 
-  begin(key: string, requestHash: string): BeginResult {
+  begin(spec: IdempotencyKeySpec, requestHash: string): BeginResult {
+    const key = composite(spec);
     const existing = this.entries.get(key);
     if (existing && this.now() - existing.storedAt > IDEMPOTENCY_TTL_MS) {
       this.entries.delete(key);
-      return this.begin(key, requestHash);
+      return this.begin(spec, requestHash);
     }
     if (!existing) {
       this.entries.set(key, { requestHash, status: 'PENDING', storedAt: this.now() });
@@ -33,8 +40,8 @@ export class MemoryIdempotencyStore implements IdempotencyStore {
     return { kind: 'replay', response: existing.response! };
   }
 
-  complete(key: string, response: StoredResponse): void {
-    const entry = this.entries.get(key);
+  complete(spec: IdempotencyKeySpec, response: StoredResponse): void {
+    const entry = this.entries.get(composite(spec));
     if (entry) {
       entry.status = 'COMPLETED';
       entry.response = response;
@@ -42,7 +49,7 @@ export class MemoryIdempotencyStore implements IdempotencyStore {
     }
   }
 
-  fail(key: string): void {
-    this.entries.delete(key);
+  fail(spec: IdempotencyKeySpec): void {
+    this.entries.delete(composite(spec));
   }
 }

@@ -19,7 +19,9 @@ export function accessLogMiddleware(sink: AccessLogSink = defaultSink) {
         type: 'access',
         time: new Date().toISOString(),
         method: req.method,
-        route: req.originalUrl,
+        // 只记路径，不记原始 query string——检索/过滤参数可能含敏感标识，
+        // 而访问日志面向集中采集（PR #25 评论处置 3522684842）
+        route: req.originalUrl.split('?')[0],
         status: res.statusCode,
         duration_ms: Number((process.hrtime.bigint() - startedAt) / 1_000_000n),
         request_id: ctx?.requestId,

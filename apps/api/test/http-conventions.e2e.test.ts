@@ -2,7 +2,7 @@
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { createApp } from '../src/main';
+import { createApp } from '../src/create-app';
 
 describe('HTTP 约定（错误体 + 请求上下文头）', () => {
   let app: INestApplication;
@@ -25,7 +25,7 @@ describe('HTTP 约定（错误体 + 请求上下文头）', () => {
   });
 
   it('未带头时生成 request-id 并回显，correlation-id 缺省等于 request-id', async () => {
-    const res = await request(app.getHttpServer()).get('/api/v1/health').expect(200);
+    const res = await request(app.getHttpServer()).get('/health').expect(200);
     const rid = res.headers['x-request-id'];
     expect(rid).toBeTruthy();
     expect(res.headers['x-correlation-id']).toBe(rid);
@@ -33,7 +33,7 @@ describe('HTTP 约定（错误体 + 请求上下文头）', () => {
 
   it('入站 x-request-id / x-correlation-id 原样透传回显', async () => {
     const res = await request(app.getHttpServer())
-      .get('/api/v1/health')
+      .get('/health')
       .set('x-request-id', 'req-abc-123')
       .set('x-correlation-id', 'corr-xyz-789')
       .expect(200);
