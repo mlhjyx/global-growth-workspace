@@ -2,7 +2,7 @@
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { createApp } from '../src/main';
+import { createApp } from '../src/create-app';
 
 describe('幂等与校验（demo 端点承载）', () => {
   let app: INestApplication;

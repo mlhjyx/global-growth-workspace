@@ -2,7 +2,7 @@
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { createApp } from '../src/main';
+import { createApp } from '../src/create-app';
 
 describe('访问日志（结构化 JSON）', () => {
   let app: INestApplication;
@@ -20,7 +20,7 @@ describe('访问日志（结构化 JSON）', () => {
   it('每请求恰好一条，字段齐全且与响应头一致', async () => {
     lines.length = 0;
     await request(app.getHttpServer())
-      .get('/api/v1/health')
+      .get('/health')
       .set('x-request-id', 'log-probe-1')
       .set('x-correlation-id', 'corr-probe-1')
       .expect(200);
@@ -29,7 +29,7 @@ describe('访问日志（结构化 JSON）', () => {
     const line = lines[0]!;
     expect(line.type).toBe('access');
     expect(line.method).toBe('GET');
-    expect(line.route).toBe('/api/v1/health');
+    expect(line.route).toBe('/health');
     expect(line.status).toBe(200);
     expect(typeof line.duration_ms).toBe('number');
     expect(line.request_id).toBe('log-probe-1');
@@ -46,10 +46,10 @@ describe('访问日志（结构化 JSON）', () => {
   it('query string 不落日志（敏感检索参数不进集中采集，3522684842）', async () => {
     lines.length = 0;
     await request(app.getHttpServer())
-      .get('/api/v1/health?filter=secret-email@example.com&cursor=abc')
+      .get('/health?filter=secret-email@example.com&cursor=abc')
       .expect(200);
     expect(lines).toHaveLength(1);
-    expect(lines[0]!.route).toBe('/api/v1/health');
+    expect(lines[0]!.route).toBe('/health');
     expect(JSON.stringify(lines[0])).not.toContain('secret-email');
   });
 });

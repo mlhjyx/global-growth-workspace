@@ -1,48 +1,9 @@
-// GGW API 启动入口（BE-02 骨架）。约定见 EPIC-FOUNDATION §0.2/§5：
-// /api/v1 前缀、全局 ValidationPipe、OpenAPI 输出、优雅停机（SIGTERM → 退出码 0）。
+// GGW API 启动入口（BE-02 骨架）：只做 Config 校验 → OTel 初始化 → 动态加载应用组装。
+// 应用组装在 ./create-app——必须在 initOtel 之后 import，HTTP instrumentation 需先于
+// Nest/Express 加载注册（PR #25 评论处置 3522684843）；优雅停机（SIGTERM → 退出码 0）。
 import 'reflect-metadata';
-import { ValidationPipe, type INestApplication } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AppModule } from './app.module';
-import { accessLogMiddleware, type AccessLogSink } from './common/http/access-log.middleware';
-import { GlobalExceptionFilter } from './common/http/http-exception.filter';
-import { requestContextMiddleware } from './common/http/request-context.middleware';
 import { ConfigValidationError, loadConfig } from './infrastructure/config/config';
-import { JsonLogger } from './infrastructure/logging/json-logger';
 import { initOtel } from './infrastructure/otel/otel';
-
-export interface CreateAppOptions {
-  accessLogSink?: AccessLogSink;
-}
-
-export async function createApp(options: CreateAppOptions = {}): Promise<INestApplication> {
-  const app = await NestFactory.create(AppModule, {
-    logger: new JsonLogger(),
-  });
-  app.setGlobalPrefix('api/v1');
-  app.use(requestContextMiddleware);
-  app.use(accessLogMiddleware(options.accessLogSink));
-  app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
-  );
-  app.useGlobalFilters(new GlobalExceptionFilter());
-  app.enableShutdownHooks();
-
-  const openapi = SwaggerModule.createDocument(
-    app,
-    new DocumentBuilder()
-      .setTitle('GGW API')
-      .setDescription('Global Growth Workspace API（契约事实源在 packages/contracts/openapi）')
-      .setVersion('v1')
-      .build(),
-  );
-  SwaggerModule.setup('api/v1/openapi', app, openapi, {
-    jsonDocumentUrl: 'api/v1/openapi.json',
-  });
-
-  return app;
-}
 
 async function bootstrap(): Promise<void> {
   let config;
@@ -59,6 +20,7 @@ async function bootstrap(): Promise<void> {
     throw e;
   }
   await initOtel(config);
+  const { createApp } = await import('./create-app');
   const app = await createApp();
   await app.listen(config.PORT, '127.0.0.1');
 
