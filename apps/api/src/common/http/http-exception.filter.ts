@@ -19,7 +19,7 @@ interface ErrorBody {
 }
 
 const CODE_BY_STATUS: Record<number, string> = {
-  400: 'VALIDATION_FAILED',
+  400: 'INVALID_SCHEMA', // 冒烟 #5 规格用码（EPIC-FOUNDATION §7.3）
   401: 'UNAUTHENTICATED',
   403: 'PERMISSION_DENIED',
   404: 'NOT_FOUND',

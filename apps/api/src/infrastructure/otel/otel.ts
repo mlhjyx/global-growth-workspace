@@ -7,10 +7,14 @@ let shutdownFn: (() => Promise<void>) | undefined;
 export async function initOtel(config: Pick<AppConfig, 'OTEL_ENABLED'>): Promise<void> {
   if (!config.OTEL_ENABLED || shutdownFn) return;
   const sdk = await import('@opentelemetry/sdk-trace-node');
+  const { registerInstrumentations } = await import('@opentelemetry/instrumentation');
+  const { HttpInstrumentation } = await import('@opentelemetry/instrumentation-http');
   const provider = new sdk.NodeTracerProvider({
     spanProcessors: [new sdk.SimpleSpanProcessor(new sdk.ConsoleSpanExporter())],
   });
   provider.register();
+  // 每入站请求生成 span（冒烟 #10）；导出器骨架期为 console，共享环境起换 OTLP
+  registerInstrumentations({ instrumentations: [new HttpInstrumentation()] });
   shutdownFn = () => provider.shutdown();
 }
 

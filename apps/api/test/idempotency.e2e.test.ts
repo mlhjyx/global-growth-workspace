@@ -60,14 +60,14 @@ describe('幂等与校验（demo 端点承载）', () => {
     expect(res.body.retryable).toBe(false);
   });
 
-  it('校验失败：400 VALIDATION_FAILED 含 details；失败不占用 key，修正后同 key 可执行', async () => {
+  it('校验失败：400 INVALID_SCHEMA 含 details；失败不占用 key，修正后同 key 可执行', async () => {
     const key = 'idem-retry-after-400';
     const bad = await request(app.getHttpServer())
       .post('/api/v1/_demo/echo')
       .set('idempotency-key', key)
       .send({ message: '', extra_field: 'x' })
       .expect(400);
-    expect(bad.body.error_code).toBe('VALIDATION_FAILED');
+    expect(bad.body.error_code).toBe('INVALID_SCHEMA');
     expect(Array.isArray(bad.body.details)).toBe(true);
 
     // 同 key、修正后的请求体：不应被 PENDING/mismatch 卡死（fail() 已清除）

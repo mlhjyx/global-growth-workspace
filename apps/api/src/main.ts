@@ -5,18 +5,24 @@ import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { accessLogMiddleware, type AccessLogSink } from './common/http/access-log.middleware';
 import { GlobalExceptionFilter } from './common/http/http-exception.filter';
 import { requestContextMiddleware } from './common/http/request-context.middleware';
 import { ConfigValidationError, loadConfig } from './infrastructure/config/config';
 import { JsonLogger } from './infrastructure/logging/json-logger';
 import { initOtel } from './infrastructure/otel/otel';
 
-export async function createApp(): Promise<INestApplication> {
+export interface CreateAppOptions {
+  accessLogSink?: AccessLogSink;
+}
+
+export async function createApp(options: CreateAppOptions = {}): Promise<INestApplication> {
   const app = await NestFactory.create(AppModule, {
     logger: new JsonLogger(),
   });
   app.setGlobalPrefix('api/v1');
   app.use(requestContextMiddleware);
+  app.use(accessLogMiddleware(options.accessLogSink));
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
   );
