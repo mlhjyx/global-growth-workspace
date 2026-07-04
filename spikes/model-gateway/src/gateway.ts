@@ -141,32 +141,35 @@ export class ModelGatewayImpl implements ModelGateway {
       const provider = this.deps.providers.get(target.provider);
       if (!provider) throw new Error(`RoutingPolicy 指向未注册 Provider：${target.provider}`);
 
-      // 4a) 单次成本上限：估算超过任务契约 maxCostPerRunUsd 直接拒绝，
-      //     禁止 clamp 掩盖后照常触达 Provider（Codex 3521756909）
       const estimate = estimateCostUsd(target, redacted.text.length);
-      if (estimate > task.maxCostPerRunUsd) {
-        trace.costUsd = attempts.reduce((s, a) => s + (a.costUsd ?? 0), 0);
-        return fail(
-          new BudgetExceededError(
-            `目标 ${target.provider}/${target.model} 估算成本 $${estimate.toFixed(4)} ` +
-              `超过任务单次上限 $${task.maxCostPerRunUsd.toFixed(4)}（task-contract 第 3 节）`,
-          ),
-          'BUDGET_EXCEEDED',
-        );
-      }
-      // 4b) 日预算预检对将尝试的每个目标执行（含 fallback），超限即熔断、不触达 Provider
-      try {
-        this.deps.budget.assertWithinBudget(opts.workspaceId, estimate);
-      } catch (e) {
-        if (e instanceof BudgetExceededError) {
-          trace.costUsd = attempts.reduce((s, a) => s + (a.costUsd ?? 0), 0);
-          return fail(e, 'BUDGET_EXCEEDED');
-        }
-        throw e;
-      }
 
       let repairFeedback = '';
       for (let attempt = 1; attempt <= MAX_VALIDATION_ATTEMPTS; attempt++) {
+        // 4a) 单次成本上限——每次触达 Provider 前（含修复重试）：本次估算**连同已耗实际成本**
+        //     越过 maxCostPerRunUsd 即拒绝，重试不得吃穿上限（Codex 3521756909/3522772079）
+        const spentSoFar = attempts.reduce((s, a) => s + (a.costUsd ?? 0), 0);
+        if (spentSoFar + estimate > task.maxCostPerRunUsd) {
+          trace.costUsd = spentSoFar;
+          return fail(
+            new BudgetExceededError(
+              `目标 ${target.provider}/${target.model} 估算成本 $${estimate.toFixed(4)}` +
+                `（已耗 $${spentSoFar.toFixed(4)}）超过任务单次上限 ` +
+                `$${task.maxCostPerRunUsd.toFixed(4)}（task-contract 第 3 节）`,
+            ),
+            'BUDGET_EXCEEDED',
+          );
+        }
+        // 4b) 日预算预检每次触达前执行（含 fallback 与修复重试），超限熔断、不触达 Provider
+        try {
+          this.deps.budget.assertWithinBudget(opts.workspaceId, estimate);
+        } catch (e) {
+          if (e instanceof BudgetExceededError) {
+            trace.costUsd = spentSoFar;
+            return fail(e, 'BUDGET_EXCEEDED');
+          }
+          throw e;
+        }
+
         const t0 = Date.now();
         let text: string;
         let usage: { inputTokens: number; outputTokens: number };
