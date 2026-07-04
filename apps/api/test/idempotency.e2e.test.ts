@@ -16,16 +16,40 @@ describe('幂等与校验（demo 端点承载）', () => {
     await app.close();
   });
 
-  it('无 Idempotency-Key：每次真实执行', async () => {
-    const a = await request(app.getHttpServer())
+  it('无 Idempotency-Key 的写请求：400 INVALID_SCHEMA（conventions.md 全写操作必带）', async () => {
+    const res = await request(app.getHttpServer())
       .post('/api/v1/_demo/echo')
       .send({ message: 'hi' })
-      .expect(200);
-    const b = await request(app.getHttpServer())
+      .expect(400);
+    expect(res.body.error_code).toBe('INVALID_SCHEMA');
+    expect(res.body.message).toContain('Idempotency-Key');
+  });
+
+  it('Idempotency-Key 超过 128 字符：400 INVALID_SCHEMA（§5.3 头约束）', async () => {
+    const res = await request(app.getHttpServer())
       .post('/api/v1/_demo/echo')
+      .set('idempotency-key', 'k'.repeat(129))
       .send({ message: 'hi' })
+      .expect(400);
+    expect(res.body.error_code).toBe('INVALID_SCHEMA');
+  });
+
+  it('同 key、同语义但键序不同的 JSON：按同一请求重放，不误判键复用（规范化指纹）', async () => {
+    const key = 'idem-canonical-001';
+    const first = await request(app.getHttpServer())
+      .post('/api/v1/_demo/echo')
+      .set('idempotency-key', key)
+      .set('content-type', 'application/json')
+      .send('{"message":"canon","tag":"t1"}')
       .expect(200);
-    expect(b.body.execution_seq).toBeGreaterThan(a.body.execution_seq);
+    const second = await request(app.getHttpServer())
+      .post('/api/v1/_demo/echo')
+      .set('idempotency-key', key)
+      .set('content-type', 'application/json')
+      .send('{"tag":"t1","message":"canon"}')
+      .expect(200);
+    expect(second.headers['x-idempotency-replay']).toBe('true');
+    expect(second.body.execution_seq).toBe(first.body.execution_seq);
   });
 
   it('同 key 同请求：重放快照，不重复执行，带 x-idempotency-replay', async () => {
