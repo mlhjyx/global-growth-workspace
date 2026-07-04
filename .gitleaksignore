@@ -1,3 +1,6 @@
 # gitleaks 误报登记（每条须注明核实理由；真泄漏禁止加入本文件）
 # 281a3f5 config.test.ts 的单测样例值（已在后续 commit 换为可读非密钥值；历史 blob 无法改写，指纹放行）
 281a3f5b1350a44fadadcdd169958b57269794bb:apps/api/test/config.test.ts:generic-api-key:32
+# c5c50c4 idempotency.e2e.test.ts 幂等测试键 'idem-canonical-001'（纯 e2e 常量非密钥，熵 3.50 贴阈值误报；
+# 已在后续 commit 换为低熵值 idem-canon-aaa-001；历史 blob 无法改写，指纹放行）
+c5c50c4c1a76ed198ca21e9522b11b76d7e34985:apps/api/test/idempotency.e2e.test.ts:generic-api-key:38

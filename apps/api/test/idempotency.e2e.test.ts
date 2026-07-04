@@ -35,7 +35,7 @@ describe('幂等与校验（demo 端点承载）', () => {
   });
 
   it('同 key、同语义但键序不同的 JSON：按同一请求重放，不误判键复用（规范化指纹）', async () => {
-    const key = 'idem-canonical-001';
+    const key = 'idem-canon-aaa-001';
     const first = await request(app.getHttpServer())
       .post('/api/v1/_demo/echo')
       .set('idempotency-key', key)
