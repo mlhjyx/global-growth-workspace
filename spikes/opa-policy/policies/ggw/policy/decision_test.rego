@@ -268,6 +268,45 @@ test_export_revoked_token_denied if {
 	d == {"allow": false, "require_approval": false, "reason_codes": ["APPROVAL_STATUS_NOT_GRANTED"]}
 }
 
+# 负向：令牌安全攸关字段缺失/畸形必须显式拒绝，不得因比较表达式 undefined 而放行
+# （Codex 3521756903/3521756920 fail-open 修复的回归防线）
+
+test_export_token_without_expires_at_denied if {
+	appr := object.remove(approval_fixture, ["expires_at"])
+	d := data.ggw.policy.decision with input as {"action": export_ok, "approval": appr}
+	d == {"allow": false, "require_approval": false, "reason_codes": ["APPROVAL_EXPIRES_AT_MISSING"]}
+}
+
+test_export_token_malformed_expires_at_denied if {
+	appr := object.union(approval_fixture, {"expires_at": "not-a-timestamp"})
+	d := data.ggw.policy.decision with input as {"action": export_ok, "approval": appr}
+	d == {"allow": false, "require_approval": false, "reason_codes": ["APPROVAL_EXPIRES_AT_INVALID"]}
+}
+
+test_export_token_without_governed_actions_denied if {
+	appr := object.remove(approval_fixture, ["governed_actions"])
+	d := data.ggw.policy.decision with input as {"action": export_ok, "approval": appr}
+	d == {"allow": false, "require_approval": false, "reason_codes": ["APPROVAL_SCOPE_MISSING"]}
+}
+
+test_export_token_without_status_denied if {
+	appr := object.remove(approval_fixture, ["status"])
+	d := data.ggw.policy.decision with input as {"action": export_ok, "approval": appr}
+	d == {"allow": false, "require_approval": false, "reason_codes": ["APPROVAL_STATUS_MISSING"]}
+}
+
+test_export_token_without_workspace_id_denied if {
+	appr := object.remove(approval_fixture, ["workspace_id"])
+	d := data.ggw.policy.decision with input as {"action": export_ok, "approval": appr}
+	d == {"allow": false, "require_approval": false, "reason_codes": ["APPROVAL_WORKSPACE_ID_MISSING"]}
+}
+
+test_export_token_without_resource_ids_denied if {
+	appr := object.remove(approval_fixture, ["resource_ids"])
+	d := data.ggw.policy.decision with input as {"action": export_ok, "approval": appr}
+	d == {"allow": false, "require_approval": false, "reason_codes": ["APPROVAL_RESOURCE_IDS_MISSING"]}
+}
+
 # ============================== CROSS_BORDER_MODEL_CALL ==============================
 
 test_crossborder_without_grant_requires_approval if {
@@ -329,6 +368,13 @@ test_crossborder_budget_counter_missing_denied if {
 	act := object.union(object.remove(model_call_ok, ["model"]), {"model": object.remove(model_call_ok.model, ["consumed_amount"])})
 	d := data.ggw.policy.decision with input as {"action": act, "workspace_model_authorization": grant_fixture}
 	d == {"allow": false, "require_approval": false, "reason_codes": ["BUDGET_COUNTER_MISSING"]}
+}
+
+# 负向：授权缺 budget_cap = 无预算上限的跨境调用，显式拒绝（Codex 3521756906）
+test_crossborder_grant_without_budget_cap_denied if {
+	grant := object.remove(grant_fixture, ["budget_cap"])
+	d := data.ggw.policy.decision with input as {"action": model_call_ok, "workspace_model_authorization": grant}
+	d == {"allow": false, "require_approval": false, "reason_codes": ["BUDGET_CAP_MISSING"]}
 }
 
 # 负向：model 属性整体缺失 → 完整性违规 + 预算计数缺失（不得静默放行）
