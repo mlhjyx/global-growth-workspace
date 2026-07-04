@@ -10,3 +10,4 @@ minimumReleaseAge: 1440
 allowBuilds:
   esbuild: true # vitest/tsx 构建内核，平台二进制检查脚本
   '@scarf/scarf': false # 纯遥测包，禁止执行
+  '@swc/core': true # vitest 装饰器 metadata 转换器（Nest DI/ValidationPipe 依赖），平台二进制检查
