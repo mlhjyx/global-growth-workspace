@@ -3,6 +3,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { BudgetExceededError } from '../src/contract.js';
+import { InMemoryBudgetGuard } from '../src/budget-guard.js';
 import { MockFaultyProvider } from '../src/providers/mock-faulty.js';
 import { MockStableProvider } from '../src/providers/mock-stable.js';
 import { makeValidInput, makeValidOutput, WS_A, WS_B } from '../src/providers/fixtures.js';
@@ -151,6 +152,26 @@ describe('预算熔断（BUDGET_EXCEEDED）', () => {
     expect(err.trace.status).toBe('BUDGET_EXCEEDED');
     expect(nearCap.requests).toHaveLength(1); // 第二次调用从未发出
     expect(budget.spentToday(WS_A)).toBeCloseTo(0.792, 4); // 首次真实费用照常记账
+  });
+
+  it('修复重试的估算按实际载荷重算：第二次预检估算高于首次（含反馈文本——Codex 3523380468）', async () => {
+    const estimates: number[] = [];
+    const inner = new InMemoryBudgetGuard({}, 100);
+    const recording = {
+      assertWithinBudget(ws: string, est: number) {
+        estimates.push(est);
+        inner.assertWithinBudget(ws, est);
+      },
+      charge: (ws: string, c: number) => inner.charge(ws, c),
+      spentToday: (ws: string) => inner.spentToday(ws),
+    };
+    const faulty = new MockFaultyProvider(['SCHEMA_VIOLATION', 'OK']);
+    const { gateway } = buildGateway({ primary: faulty, budgetGuard: recording });
+
+    await gateway.complete(TASK_REF, makeValidInput(), { workspaceId: WS_A });
+
+    expect(estimates).toHaveLength(2);
+    expect(estimates[1]!).toBeGreaterThan(estimates[0]!); // repairFeedback 追加进第二次载荷估算
   });
 
   it('UTC 跨日后预算重置（clock 注入）', async () => {

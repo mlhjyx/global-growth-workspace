@@ -141,18 +141,21 @@ export class ModelGatewayImpl implements ModelGateway {
       const provider = this.deps.providers.get(target.provider);
       if (!provider) throw new Error(`RoutingPolicy 指向未注册 Provider：${target.provider}`);
 
-      const estimate = estimateCostUsd(target, redacted.text.length);
-
       let repairFeedback = '';
       for (let attempt = 1; attempt <= MAX_VALIDATION_ATTEMPTS; attempt++) {
-        // 4a) 单次成本上限——每次触达 Provider 前（含修复重试）：本次估算**连同已耗实际成本**
-        //     越过 maxCostPerRunUsd 即拒绝，重试不得吃穿上限（Codex 3521756909/3522772079）
+        // 4a) 单次成本上限——每次触达 Provider 前（含修复重试）：估算按**本次实际发出的
+        //     载荷**（含 repairFeedback 追加文本）重算，连同已耗实际成本越过
+        //     maxCostPerRunUsd 即拒绝（Codex 3521756909/3522772079/3523380468）
+        const attemptEstimate = estimateCostUsd(
+          target,
+          redacted.text.length + repairFeedback.length,
+        );
         const spentSoFar = attempts.reduce((s, a) => s + (a.costUsd ?? 0), 0);
-        if (spentSoFar + estimate > task.maxCostPerRunUsd) {
+        if (spentSoFar + attemptEstimate > task.maxCostPerRunUsd) {
           trace.costUsd = spentSoFar;
           return fail(
             new BudgetExceededError(
-              `目标 ${target.provider}/${target.model} 估算成本 $${estimate.toFixed(4)}` +
+              `目标 ${target.provider}/${target.model} 估算成本 $${attemptEstimate.toFixed(4)}` +
                 `（已耗 $${spentSoFar.toFixed(4)}）超过任务单次上限 ` +
                 `$${task.maxCostPerRunUsd.toFixed(4)}（task-contract 第 3 节）`,
             ),
@@ -161,7 +164,7 @@ export class ModelGatewayImpl implements ModelGateway {
         }
         // 4b) 日预算预检每次触达前执行（含 fallback 与修复重试），超限熔断、不触达 Provider
         try {
-          this.deps.budget.assertWithinBudget(opts.workspaceId, estimate);
+          this.deps.budget.assertWithinBudget(opts.workspaceId, attemptEstimate);
         } catch (e) {
           if (e instanceof BudgetExceededError) {
             trace.costUsd = spentSoFar;
