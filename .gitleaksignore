@@ -1,0 +1,3 @@
+# gitleaks 误报登记（每条须注明核实理由；真泄漏禁止加入本文件）
+# 281a3f5 config.test.ts 的单测样例值（已在后续 commit 换为可读非密钥值；历史 blob 无法改写，指纹放行）
+281a3f5b1350a44fadadcdd169958b57269794bb:apps/api/test/config.test.ts:generic-api-key:32
