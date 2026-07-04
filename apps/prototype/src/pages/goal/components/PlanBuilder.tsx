@@ -1,6 +1,14 @@
 import { useState, useCallback } from 'react';
 import type { PlanSection, GoalOption } from '@/mocks/goalData';
 import { useNavigate } from 'react-router-dom';
+import { useJourney } from '@/journey/journey-context';
+import type { JourneyId } from '@/journey/journeys';
+
+// 目标向导 → 旅程映射（M0-06 T1）：确认计划即启动对应旅程，其余目标类型不强制旅程
+const GOAL_JOURNEY_MAP: Record<string, JourneyId> = {
+  'find-customers': 'JA',
+  'recruit-distributors': 'JB',
+};
 
 interface PlanBuilderProps {
   goal: GoalOption;
@@ -10,6 +18,7 @@ interface PlanBuilderProps {
 
 export default function PlanBuilder({ goal, plan, onBack }: PlanBuilderProps) {
   const navigate = useNavigate();
+  const { startJourney } = useJourney();
   const [sections, setSections] = useState(plan);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
@@ -35,8 +44,11 @@ export default function PlanBuilder({ goal, plan, onBack }: PlanBuilderProps) {
     // localStorage key 迁移：growthos_* → ggw_*
     localStorage.setItem('ggw_onboarding_completed', 'true');
     localStorage.setItem('ggw_goal_completed', 'true');
+    // 找客户/找经销商目标确认计划即启动 J-A/J-B 旅程（M0-06 T1）
+    const journeyId = GOAL_JOURNEY_MAP[goal.id];
+    if (journeyId) startJourney(journeyId);
     navigate('/dashboard');
-  }, [navigate]);
+  }, [navigate, goal.id, startJourney]);
 
   return (
     <div className="flex flex-col items-center w-full max-w-3xl mx-auto px-4">

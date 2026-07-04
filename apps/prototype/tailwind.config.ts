@@ -16,13 +16,39 @@ export default {
           500: '#6c5ce7',
           600: '#5a4bd8',
         },
-        deep: '#0c0a1a',
+        deep: {
+          DEFAULT: '#0c0a1a',
+          dark: '#0c0a1a', // Layout/goal 全屏底（index.css body 渐变起点，保持视觉一致）
+          purple: '#1a103c', // --bg-purple
+        },
         success: '#00d4aa',
         warning: '#fbbf24',
         error: '#ff6b6b',
         info: '#60a5fa',
         'ai-accent': '#22d3ee',
         accent: { 500: '#d946ef' },
+        // 文字灰阶（紫调）：100 近白 → 900 近底色；次级文案的主要载体
+        foreground: {
+          100: '#f5f4fa',
+          200: '#e2e0f0',
+          300: '#c7c4dd',
+          400: '#a5a1c2',
+          500: '#8b87a8',
+          600: '#6f6b8f',
+          700: '#575376',
+          800: '#403d5c',
+          900: '#2b2945',
+        },
+        // 表面填充（玻璃面板层次）
+        background: {
+          50: 'rgba(255,255,255,0.03)',
+          100: 'rgba(255,255,255,0.05)',
+          200: 'rgba(255,255,255,0.08)',
+        },
+        'input-bg': 'rgba(255,255,255,0.04)',
+        'input-border': 'rgba(255,255,255,0.10)',
+        'data-highlight': '#38bdf8',
+        'link-color': '#8b7ff0',
       },
       keyframes: {
         'fade-in': {

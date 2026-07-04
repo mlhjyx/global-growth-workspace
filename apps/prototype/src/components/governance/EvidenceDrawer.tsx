@@ -1,5 +1,7 @@
 // EvidenceDrawer —— 母本 6.13：任何 AI 结论/关键字段两次点击内可查看依据（KNW-006、4.4 可解释）
+// M0-06 T2：打开即记 term_help_open（Gate 1 术语/证据理解探针——用户主动求助依据的行为信号）
 import { useEffect } from 'react';
+import { track } from '@/analytics/analytics';
 import type { EvidenceItem } from './types';
 import { ConfidenceBadge } from './Badges';
 
@@ -16,6 +18,10 @@ export default function EvidenceDrawer({ open, onClose, title, items }: Evidence
     if (open) window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
+
+  useEffect(() => {
+    if (open) track('term_help_open', { title });
+  }, [open, title]);
 
   if (!open) return null;
 

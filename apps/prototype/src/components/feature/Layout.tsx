@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import JourneyRail from '@/journey/JourneyRail';
 
 export default function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -22,6 +23,8 @@ export default function Layout() {
           onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
           mobileMenuOpen={mobileMenuOpen}
         />
+        {/* J-A/J-B 旅程导航条（EPIC-M0-06 T1）：激活旅程时跨页可见 */}
+        <JourneyRail />
         <main className="flex-1 overflow-auto">
           <Outlet />
         </main>

@@ -1,0 +1,52 @@
+# M0 原型 Preview 部署（EPIC-M0-06 T3，R1）：GitHub Pages 静态托管，UAT 用户测试入口。
+# 触发：main 上原型变更或手动。SPA 回退：404.html = index.html（BrowserRouter 深链刷新）。
+name: Deploy Preview
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/prototype/**'
+      - '.github/workflows/deploy-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同刻只保留最新一次部署
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build prototype（BASE_PATH 指向 Pages 子路径）
+        run: pnpm --filter @ggw/prototype build
+        env:
+          BASE_PATH: /global-growth-workspace/
+      - name: SPA fallback（深链刷新不 404）
+        run: cp apps/prototype/out/index.html apps/prototype/out/404.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/prototype/out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
