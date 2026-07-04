@@ -49,19 +49,21 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
     return def.steps.find((s) => !next.completed.includes(s.id)) ?? def.steps[0]!;
   }, []);
 
-  const completeStep = useCallback((stepId: string) => {
-    setState((prev) => {
-      if (!prev || prev.completed.includes(stepId)) return prev;
-      const def = JOURNEYS[prev.id];
-      const next: JourneyState = { ...prev, completed: [...prev.completed, stepId] };
+  // 副作用（埋点/持久化）不进 setState 更新函数——StrictMode 双调更新器会重复上报（真机验证发现）
+  const completeStep = useCallback(
+    (stepId: string) => {
+      if (!state || state.completed.includes(stepId)) return;
+      const def = JOURNEYS[state.id];
+      const next: JourneyState = { ...state, completed: [...state.completed, stepId] };
       writeState(next);
-      track('journey_step_complete', { journey: prev.id, step: stepId });
+      track('journey_step_complete', { journey: state.id, step: stepId });
       if (def.steps.every((s) => next.completed.includes(s.id))) {
-        track('journey_complete', { journey: prev.id });
+        track('journey_complete', { journey: state.id });
       }
-      return next;
-    });
-  }, []);
+      setState(next);
+    },
+    [state],
+  );
 
   const resetJourney = useCallback(() => {
     setState(null);
